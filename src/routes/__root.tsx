@@ -1,10 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const queryClient = new QueryClient();
   useEffect(() => { reportLovableError(error, { boundary: "root" }); }, [error]);
   return <div className="error-page"><h1>Não foi possível carregar</h1><p>Atualize a página e tente novamente.</p><button onClick={reset}>Tentar novamente</button><Link to="/">Voltar ao início</Link></div>;
