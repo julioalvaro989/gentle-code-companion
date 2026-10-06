@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
-import { getProfile, getSiteSettings, getStoredSession, signIn, signOut, signUp, type SiteSettings } from "../lib/supabase";
+import { adoptSupabaseSession, getProfile, getSiteSettings, getStoredSession, signIn, signInWithGoogle, signOut, signUp, type SiteSettings } from "../lib/supabase";
 
 export const Route = createFileRoute("/")({ component: InvestmentApp });
 
