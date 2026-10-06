@@ -20,18 +20,123 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_admin: boolean
         }
         Insert: {
           created_at?: string
           email: string
           full_name: string
           id: string
+          is_admin?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           full_name?: string
           id?: string
+          is_admin?: boolean
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          background_color: string
+          banner_url: string | null
+          brand_name: string
+          footer_text: string
+          hero_badge: string
+          hero_description: string
+          hero_primary_button: string
+          hero_secondary_button: string
+          hero_title: string
+          how_title: string
+          id: boolean
+          nav_how: string
+          nav_security: string
+          nav_simulator: string
+          primary_color: string
+          result_disclaimer: string
+          result_label: string
+          security_description: string
+          security_title: string
+          simulator_description: string
+          simulator_note: string
+          simulator_title: string
+          step1_description: string
+          step1_title: string
+          step2_description: string
+          step2_title: string
+          step3_description: string
+          step3_title: string
+          surface_color: string
+          text_color: string
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string
+          banner_url?: string | null
+          brand_name?: string
+          footer_text?: string
+          hero_badge?: string
+          hero_description?: string
+          hero_primary_button?: string
+          hero_secondary_button?: string
+          hero_title?: string
+          how_title?: string
+          id?: boolean
+          nav_how?: string
+          nav_security?: string
+          nav_simulator?: string
+          primary_color?: string
+          result_disclaimer?: string
+          result_label?: string
+          security_description?: string
+          security_title?: string
+          simulator_description?: string
+          simulator_note?: string
+          simulator_title?: string
+          step1_description?: string
+          step1_title?: string
+          step2_description?: string
+          step2_title?: string
+          step3_description?: string
+          step3_title?: string
+          surface_color?: string
+          text_color?: string
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string
+          banner_url?: string | null
+          brand_name?: string
+          footer_text?: string
+          hero_badge?: string
+          hero_description?: string
+          hero_primary_button?: string
+          hero_secondary_button?: string
+          hero_title?: string
+          how_title?: string
+          id?: boolean
+          nav_how?: string
+          nav_security?: string
+          nav_simulator?: string
+          primary_color?: string
+          result_disclaimer?: string
+          result_label?: string
+          security_description?: string
+          security_title?: string
+          simulator_description?: string
+          simulator_note?: string
+          simulator_title?: string
+          step1_description?: string
+          step1_title?: string
+          step2_description?: string
+          step2_title?: string
+          step3_description?: string
+          step3_title?: string
+          surface_color?: string
+          text_color?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -40,7 +145,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
