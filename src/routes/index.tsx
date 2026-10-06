@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { getProfile, getStoredSession, signIn, signOut, signUp } from "../lib/supabase";
 
 export const Route = createFileRoute("/")({ component: InvestmentApp });
@@ -27,7 +27,7 @@ function InvestmentApp() {
   }, [amount, days]);
   const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  async function submitAuth(e: React.FormEvent) {
+  async function submitAuth(e: FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
     try {
       if (mode === "signup") {
