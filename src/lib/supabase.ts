@@ -75,6 +75,28 @@ export async function signOut() {
   localStorage.removeItem("investe_session");
 }
 
+export async function signInWithGoogle() {
+  const { lovable } = await import("@/integrations/lovable/index");
+  const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+  if (result.error) throw result.error instanceof Error ? result.error : new Error("Não foi possível entrar com o Google.");
+  if (result.redirected) return null;
+  return adoptSupabaseSession();
+}
+
+export async function adoptSupabaseSession(): Promise<AuthSession | null> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data } = await supabase.auth.getSession();
+  const s = data.session;
+  if (!s) return null;
+  const session: AuthSession = {
+    access_token: s.access_token,
+    refresh_token: s.refresh_token,
+    user: { id: s.user.id, email: s.user.email, user_metadata: s.user.user_metadata },
+  };
+  localStorage.setItem("investe_session", JSON.stringify(session));
+  return session;
+}
+
 export async function getProfile(session: AuthSession) {
   const rows = await request("rest/v1/profiles?select=id,full_name,email,is_admin&limit=1", { method: "GET" }, session.access_token);
   return rows?.[0] ?? null;
