@@ -1,6 +1,6 @@
 type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { full_name?: string } } };
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
 
 function headers(token?: string) {
   if (!url || !key) throw new Error("O backend do Lovable Cloud ainda não está disponível neste preview.");
