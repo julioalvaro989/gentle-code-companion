@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { getProfile, getSiteSettings, getStoredSession, signIn, signOut, signUp, type SiteSettings } from "../lib/supabase";
 
 export const Route = createFileRoute("/")({ component: InvestmentApp });
@@ -54,7 +54,7 @@ function InvestmentApp() {
   }, [amount, days]);
 
   const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const theme = { "--green": settings.primary_color, "--bg": settings.background_color, "--surface": settings.surface_color, "--text": settings.text_color } as React.CSSProperties;
+  const theme = { "--green": settings.primary_color, "--bg": settings.background_color, "--surface": settings.surface_color, "--text": settings.text_color } as CSSProperties;
 
   async function submitAuth(e: FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
