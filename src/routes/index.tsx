@@ -46,6 +46,20 @@ function InvestmentApp() {
     if (session) getProfile(session).then(setProfile).catch(() => setProfile(null));
   }, [session]);
 
+  useEffect(() => {
+    if (!session) adoptSupabaseSession().then(s => { if (s) setSession(s); }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function submitGoogle() {
+    setError(""); setLoading(true);
+    try {
+      const s = await signInWithGoogle();
+      if (s) setSession(s);
+    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível entrar com o Google."); }
+    finally { setLoading(false); }
+  }
+
   const projection = useMemo(() => {
     const principal = Math.max(10, Number(amount) || 10);
     const period = Math.max(1, Number(days) || 1);
