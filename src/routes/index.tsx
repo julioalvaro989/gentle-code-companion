@@ -1,137 +1,69 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
-import { adoptSupabaseSession, getProfile, getSiteSettings, getStoredSession, signIn, signInWithGoogle, signOut, signUp, type SiteSettings } from "../lib/supabase";
+import { useState } from "react";
+import { Activity, ArrowDownRight, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Menu, Plus, Search, Settings, Target, Trophy, UserRound, X } from "lucide-react";
 
-export const Route = createFileRoute("/")({ component: InvestmentApp });
+export const Route = createFileRoute("/")({ component: GymApp });
 
-const fallback: SiteSettings = {
-  brand_name: "InvesteSimples", nav_simulator: "Simulador", nav_how: "Como funciona", nav_security: "Segurança",
-  hero_badge: "SIMULAÇÃO EDUCATIVA", hero_title: "Cada valor que você colocar rende 10% ao dia.",
-  hero_description: "Esta é uma simulação hipotética de 10% ao dia, apenas para fins educativos.",
-  hero_primary_button: "Abrir simulação", hero_secondary_button: "Como funciona ↓",
-  simulator_title: "Sua projeção financeira", simulator_description: "Cada valor informado é projetado com 10% ao dia nesta simulação hipotética.",
-  simulator_note: "Valor mínimo para simulação: R$ 10,00.", result_label: "VALOR PROJETADO",
-  result_disclaimer: "Taxa usada: 10% ao dia, somente nesta simulação hipotética. Não é rendimento real nem promessa de lucro.",
-  how_title: "Informação antes de qualquer decisão",
-  step1_title: "Cadastre-se", step1_description: "Seu nome e e-mail ficam associados à sua conta no banco de dados do projeto.",
-  step2_title: "Simule", step2_description: "Escolha valor e prazo para comparar cenários de forma simples.",
-  step3_title: "Analise", step3_description: "Use a projeção apenas como ferramenta educativa; investimentos reais envolvem riscos.",
-  security_title: "Seus dados protegidos.", security_description: "O cadastro usa autenticação do Lovable Cloud/Supabase.",
-  footer_text: "© 2026 InvesteSimples · Ferramenta educacional.", primary_color: "#63e6a4",
-  background_color: "#07110d", surface_color: "#0d1b15", text_color: "#f4f8f5", banner_url: null
-};
+const initialExercises = [
+  { name: "Supino reto", detail: "Peitoral · 4 séries × 10 reps", done: true },
+  { name: "Supino inclinado com halteres", detail: "Peitoral · 3 séries × 12 reps", done: true },
+  { name: "Crucifixo na máquina", detail: "Peitoral · 3 séries × 12 reps", done: false },
+  { name: "Tríceps na polia", detail: "Tríceps · 3 séries × 15 reps", done: false },
+];
+const plans = [
+  { day: "SEG", date: "05", name: "Peito & tríceps", type: "Superior", active: false },
+  { day: "TER", date: "06", name: "Costas & bíceps", type: "Superior", active: false },
+  { day: "QUA", date: "07", name: "Pernas completas", type: "Inferior", active: true },
+  { day: "QUI", date: "08", name: "Ombros & abdômen", type: "Superior", active: false },
+  { day: "SEX", date: "09", name: "Full body", type: "Corpo todo", active: false },
+];
 
-function InvestmentApp() {
-  const [session, setSession] = useState(getStoredSession());
-  const [profile, setProfile] = useState<{ full_name: string; email: string } | null>(null);
-  const [settings, setSettings] = useState<SiteSettings>(fallback);
-  const [mode, setMode] = useState<"signup" | "login">("signup");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [amount, setAmount] = useState(100);
-  const [days, setDays] = useState(30);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    const refresh = () => getSiteSettings().then(value => { if (active && value) setSettings(value); }).catch(() => {});
-    refresh();
-    const timer = window.setInterval(refresh, 3000);
-    return () => { active = false; window.clearInterval(timer); };
-  }, []);
-
-  useEffect(() => {
-    if (session) getProfile(session).then(setProfile).catch(() => setProfile(null));
-  }, [session]);
-
-  useEffect(() => {
-    if (!session) adoptSupabaseSession().then(s => { if (s) setSession(s); }).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function submitGoogle() {
-    setError(""); setLoading(true);
-    try {
-      const s = await signInWithGoogle();
-      if (s) setSession(s);
-    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível entrar com o Google."); }
-    finally { setLoading(false); }
-  }
-
-  const projection = useMemo(() => {
-    const principal = Math.max(10, Number(amount) || 10);
-    const period = Math.max(1, Number(days) || 1);
-    const finalValue = principal * Math.pow(1.10, period);
-    return { principal, period, gain: finalValue - principal, finalValue };
-  }, [amount, days]);
-
-  const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const theme = { "--green": settings.primary_color, "--bg": settings.background_color, "--surface": settings.surface_color, "--text": settings.text_color } as CSSProperties;
-
-  async function submitAuth(e: FormEvent) {
-    e.preventDefault(); setError(""); setLoading(true);
-    try {
-      if (mode === "signup") {
-        if (!name.trim()) throw new Error("Informe seu nome.");
-        const created = await signUp(name.trim(), email.trim(), password);
-        if (!created) {
-          setMode("login");
-          setError("Conta criada. Entre com o e-mail e a senha cadastrados.");
-        } else setSession(created);
-      } else setSession(await signIn(email.trim(), password));
-    } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível concluir."); }
-    finally { setLoading(false); }
-  }
-
-  if (!session) return (
-    <div className="auth-page" style={theme}>
-      <div className="auth-brand">{settings.brand_name}</div>
-      <div className="auth-card">
-        <div className="eyebrow">{mode === "signup" ? "PRIMEIRO ACESSO" : "ENTRAR"}</div>
-        <h1>{mode === "signup" ? "Crie sua conta" : "Acesse sua simulação"}</h1>
-        <p>{mode === "signup" ? "Preencha nome, e-mail e senha para acessar sua área de simulação." : "Entre com seu e-mail e senha para continuar."}</p>
-        <form onSubmit={submitAuth}>
-          {mode === "signup" && <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nome completo" autoComplete="name" />}
-          <input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="E-mail" autoComplete="email" />
-          <input required minLength={6} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Senha (mínimo 6 caracteres)" autoComplete={mode === "signup" ? "new-password" : "current-password"} />
-          {error && <div className="auth-error">{error}</div>}
-          <button className="primary full" disabled={loading}>{loading ? "Aguarde..." : mode === "signup" ? "Criar conta e acessar" : "Entrar"}</button>
-        </form>
-        <button className="switch-auth" onClick={() => { setError(""); setMode(mode === "signup" ? "login" : "signup"); }}>
-          {mode === "signup" ? "Já tenho uma conta → Entrar" : "Ainda não tenho conta → Cadastrar"}
-        </button>
-        <div className="auth-divider"><span>ou</span></div>
-        <button type="button" className="google-btn" onClick={submitGoogle} disabled={loading}>
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.02.15 3.5 2.7.24.02c2.2-2 3.5-5 3.5-8.6z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5l-.14.01-3.6 2.8-.05.13C3.4 21.3 7.4 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.24-.7-.38-1.5-.38-2.4s.14-1.7.36-2.4l-.01-.16-3.65-2.8-.12.06C.5 8.3 0 10.1 0 12s.5 3.7 1.4 5.3l3.8-2.9z"/><path fill="#EA4335" d="M12 4.6c2.2 0 3.7 1 4.6 1.8l3.3-3.2C17.9 1.2 15.2 0 12 0 7.4 0 3.4 2.7 1.4 6.7l3.8 2.9c1-2.9 3.7-5 6.8-5z"/></svg>
-          Entrar com Google
-        </button>
-      </div>
-      <small className="auth-foot">A autenticação é feita pelo Lovable Cloud/Supabase. A senha não é armazenada em texto aberto.</small>
-    </div>
-  );
+function GymApp() {
+  const [activeNav, setActiveNav] = useState("Visão geral");
+  const [exercises, setExercises] = useState(initialExercises);
+  const [started, setStarted] = useState(false);
+  const [query, setQuery] = useState("");
+  const [showPlan, setShowPlan] = useState(false);
+  const completed = exercises.filter((exercise) => exercise.done).length;
+  const nav = [
+    { name: "Visão geral", icon: Home },
+    { name: "Treinos", icon: Dumbbell },
+    { name: "Progresso", icon: Activity },
+    { name: "Meu perfil", icon: UserRound },
+  ];
+  const filteredExercises = exercises.filter((exercise) => exercise.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <div className="investment-site" style={theme}>
-      <header className="site-header">
-        <a href="#inicio" className="brand">{settings.brand_name}</a>
-        <nav><a href="#simulador">{settings.nav_simulator}</a><a href="#como-funciona">{settings.nav_how}</a><a href="#seguranca">{settings.nav_security}</a></nav>
-        <div className="user-area"><span>Olá, {profile?.full_name || "cliente"}</span><button onClick={() => { signOut(); setSession(null); setProfile(null); }}>Sair</button></div>
-      </header>
-      <main>
-        <section id="inicio" className="hero" style={settings.banner_url ? { backgroundImage: `linear-gradient(rgba(7,17,13,.78),rgba(7,17,13,.9)), url("${settings.banner_url}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
-          <div className="hero-copy"><div className="badge">{settings.hero_badge}</div><h1>{settings.hero_title}</h1><p>Olá, {profile?.full_name || "cliente"}. {settings.hero_description}</p><div className="hero-actions"><a className="primary" href="#simulador">{settings.hero_primary_button}</a><a className="secondary" href="#como-funciona">{settings.hero_secondary_button}</a></div></div>
-          <div className="hero-card"><div className="card-top"><span>Projeção ilustrativa</span><span>↗</span></div><strong>{money(projection.finalValue)}</strong><small>valor projetado</small><div className="chart"><i/><i/><i/><i/><i/><i/><i/><i/></div><div className="card-footer"><span>Inicial {money(projection.principal)}</span><span>+{money(projection.gain)}</span></div></div>
-        </section>
+    <div className="gym-app">
+      <aside className="sidebar">
+        <a className="gym-logo" href="#inicio"><span className="logo-mark"><Dumbbell size={23} strokeWidth={2.5} /></span><span>FORMA<span className="logo-dot">.</span><small>FITNESS CLUB</small></span></a>
+        <div className="side-label">MENU PRINCIPAL</div>
+        <nav className="side-nav">{nav.map(({ name, icon: Icon }) => <button key={name} className={activeNav === name ? "nav-item active" : "nav-item"} onClick={() => setActiveNav(name)}><Icon size={18} />{name}{name === "Treinos" && <span className="nav-count">5</span>}</button>)}</nav>
+        <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu objetivo, seu ritmo.</strong><p>Pequenos passos todos os dias geram grandes resultados.</p><button onClick={() => setShowPlan(true)}>Ver meu plano <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={() => setActiveNav("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>João Dias</strong><small>Plano Premium</small></div><button aria-label="Opções do perfil" onClick={() => setActiveNav("Meu perfil")}><ChevronRight size={17}/></button></div></div>
+      </aside>
 
-        <section id="simulador" className="simulator section"><div className="section-heading"><div className="eyebrow">SIMULADOR</div><h2>{settings.simulator_title}</h2><p>{settings.simulator_description}</p></div><div className="sim-grid"><div className="controls"><label>Valor inicial <b>{money(Math.max(10, Number(amount) || 10))}</b></label><input type="number" min="10" step="10" value={amount} onChange={e => setAmount(Number(e.target.value))}/><input type="range" min="10" max="100000" step="10" value={Math.max(10, Number(amount) || 10)} onChange={e => setAmount(Number(e.target.value))}/><label>Prazo <b>{days} dias</b></label><input type="range" min="1" max="365" value={days} onChange={e => setDays(Number(e.target.value))}/><div className="note">{settings.simulator_note}</div></div><div className="result-card"><span>{settings.result_label}</span><strong>{money(projection.finalValue)}</strong><div className="result-line"><span>Valor inicial</span><b>{money(projection.principal)}</b></div><div className="result-line"><span>Ganho estimado</span><b>{money(projection.gain)}</b></div><div className="result-line"><span>Prazo</span><b>{projection.period} dias</b></div><small>{settings.result_disclaimer}</small></div></div></section>
+      <main className="main-content" id="inicio">
+        <header className="topbar"><div className="mobile-brand"><Dumbbell size={20}/> FORMA<span>.</span></div><div className="breadcrumb">Workspace <ChevronRight size={14}/> <strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><div className="avatar top-avatar">JD</div></div></header>
+        <div className="page-wrap">
+          <section className="welcome-row"><div><div className="section-kicker"><span/> QUINTA-FEIRA, 8 DE OUTUBRO</div><h1>Vamos ficar mais <span>fortes.</span></h1><p>O seu próximo nível começa com o treino de hoje. Bora?</p></div><button className="outline-button" onClick={() => setShowPlan(true)}><CalendarDays size={17}/> Ver agenda</button></section>
 
-        <section id="como-funciona" className="section steps"><div className="section-heading"><div className="eyebrow">COMO FUNCIONA</div><h2>{settings.how_title}</h2></div><div className="step-grid"><article><b>01</b><h3>{settings.step1_title}</h3><p>{settings.step1_description}</p></article><article><b>02</b><h3>{settings.step2_title}</h3><p>{settings.step2_description}</p></article><article><b>03</b><h3>{settings.step3_title}</h3><p>{settings.step3_description}</p></article></div></section>
+          <section className="hero-workout"><div className="hero-copy"><div className="hero-pill"><Flame size={14}/> SEU TREINO DE HOJE</div><h2>Dia de superar<br/>seus <span>limites.</span></h2><p>Treino de força para construir consistência e evoluir a cada repetição.</p><div className="hero-meta"><span><Clock3 size={16}/> 50 min</span><span><Dumbbell size={16}/> 6 exercícios</span><span><Activity size={16}/> Intermediário</span></div><button className="green-button" onClick={() => { setStarted(true); setActiveNav("Treinos"); }}><CirclePlay size={18}/>{started ? "Continuar treino" : "Começar treino"}<ChevronRight size={17}/></button></div><div className="hero-art"><div className="art-ring ring-one"/><div className="art-ring ring-two"/><div className="art-number">01<span>/05</span></div><div className="art-dumbbell"><Dumbbell size={148} strokeWidth={1.1}/></div><div className="art-tag"><span className="live-dot"/> FOCO & CONSISTÊNCIA</div></div></section>
 
-        <section id="seguranca" className="security section"><div><div className="eyebrow">TRANSPARÊNCIA</div><h2>{settings.security_title}</h2><p>{settings.security_description}</p></div><div className="security-list"><span>✓ Conta individual</span><span>✓ Perfil salvo no banco</span><span>✓ Simulação após login</span></div></section>
+          <section className="stats-grid">
+            <article className="stat-card"><div className="stat-top"><span>Treinos esta semana</span><span className="stat-icon"><Dumbbell size={18}/></span></div><div className="stat-value">04 <small>/ 05</small></div><div className="stat-bottom"><span className="trend"><ArrowUpRight size={14}/> +1 treino</span><span>vs. semana passada</span></div><div className="mini-progress"><i style={{width:"80%"}}/></div></article>
+            <article className="stat-card"><div className="stat-top"><span>Tempo de atividade</span><span className="stat-icon"><Clock3 size={18}/></span></div><div className="stat-value">3h 25<small>min</small></div><div className="stat-bottom"><span className="trend"><ArrowUpRight size={14}/> +12%</span><span>vs. semana passada</span></div><div className="mini-progress"><i style={{width:"67%"}}/></div></article>
+            <article className="stat-card"><div className="stat-top"><span>Calorias estimadas</span><span className="stat-icon"><Flame size={18}/></span></div><div className="stat-value">1.240 <small>kcal</small></div><div className="stat-bottom"><span className="trend"><ArrowUpRight size={14}/> +8%</span><span>nesta semana</span></div><div className="mini-progress"><i style={{width:"58%"}}/></div></article>
+            <article className="stat-card"><div className="stat-top"><span>Sequência atual</span><span className="stat-icon"><Trophy size={18}/></span></div><div className="stat-value">7 <small>dias</small></div><div className="stat-bottom"><span className="trend">🔥 Boa sequência!</span><span>continue assim</span></div><div className="mini-progress"><i style={{width:"74%"}}/></div></article>
+          </section>
+
+          <section className="lower-grid"><article className="panel workout-panel"><div className="panel-heading"><div><div className="section-kicker">PLANO DE HOJE</div><h3>Peito & tríceps</h3><p>{completed} de {exercises.length} exercícios concluídos</p></div><button className="text-button" onClick={() => setShowPlan(true)}>Ver plano <ChevronRight size={15}/></button></div><div className="workout-progress"><div><span>Progresso do treino</span><strong>{Math.round(completed / exercises.length * 100)}%</strong></div><div className="progress-track"><i style={{width: (completed / exercises.length * 100) + "%"}}/></div></div><div className="exercise-search"><Search size={16}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar exercício..."/></div><div className="exercise-list">{filteredExercises.map((exercise) => <button key={exercise.name} className={"exercise-row " + (exercise.done ? "exercise-done" : "")} onClick={() => setExercises(old => old.map(item => item.name === exercise.name ? {...item, done: !item.done} : item))}><span className="exercise-check">{exercise.done ? <Check size={15}/> : <Plus size={15}/>}</span><span className="exercise-info"><strong>{exercise.name}</strong><small>{exercise.detail}</small></span><ChevronRight className="exercise-arrow" size={17}/></button>)}{filteredExercises.length === 0 && <p className="empty-state">Nenhum exercício encontrado.</p>}</div><button className="start-bottom" onClick={() => { setStarted(true); setActiveNav("Treinos"); }}>{started ? "Treino em andamento" : "Iniciar sessão de treino"} <ArrowDownRight size={17}/></button></article>
+
+          <article className="panel week-panel"><div className="panel-heading"><div><div className="section-kicker">MANTENHA O RITMO</div><h3>Sua semana</h3></div><button className="icon-button subtle" aria-label="Ver calendário" onClick={() => setShowPlan(true)}><CalendarDays size={17}/></button></div><div className="week-days">{plans.map((plan, i) => <button key={plan.day} className={"day-cell " + (plan.active ? "day-active" : "")} onClick={() => setShowPlan(true)}><span>{plan.day}</span><b>{plan.date}</b><i className={i < 2 ? "day-complete" : ""}>{i < 2 ? <Check size={11}/> : <span/>}</i></button>)}</div><div className="goal-card"><div className="goal-icon"><Target size={20}/></div><div className="goal-text"><strong>Meta semanal</strong><p>5 treinos para manter a evolução.</p><div className="goal-track"><i/></div><small>4 de 5 treinos concluídos</small></div><div className="goal-percent">80%</div></div><div className="motivation"><div className="motivation-mark">“</div><p>Não precisa ser perfeito. Só precisa continuar.</p><span>— SUA MENTALIDADE FITNESS</span></div></article></section>
+          <footer className="app-footer"><span>© 2026 FORMA FITNESS CLUB</span><span>Feito para sua melhor versão <span className="footer-heart">♥</span></span></footer>
+        </div>
       </main>
-      <footer><div className="brand">{settings.brand_name}</div><p>{settings.footer_text}</p><a href="#inicio">Voltar ao topo ↑</a></footer>
+
+      {showPlan && <div className="modal-backdrop" onClick={() => setShowPlan(false)}><section className="plan-modal" onClick={e => e.stopPropagation()}><button className="modal-close" aria-label="Fechar" onClick={() => setShowPlan(false)}><X size={20}/></button><div className="section-kicker">SEU PLANEJAMENTO</div><h2>Agenda de treinos</h2><p className="modal-subtitle">Organize sua semana e mantenha a consistência.</p><div className="modal-plan-list">{plans.map((plan, i) => <div className="modal-plan-row" key={plan.day}><div className={"modal-day " + (plan.active ? "current" : "")}>{plan.day}<strong>{plan.date}</strong></div><div><strong>{plan.name}</strong><small>{plan.type} · {i < 2 ? "Concluído" : plan.active ? "Próximo treino" : "Planejado"}</small></div><span className={i < 2 ? "plan-status complete" : "plan-status"}>{i < 2 ? "Concluído" : plan.active ? "Hoje" : "Agendado"}</span></div>)}</div><button className="green-button modal-done" onClick={() => setShowPlan(false)}>Tudo certo <Check size={17}/></button></section></div>}
     </div>
   );
 }
