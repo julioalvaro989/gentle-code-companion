@@ -20,10 +20,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({ meta: [
     { charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" },
-    { title: "InvesteSimples — Simulador de Investimentos" },
-    { name: "description", content: "Simulador educativo de investimentos a partir de R$ 10." },
-    { property: "og:title", content: "InvesteSimples — Simulador de Investimentos" },
-    { property: "og:description", content: "Faça projeções financeiras de forma simples e transparente." }
+    { title: "FORMA Fitness Club — Seu aplicativo de academia" },
+    { name: "description", content: "Organize seus treinos, acompanhe seu progresso e mantenha a consistência com o FORMA Fitness Club." },
+    { property: "og:title", content: "FORMA Fitness Club" },
+    { property: "og:description", content: "Seu treino, sua evolução, seu ritmo." }
   ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.ico", type: "image/x-icon" }] }),
   shellComponent: ({ children }: { children: ReactNode }) => <html lang="pt-BR"><head><HeadContent /></head><body>{children}<Scripts /></body></html>,
   component: () => { const { queryClient } = Route.useRouteContext(); return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>; },
