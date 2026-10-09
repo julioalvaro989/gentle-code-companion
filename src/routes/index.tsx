@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Activity, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: GymApp });
 
@@ -48,6 +48,7 @@ function GymApp() {
     <main className="main-content" id="inicio">
       <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><div className="avatar top-avatar">JD</div></div></header>
       <div className="page-wrap">
+        {activeNav !== "Visão geral" && <button className="outline-button fit-back-button" onClick={() => changePage("Visão geral")}><ArrowLeft size={17}/> Voltar ao início</button>}
         {activeNav==="Visão geral" && <>
           <section className="welcome-row"><div><div className="section-kicker"><span/> SUA JORNADA COMEÇA AQUI</div><h1>Hoje é dia de <span>evoluir.</span></h1><p>Um passo de cada vez. Vamos construir sua melhor versão?</p></div><button className="outline-button" onClick={()=>changePage("Progresso")}><Activity size={17}/> Minha evolução</button></section>
           <section className="fit-hero">
