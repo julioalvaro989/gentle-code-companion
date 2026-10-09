@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Activity, ArrowDownRight, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Menu, Plus, Search, Settings, Target, Trophy, UserRound, X } from "lucide-react";
+import { Activity, ArrowDownRight, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Plus, Search, Settings, Target, Trophy, UserRound, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: GymApp });
 
