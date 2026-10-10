@@ -11,7 +11,7 @@ type ChatMessage = {
 const welcomeMessage: ChatMessage = {
   id: 1,
   role: "assistant",
-  content: "Oi! 👋 Eu sou a Vibra AI. Este espaço está sendo preparado para ajudar você na sua jornada. Em breve, poderemos conversar por aqui!",
+  content: "Oi! 👋 Eu sou a Vibra AI. Posso ajudar com treinos, exercícios, academia, hábitos saudáveis e dúvidas gerais. O que você gostaria de saber?",
 };
 
 const positionStorageKey = "vibra-chat-launcher-position";
@@ -35,13 +35,13 @@ function savePosition(position: Position) {
 }
 
 /**
- * Presentation-only chat shell. Keep network/API work out of this component;
- * connect a future secure server action and authenticated conversation store here.
+ * Chat client connected to the secure Supabase Edge Function. API secrets stay server-side.
  */
 export function VibraChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
+  const [isSending, setIsSending] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
@@ -195,17 +195,43 @@ export function VibraChat() {
     }
   }, [isOpen, messages.length]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const content = draft.trim();
-    if (!content) return;
+    if (!content || isSending) return;
 
-    setMessages((current) => [
-      ...current,
-      { id: Date.now(), role: "user", content },
-    ]);
+    const history = [...messages, { id: Date.now(), role: "user" as const, content }];
+    setMessages(history);
     setDraft("");
-    // Intentionally no generated reply or network request in this UI-only stage.
+    setIsSending(true);
+    try {
+      const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+      const publishableKey = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
+      if (!supabaseUrl || !publishableKey) {
+        throw new Error("O serviço de IA não está configurado neste ambiente.");
+      }
+      const response = await fetch(`${supabaseUrl}/functions/v1/fitness-chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
+        body: JSON.stringify({
+          messages: history.filter((message) => message.role !== "assistant" || message.id !== welcomeMessage.id)
+            .slice(-12).map(({ role, content }) => ({ role, content })),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result?.error || "Não consegui responder agora. Tente novamente.");
+      const answer = typeof result?.reply === "string" ? result.reply : "";
+      if (!answer) throw new Error("A IA não retornou uma resposta. Tente novamente.");
+      setMessages((current) => [...current, { id: Date.now() + 1, role: "assistant", content: answer }]);
+    } catch (error) {
+      setMessages((current) => [...current, {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: error instanceof Error ? error.message : "Ocorreu um erro ao consultar a IA. Tente novamente.",
+      }]);
+    } finally {
+      setIsSending(false);
+    }
   }
 
   return (
@@ -288,13 +314,13 @@ export function VibraChat() {
               type="submit"
               className="vibra-chat-send"
               aria-label="Adicionar mensagem"
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || isSending}
             >
-              <ArrowUp size={19} />
+              isSending ? <span aria-hidden="true">…</span> : <ArrowUp size={19} />
             </button>
           </form>
           <p className="vibra-chat-disclaimer">
-            Interface em preparação · respostas automáticas ainda não conectadas
+            Respostas por IA · confira informações importantes com um profissional
           </p>
         </section>
       )}
