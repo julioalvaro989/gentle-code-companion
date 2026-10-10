@@ -1,4 +1,4 @@
-type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string | undefined; user_metadata?: { full_name?: string; username?: string } } };
+type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { full_name?: string } } };
 
 const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
 const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;

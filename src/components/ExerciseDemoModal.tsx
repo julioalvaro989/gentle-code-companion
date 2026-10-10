@@ -2,9 +2,8 @@ import { useEffect } from "react";
 import { BookOpen, CircleHelp, Dumbbell, X } from "lucide-react";
 import { exerciseCatalog } from "./exerciseCatalog";
 import "./ExerciseDemoModal.css";
-import { Exercise3DViewer } from "./Exercise3DViewer";
 
-type Props = { exerciseId: string | null; workoutName?: string | undefined; onClose: () => void };
+type Props = { exerciseId: string | null; workoutName?: string; onClose: () => void };
 
 export function ExerciseDemoModal({ exerciseId, workoutName, onClose }: Props) {
  const exercise = exerciseId ? exerciseCatalog.find(item => item.id === exerciseId) : undefined;
@@ -25,9 +24,9 @@ export function ExerciseDemoModal({ exerciseId, workoutName, onClose }: Props) {
     <p className="exercise-demo-note">Situação: cadastro não encontrado. Associe o exercício a um ID estável do catálogo para disponibilizar suas instruções.</p>
    </div> : <>
     <div className="exercise-demo-visual">
-     <Exercise3DViewer exerciseId={exercise.id} compact />
-     {exercise.videoUrl && <div className="exercise-demo-legacy-media"><span>Vídeo demonstrativo 2D</span><video controls playsInline preload="none" poster={exercise.imageUrl ?? undefined}><source src={exercise.videoUrl}/></video></div>}
-     {!exercise.videoUrl && exercise.imageUrl && <img src={exercise.imageUrl} alt={exercise.name} loading="lazy"/>}
+     {exercise.videoUrl ? <video controls playsInline preload="none" poster={exercise.imageUrl ?? undefined}><source src={exercise.videoUrl}/></video>
+      : exercise.imageUrl ? <img src={exercise.imageUrl} alt={exercise.name} loading="lazy"/>
+      : <div className="exercise-demo-no-media"><Dumbbell size={34}/><strong>Demonstração visual ainda não cadastrada</strong><span>Consulte as instruções antes de executar o movimento.</span></div>}
     </div>
     <div className="exercise-demo-body">
      <span className="exercise-demo-kicker">{exercise.primaryMuscle}</span>
