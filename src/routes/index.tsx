@@ -104,7 +104,7 @@ function GymApp() {
       if (authMode === "signup") {
         next = await signUp(authUsername.trim(), authEmail.trim(), authPassword);
         if (!next) {
-          setAuthMessage("Cadastro recebido. Se a confirmação de e-mail estiver ativada, confirme seu e-mail e entre para continuar.");
+          setAuthMessage("Cadastro recebido! Enviamos um e-mail de confirmação para o endereço informado. Abra a mensagem e clique no link para confirmar sua conta; depois, volte aqui para entrar.");
           return;
         }
         setProfileName(authUsername.trim());
