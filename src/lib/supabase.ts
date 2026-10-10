@@ -54,7 +54,9 @@ export function getStoredSession(): AuthSession | null {
 }
 
 export async function signUp(username: string, email: string, password: string) {
-  const body = await request("auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password, data: { full_name: username, username } }) });
+  const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+  const signupPath = redirectTo ? `auth/v1/signup?redirect_to=${encodeURIComponent(redirectTo)}` : "auth/v1/signup";
+  const body = await request(signupPath, { method: "POST", body: JSON.stringify({ email, password, data: { full_name: username, username } }) });
   if (body?.access_token) {
     const session = body as AuthSession;
     localStorage.setItem("investe_session", JSON.stringify(session));
