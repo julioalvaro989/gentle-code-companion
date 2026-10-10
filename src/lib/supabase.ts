@@ -53,8 +53,8 @@ export function getStoredSession(): AuthSession | null {
   try { return JSON.parse(localStorage.getItem("investe_session") || "null"); } catch { return null; }
 }
 
-export async function signUp(fullName: string, email: string, password: string) {
-  const body = await request("auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password, data: { full_name: fullName } }) });
+export async function signUp(username: string, email: string, password: string) {
+  const body = await request("auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password, data: { full_name: username, username } }) });
   if (body?.access_token) {
     const session = body as AuthSession;
     localStorage.setItem("investe_session", JSON.stringify(session));
@@ -136,3 +136,30 @@ export async function uploadBanner(session: AuthSession, file: File) {
 }
 
 export type { AuthSession };
+
+
+export type FitnessProfile = { id: string; username: string; email: string; goal: string; created_at?: string };
+export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
+
+export async function getFitnessProfile(session: AuthSession): Promise<FitnessProfile | null> {
+  const rows = await request("rest/v1/fitness_profiles?select=*&id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
+  return rows?.[0] ?? null;
+}
+export async function saveFitnessProfile(session: AuthSession, profile: Pick<FitnessProfile, "username" | "email" | "goal">): Promise<void> {
+  await request("rest/v1/fitness_profiles?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ id: session.user.id, ...profile, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
+export async function getFitnessProgress(session: AuthSession): Promise<FitnessProgress | null> {
+  const rows = await request("rest/v1/fitness_progress?select=*&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
+  return rows?.[0] ?? null;
+}
+export async function saveFitnessProgress(session: AuthSession, progress: Pick<FitnessProgress, "completed_exercises" | "water_glasses" | "goal">): Promise<void> {
+  await request("rest/v1/fitness_progress?on_conflict=user_id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ user_id: session.user.id, ...progress, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
