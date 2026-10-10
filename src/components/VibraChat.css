@@ -198,3 +198,77 @@
   .vibra-chat-panel { left: 10px; right: 10px; bottom: 72px; width: auto; height: min(620px, calc(100dvh - 90px)); min-height: 320px; border-radius: 19px; }
 }
 @media (prefers-reduced-motion: reduce) { .vibra-chat-launcher, .vibra-chat-panel, .vibra-chat-send, .vibra-chat-launcher-content { transition: none; animation: none; } }
+
+
+/* Compact Vibra AI launcher and chat panel — dimensions only */
+.vibra-chat-launcher {
+  gap: 7px;
+  min-height: 43px;
+  padding-inline: 14px;
+}
+.vibra-chat-launcher-content { gap: 7px; }
+.vibra-chat-launcher-content > svg { width: 20px; height: 20px; }
+.vibra-chat-launcher-label { font-size: 12px; }
+.vibra-chat-launcher-sparkle {
+  top: -10px;
+  right: -10px;
+  width: 19px;
+  height: 19px;
+  border-width: 1px;
+}
+.vibra-chat-launcher.is-open { width: 42px; min-height: 42px; }
+.vibra-chat-panel {
+  width: min(340px, calc(100vw - 32px));
+  height: min(480px, calc(100dvh - 96px));
+  min-height: 300px;
+  border-radius: 18px;
+}
+.vibra-chat-panel.is-positioned {
+  width: min(340px, var(--vibra-panel-max-width));
+  height: min(480px, var(--vibra-panel-max-height));
+}
+.vibra-chat-header { gap: 8px; padding: 12px 12px; }
+.vibra-chat-brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+.vibra-chat-heading h2 { margin-bottom: 3px; font-size: 15px; }
+.vibra-chat-icon-button { width: 30px; height: 30px; }
+.vibra-chat-context { gap: 7px; margin: 10px 12px 0; padding: 8px 10px; font-size: 10px; }
+.vibra-chat-messages { gap: 12px; padding: 14px 12px 12px; min-height: 0; }
+.vibra-chat-message-row { gap: 7px; }
+.vibra-chat-bubble { padding: 10px 12px; line-height: 1.55; }
+.vibra-chat-composer { gap: 7px; margin-inline: 11px; padding: 7px; }
+.vibra-chat-send { width: 32px; height: 32px; }
+.vibra-chat-disclaimer { margin: 7px 12px 10px; }
+@media (max-width: 900px) {
+  .vibra-chat-launcher { left: 18px; bottom: max(18px, env(safe-area-inset-bottom)); }
+  .vibra-chat-panel {
+    left: 18px;
+    bottom: max(70px, calc(env(safe-area-inset-bottom) + 58px));
+    width: min(340px, calc(100vw - 36px));
+    height: min(480px, calc(100dvh - 100px));
+  }
+}
+@media (max-width: 520px) {
+  .vibra-chat-launcher {
+    left: 78px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    min-height: 43px;
+    padding-inline: 13px;
+  }
+  .vibra-chat-panel {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(66px, calc(env(safe-area-inset-bottom) + 54px));
+    width: auto;
+    height: min(500px, calc(100dvh - 100px));
+    min-height: 260px;
+    border-radius: 16px;
+  }
+  .vibra-chat-panel.is-positioned {
+    width: min(calc(100vw - 20px), var(--vibra-panel-max-width));
+    height: min(500px, var(--vibra-panel-max-height));
+  }
+  .vibra-chat-header { padding: 10px; }
+  .vibra-chat-context { margin-inline: 10px; }
+  .vibra-chat-messages { padding: 12px 10px; }
+  .vibra-chat-composer { margin-inline: 9px; }
+}
