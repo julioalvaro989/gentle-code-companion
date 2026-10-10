@@ -53,11 +53,11 @@ function AdminPage() {
 
   if (!ready) return <div className="admin-page"><div className="admin-card"><h1>Validando acesso...</h1></div></div>;
 
-  if (!session) return <div className="admin-page" style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:20,background:"radial-gradient(ellipse at top right,#35105d,transparent 48%),#080711"}}>
-    <div className="admin-card admin-login" style={{width:"min(100%,440px)",background:"#151020",border:"1px solid #3b304d",borderRadius:24,color:"#fff"}}>
-      <div style={{color:"#b4ff35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ÁREA RESTRITA</div>
+  if (!session) return <div className="admin-page" style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:20,background:"radial-gradient(ellipse at top right,#7900FF,transparent 48%),#05060B"}}>
+    <div className="admin-card admin-login" style={{width:"min(100%,440px)",background:"#0B0C16",border:"1px solid #29233F",borderRadius:24,color:"#fff"}}>
+      <div style={{color:"#B7FF35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ÁREA RESTRITA</div>
       <h1 style={{color:"#fff"}}>Painel administrativo</h1>
-      <p style={{color:"#c8c1d4"}}>Entre com o e-mail e a senha da conta autorizada como administradora.</p>
+      <p style={{color:"#A8B4D8"}}>Entre com o e-mail e a senha da conta autorizada como administradora.</p>
       <form onSubmit={login} style={{display:"grid",gap:12}}>
         <input required type="email" autoComplete="username" placeholder="E-mail do administrador" value={email} onChange={e=>setEmail(e.target.value)} />
         <input required type="password" autoComplete="current-password" placeholder="Senha do administrador" value={password} onChange={e=>setPassword(e.target.value)} />
@@ -68,23 +68,23 @@ function AdminPage() {
     </div>
   </div>;
 
-  return <div className="admin-page" style={{minHeight:"100vh",background:"#080711",color:"#fff",padding:"28px 16px"}}>
+  return <div className="admin-page" style={{minHeight:"100vh",background:"#05060B",color:"#fff",padding:"28px 16px"}}>
     <div style={{maxWidth:1080,margin:"0 auto"}}>
       <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:28}}>
-        <div><div style={{color:"#b4ff35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ADMIN</div><h1 style={{fontSize:36,margin:"8px 0"}}>Painel de controle</h1><p style={{color:"#bcb4cc",margin:0}}>Clientes e atividade cadastrados no banco de dados.</p></div>
+        <div><div style={{color:"#B7FF35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ADMIN</div><h1 style={{fontSize:36,margin:"8px 0"}}>Painel de controle</h1><p style={{color:"#A8B4D8",margin:0}}>Clientes e atividade cadastrados no banco de dados.</p></div>
         <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><a className="admin-back" href="/"><ArrowLeft size={16}/> Ver aplicativo</a><button className="primary" onClick={()=>loadUsers(session)} disabled={loading}><RefreshCw size={16}/> Atualizar</button><button className="danger-button" onClick={logout}><LogOut size={16}/> Sair</button></div>
       </header>
       {error && <div className="auth-error admin-message">{error}</div>}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,marginBottom:22}}>
-        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><Users color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Clientes cadastrados</p><strong style={{fontSize:34}}>{users.length}</strong></section>
-        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><Activity color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Banco de dados</p><strong style={{fontSize:23}}>Conectado</strong></section>
-        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><ShieldCheck color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Permissões</p><strong style={{fontSize:23}}>Protegidas</strong></section>
+        <section className="admin-card" style={{background:"#0B0C16",border:"1px solid #29233F",borderRadius:20,color:"#fff"}}><Users color="#B7FF35"/><p style={{color:"#A8B4D8"}}>Clientes cadastrados</p><strong style={{fontSize:34}}>{users.length}</strong></section>
+        <section className="admin-card" style={{background:"#0B0C16",border:"1px solid #29233F",borderRadius:20,color:"#fff"}}><Activity color="#B7FF35"/><p style={{color:"#A8B4D8"}}>Banco de dados</p><strong style={{fontSize:23}}>Conectado</strong></section>
+        <section className="admin-card" style={{background:"#0B0C16",border:"1px solid #29233F",borderRadius:20,color:"#fff"}}><ShieldCheck color="#B7FF35"/><p style={{color:"#A8B4D8"}}>Permissões</p><strong style={{fontSize:23}}>Protegidas</strong></section>
       </div>
-      <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}>
+      <section className="admin-card" style={{background:"#0B0C16",border:"1px solid #29233F",borderRadius:20,color:"#fff"}}>
         <h2>Clientes Vibra</h2>
         {loading && <p>Carregando clientes...</p>}
-        {!loading && users.length === 0 && <p style={{color:"#bcb4cc"}}>Ainda não há clientes cadastrados ou a lista não pôde ser carregada.</p>}
-        {users.length > 0 && <div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",textAlign:"left"}}><thead><tr><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>Usuário</th><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>E-mail</th><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>Cadastro</th></tr></thead><tbody>{users.map(u=><tr key={u.id}><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.username}</td><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.email}</td><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.created_at ? new Date(u.created_at).toLocaleDateString("pt-BR") : "—"}</td></tr>)}</tbody></table></div>}
+        {!loading && users.length === 0 && <p style={{color:"#A8B4D8"}}>Ainda não há clientes cadastrados ou a lista não pôde ser carregada.</p>}
+        {users.length > 0 && <div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",textAlign:"left"}}><thead><tr><th style={{padding:12,borderBottom:"1px solid #29233F"}}>Usuário</th><th style={{padding:12,borderBottom:"1px solid #29233F"}}>E-mail</th><th style={{padding:12,borderBottom:"1px solid #29233F"}}>Cadastro</th></tr></thead><tbody>{users.map(u=><tr key={u.id}><td style={{padding:12,borderBottom:"1px solid #29233F"}}>{u.username}</td><td style={{padding:12,borderBottom:"1px solid #29233F"}}>{u.email}</td><td style={{padding:12,borderBottom:"1px solid #29233F"}}>{u.created_at ? new Date(u.created_at).toLocaleDateString("pt-BR") : "—"}</td></tr>)}</tbody></table></div>}
       </section>
     </div>
   </div>;
