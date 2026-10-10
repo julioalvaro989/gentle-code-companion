@@ -134,8 +134,8 @@
 .vibra-chat-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes vibra-chat-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 900px) {
-  .vibra-chat-launcher { left: 82px; bottom: 18px; }
-  .vibra-chat-panel { left: 82px; bottom: 78px; width: min(390px, calc(100vw - 100px)); height: min(570px, calc(100dvh - 100px)); }
+  .vibra-chat-launcher { left: 18px; bottom: 18px; }
+  .vibra-chat-panel { left: 18px; bottom: 78px; width: min(390px, calc(100vw - 36px)); height: min(570px, calc(100dvh - 100px)); }
 }
 @media (max-width: 520px) {
   .vibra-chat-launcher { left: 78px; bottom: 14px; min-height: 49px; padding: 0 15px; }
