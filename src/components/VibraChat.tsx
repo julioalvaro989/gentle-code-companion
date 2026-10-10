@@ -348,8 +348,8 @@ export function VibraChat() {
         }}
       >
         <span className="vibra-chat-launcher-content">
-        {isOpen ? <X size={23} /> : <MessageCircle size={23} />}
-        {!isOpen && <span className="vibra-chat-launcher-sparkle"><Sparkles size={12} /></span>}
+        {isOpen ? <X size={20} /> : <MessageCircle size={20} />}
+        {!isOpen && <span className="vibra-chat-launcher-sparkle"><Sparkles size={10} /></span>}
         <span className="vibra-chat-launcher-label">{isOpen ? "Fechar chat" : "Vibra AI"}</span>
         </span>
       </button>
