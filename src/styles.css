@@ -113,3 +113,90 @@ body, .gym-app { background: #0b0912; color: #f6f2fb; }
 #lovable-badge {
   display: none !important;
 }
+
+
+/* Mobile layout and navigation hardening */
+html, body, #root { width: 100%; min-width: 0; min-height: 100%; overflow-x: clip; }
+.gym-app, .fit-app, .main-content, .page-wrap, .fit-page-section { min-width: 0; max-width: 100%; }
+.fit-app .page-wrap { width: 100%; }
+.fit-page-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 18px; }
+.fit-page-actions .outline-button { font-size:12px; }
+.fit-page-actions .fit-close-page { margin-left:auto; }
+.sidebar-close { display:none; }
+.sidebar-scrim { display:none; }
+.fit-app .fit-mobile-menu { flex:none; }
+.fit-app .sidebar { overflow-y:auto; overscroll-behavior:contain; }
+.fit-app .sidebar-close { align-items:center; justify-content:center; width:36px; height:36px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--text); }
+.fit-app .sidebar-close:hover { background:var(--panel2); }
+.fit-app .fit-hero, .fit-app .fit-specialist-strip, .fit-app .fit-profile-panel,
+.fit-app .fit-goal-panel, .fit-app .panel, .fit-app .stat-card { min-width:0; }
+.fit-app img, .fit-app video, .fit-app canvas, .fit-app iframe { max-width:100%; }
+.fit-app .fit-page-section > *, .fit-app .panel-heading > *, .fit-app .welcome-row > * { min-width:0; }
+.fit-app button, .fit-app a { max-width:100%; }
+@media (max-width: 900px) {
+  .fit-app .sidebar { width:min(320px, 88vw); max-width:88vw; padding:18px 16px max(18px, env(safe-area-inset-bottom)); align-items:stretch; }
+  .fit-app .sidebar .gym-logo { margin:0 0 26px; padding-right:42px; position:relative; }
+  .fit-app .sidebar .gym-logo > span:last-child { display:flex; font-size:20px; }
+  .fit-app .sidebar .side-label { display:block; font-size:9px; }
+  .fit-app .sidebar .nav-item, .fit-app .sidebar .nav-item.active { display:flex; justify-content:flex-start; gap:12px; padding:13px; font-size:12px; }
+  .fit-app .sidebar .nav-count { display:inline-flex; margin-left:auto; }
+  .fit-app .sidebar .sidebar-bottom { display:block; width:100%; }
+  .fit-app .sidebar .coach-card { display:block; }
+  .fit-app .sidebar .settings-item { display:flex; margin-bottom:10px; }
+  .fit-app .sidebar .user-mini { display:flex; justify-content:flex-start; }
+  .fit-app .sidebar .user-mini > div:nth-child(2) { display:grid; min-width:0; }
+  .fit-app .sidebar .user-mini button { display:grid; }
+  .fit-app .sidebar-close { display:flex; position:absolute; top:2px; right:0; }
+  .fit-app .sidebar-scrim { display:block; position:fixed; inset:0; z-index:19; border:0; background:rgba(0,0,0,.58); backdrop-filter:blur(2px); }
+  .fit-app .sidebar { z-index:21; }
+  .fit-app .page-wrap { padding:22px clamp(14px, 3.5vw, 24px) 20px; }
+  .fit-app .fit-hero-copy { max-width:100%; }
+  .fit-app .fit-float { max-width:calc(100% - 28px); }
+  .fit-app .fit-nutrition-layout, .fit-app .fit-expert-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width: 620px) {
+  .fit-app .topbar { position:sticky; top:0; z-index:15; height:60px; padding:0 12px; }
+  .fit-app .mobile-brand { font-size:14px; }
+  .fit-app .top-actions { gap:6px; }
+  .fit-app .top-actions > .icon-button { width:34px; height:34px; }
+  .fit-app .page-wrap { padding:16px 12px max(22px, env(safe-area-inset-bottom)); }
+  .fit-app .fit-page-actions { margin-bottom:14px; }
+  .fit-app .fit-page-actions .outline-button { font-size:11px; padding:9px 11px; }
+  .fit-app .welcome-row { display:flex; flex-direction:column; }
+  .fit-app .welcome-row .outline-button { align-self:flex-start; font-size:11px; }
+  .fit-app .fit-hero { min-height:420px; border-radius:16px; }
+  .fit-app .fit-hero-copy { padding:22px 17px; }
+  .fit-app .fit-hero-copy h2 { font-size:clamp(32px, 9vw, 40px); overflow-wrap:anywhere; }
+  .fit-app .fit-hero-copy > p { max-width:100%; font-size:12px; }
+  .fit-app .fit-hero .hero-meta { gap:9px; }
+  .fit-app .fit-hero .hero-meta span { font-size:9px; }
+  .fit-app .stats-grid { grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .fit-app .stat-card { padding:11px 10px; }
+  .fit-app .stat-value { font-size:clamp(20px, 6vw, 25px); white-space:normal; overflow-wrap:anywhere; }
+  .fit-app .stat-top { gap:5px; }
+  .fit-app .stat-icon { flex:none; }
+  .fit-app .lower-grid, .fit-app .fit-nutrition-layout, .fit-app .fit-expert-grid { grid-template-columns:minmax(0,1fr); }
+  .fit-app .panel { padding:14px; }
+  .fit-app .panel-heading { flex-wrap:wrap; }
+  .fit-app .fit-specialist-strip { align-items:flex-start; gap:12px; padding:15px; }
+  .fit-app .fit-specialist-strip > div:nth-child(2) { min-width:0; flex:1; }
+  .fit-app .fit-specialist-strip .green-button { width:100%; }
+  .fit-app .fit-goal-panel { padding:15px; }
+  .fit-app .fit-goal-panel select, .fit-app .fit-profile-info select { width:100%; }
+  .fit-app .fit-profile-panel { padding:16px; gap:15px; }
+  .fit-app .fit-profile-info { width:100%; min-width:0; }
+  .fit-app .fit-page-section > h1 { font-size:clamp(26px, 7vw, 32px); overflow-wrap:anywhere; }
+  .fit-app .fit-search { width:100%; }
+  .fit-app .fit-search input { width:100%; min-width:0; }
+  .fit-app .fit-workout-banner { min-width:0; }
+  .fit-app .fit-workout-banner h2 { overflow-wrap:anywhere; }
+  .fit-app .week-days { gap:4px; }
+  .fit-app .day-cell { min-width:0; }
+}
+@media (max-width: 360px) {
+  .fit-app .mobile-brand { font-size:12px; }
+  .fit-app .topbar { gap:6px; }
+  .fit-app .stats-grid { grid-template-columns:minmax(0,1fr); }
+  .fit-app .fit-page-actions .outline-button { padding:8px; }
+  .fit-app .fit-hero-copy { padding:18px 14px; }
+}
