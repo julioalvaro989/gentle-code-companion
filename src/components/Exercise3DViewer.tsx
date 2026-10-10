@@ -4,7 +4,7 @@ import { AlertTriangle, CircleHelp, Pause, Play, RotateCcw, ShieldCheck, TimerRe
 import { exerciseAnimationRegistry, type AnimationVerification } from "./exerciseAnimationRegistry";
 import "./Exercise3DViewer.css";
 
-type Props = { exerciseId: string; compact?: boolean };
+type Props = { exerciseId: string; compact?: boolean; visualState?: "development" };
 type ModelViewerElement = HTMLElement & {
   play?: () => void; pause?: () => void; currentTime?: number;
   duration?: number; availableAnimations?: string[]; animationName?: string;
@@ -25,7 +25,13 @@ function loadModelViewer() {
   return loaderPromise;
 }
 
-export function Exercise3DViewer({ exerciseId, compact = false }: Props) {
+export function Exercise3DViewer({ exerciseId, compact = false, visualState }: Props) {
+ if (visualState === "development") return <div className={"exercise-3d-development" + (compact ? " compact" : "")}>
+  <div className="exercise-3d-development-icon" aria-hidden="true"><TimerReset size={28}/></div>
+  <span className="exercise-3d-development-status">Em desenvolvimento</span>
+  <strong>Demonstração em desenvolvimento</strong>
+  <p>Estamos preparando demonstrações visuais para ajudar você a executar cada exercício com mais confiança. Em breve, novidades.</p>
+ </div>;
  if (exerciseId === "agachamento-livre") return <ProceduralSquatPrototype compact={compact} />;
  return <ExternalExercise3DViewer exerciseId={exerciseId} compact={compact} />;
 }
