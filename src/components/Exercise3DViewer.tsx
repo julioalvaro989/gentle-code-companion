@@ -26,7 +26,6 @@ function loadModelViewer() {
 }
 
 export function Exercise3DViewer({ exerciseId, compact = false }: Props) {
- if (exerciseId === "agachamento-livre") return <ProceduralSquatPrototype compact={compact} />;
  return <ExternalExercise3DViewer exerciseId={exerciseId} compact={compact} />;
 }
 
@@ -62,8 +61,8 @@ function ExternalExercise3DViewer({ exerciseId, compact }: Props) {
  if (!available) return <div className={"exercise-3d-pending" + (compact ? " compact" : "")}>
   <div className="exercise-3d-icon"><CircleHelp size={compact ? 20 : 30}/></div>
   <span className="exercise-3d-status"><TimerReset size={13}/> Demonstração 3D pendente</span>
-  <strong>Modelo 3D compatível ainda não verificado</strong>
-  <p>As instruções do exercício continuam disponíveis. Nenhum vídeo ou imagem genérica será apresentado como animação 3D.</p>
+  <strong>Modelo e animação 3D ainda não verificados</strong>
+  <p>Esta demonstração permanece pendente até integrar um humanoide com esqueleto compatível, uma animação real de agachamento e licença comercial documentada. Nenhuma animação procedural simplificada será apresentada como referência técnica.</p>
   <small>Identificador: {exerciseId}</small>
  </div>;
  return <div className={"exercise-3d-viewer" + (compact ? " compact" : "")}>
