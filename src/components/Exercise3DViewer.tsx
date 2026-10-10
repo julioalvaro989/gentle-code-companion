@@ -26,18 +26,17 @@ function loadModelViewer() {
 }
 
 export function Exercise3DViewer({ exerciseId, compact = false }: Props) {
+ if (exerciseId === "agachamento-livre") return <ProceduralSquatPrototype compact={compact} />;
+ return <ExternalExercise3DViewer exerciseId={exerciseId} compact={compact} />;
+}
+
+function ExternalExercise3DViewer({ exerciseId, compact }: Props) {
  const asset: AnimationVerification | undefined = exerciseAnimationRegistry[exerciseId];
  const [ready, setReady] = useState(false);
  const [error, setError] = useState("");
- const [playing, setPlaying] = useState(true);
+ const [playing, setPlaying] = useState(false);
  const [speed, setSpeed] = useState("1");
  const modelRef = useRef<ModelViewerElement | null>(null);
-
- // First real 3D prototype: a procedural articulated mannequin, not a still/GIF/video.
- // This is explicitly labeled as a simplified visual prototype, not a biomechanical reference.
- if (exerciseId === "agachamento-livre") {
-  return <ProceduralSquatPrototype compact={compact} />;
- }
 
  useEffect(() => {
   let active = true;
