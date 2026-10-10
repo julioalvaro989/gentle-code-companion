@@ -1,179 +1,91 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import {
-  getProfile,
-  getSiteSettings,
-  getStoredSession,
-  signIn,
-  signOut,
-  updateSiteSettings,
-  uploadBanner,
-  type AuthSession,
-  type SiteSettings,
-} from "../lib/supabase";
+import { Activity, ArrowLeft, LogOut, Users, ShieldCheck, RefreshCw } from "lucide-react";
+import { getProfile, getStoredSession, listFitnessProfiles, signIn, signOut, type AuthSession, type FitnessProfile } from "../lib/supabase";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
-const fields: Array<[keyof SiteSettings, string]> = [
-  ["brand_name", "Nome da marca"],
-  ["nav_simulator", "Menu: simulador"],
-  ["nav_how", "Menu: como funciona"],
-  ["nav_security", "Menu: segurança"],
-  ["hero_badge", "Selo do topo"],
-  ["hero_title", "Título principal"],
-  ["hero_description", "Descrição principal"],
-  ["hero_primary_button", "Botão principal"],
-  ["hero_secondary_button", "Botão secundário"],
-  ["simulator_title", "Título do simulador"],
-  ["simulator_description", "Descrição do simulador"],
-  ["simulator_note", "Aviso abaixo dos controles"],
-  ["result_label", "Título do resultado"],
-  ["result_disclaimer", "Aviso do resultado"],
-  ["how_title", "Título: como funciona"],
-  ["step1_title", "Etapa 1 - título"],
-  ["step1_description", "Etapa 1 - descrição"],
-  ["step2_title", "Etapa 2 - título"],
-  ["step2_description", "Etapa 2 - descrição"],
-  ["step3_title", "Etapa 3 - título"],
-  ["step3_description", "Etapa 3 - descrição"],
-  ["security_title", "Título: segurança"],
-  ["security_description", "Descrição: segurança"],
-  ["footer_text", "Texto do rodapé"],
-];
-
 function AdminPage() {
-  const [session, setSession] = useState<AuthSession | null>(getStoredSession());
-  const [profile, setProfile] = useState<any>(null);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [status, setStatus] = useState("");
+  const [users, setUsers] = useState<FitnessProfile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!session) return;
-    getProfile(session).then(setProfile).catch(() => setProfile(null));
-    getSiteSettings().then(value => setSettings(value ?? null)).catch(err => setError(err instanceof Error ? err.message : "Não foi possível carregar as configurações."));
-  }, [session]);
+    let alive = true;
+    const current = getStoredSession();
+    if (!current) { setReady(true); return; }
+    (async () => {
+      try {
+        const profile = await getProfile(current);
+        if (!alive) return;
+        if (!profile?.is_admin) { await signOut(); setError("Esta conta não possui permissão de administrador."); }
+        else { setSession(current); await loadUsers(current, alive); }
+      } catch (e) { if (alive) setError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); }
+      finally { if (alive) setReady(true); }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  async function loadUsers(current: AuthSession, alive = true) {
+    setLoading(true);
+    try { const rows = await listFitnessProfiles(current); if (alive) setUsers(rows); }
+    catch (e) { if (alive) setError(e instanceof Error ? e.message : "Não foi possível carregar os clientes."); }
+    finally { if (alive) setLoading(false); }
+  }
 
   async function login(e: FormEvent) {
-    e.preventDefault();
-    setError(""); setLoading(true);
+    e.preventDefault(); setError(""); setLoading(true);
     try {
-      const next = await signIn(email.trim(), password);
-      const nextProfile = await getProfile(next);
-      if (!nextProfile?.is_admin) {
-        await signOut();
-        throw new Error("Este usuário não possui permissão de administrador.");
-      }
-      setProfile(nextProfile);
-      setSession(next);
-      setSettings(await getSiteSettings() ?? null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível entrar.");
-    } finally { setLoading(false); }
+      const current = await signIn(email.trim(), password);
+      const profile = await getProfile(current);
+      if (!profile?.is_admin) { await signOut(); throw new Error("Acesso negado. Esta conta ainda não foi autorizada como administradora."); }
+      setSession(current);
+      await loadUsers(current);
+    } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível entrar no painel."); }
+    finally { setLoading(false); setReady(true); }
   }
 
-  async function save() {
-    if (!session || !settings) return;
-    setError(""); setStatus("Salvando...");
-    try {
-      const saved = await updateSiteSettings(session, settings);
-      if (saved) setSettings(saved);
-      setStatus("Salvo. O site público atualiza automaticamente.");
-      window.setTimeout(() => setStatus(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível salvar.");
-      setStatus("");
-    }
-  }
+  async function logout() { await signOut(); setSession(null); setUsers([]); }
 
-  async function changeBanner(file?: File) {
-    if (!session || !file) return;
-    if (!file.type.startsWith("image/")) { setError("Selecione uma imagem válida."); return; }
-    setError(""); setStatus("Enviando banner...");
-    try {
-      const banner_url = await uploadBanner(session, file);
-      setSettings(prev => prev ? { ...prev, banner_url } : prev);
-      const saved = await updateSiteSettings(session, { banner_url });
-      if (saved) setSettings(saved);
-      setStatus("Banner publicado.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível enviar o banner.");
-    }
-  }
+  if (!ready) return <div className="admin-page"><div className="admin-card"><h1>Validando acesso...</h1></div></div>;
 
-  if (!session) return (
-    <div className="admin-page">
-      <div className="admin-card admin-login">
-        <div className="eyebrow">ÁREA RESTRITA</div>
-        <h1>Painel administrativo</h1>
-        <p>Entre com uma conta marcada como administradora.</p>
-        <form onSubmit={login}>
-          <input required type="email" placeholder="E-mail do administrador" value={email} onChange={e => setEmail(e.target.value)} />
-          <input required type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} />
-          {error && <div className="auth-error">{error}</div>}
-          <button className="primary full" disabled={loading}>{loading ? "Entrando..." : "Entrar no painel"}</button>
-        </form>
-        <a className="admin-back" href="/">← Voltar para o site</a>
-      </div>
+  if (!session) return <div className="admin-page" style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:20,background:"radial-gradient(ellipse at top right,#35105d,transparent 48%),#080711"}}>
+    <div className="admin-card admin-login" style={{width:"min(100%,440px)",background:"#151020",border:"1px solid #3b304d",borderRadius:24,color:"#fff"}}>
+      <div style={{color:"#b4ff35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ÁREA RESTRITA</div>
+      <h1 style={{color:"#fff"}}>Painel administrativo</h1>
+      <p style={{color:"#c8c1d4"}}>Entre com o e-mail e a senha da conta autorizada como administradora.</p>
+      <form onSubmit={login} style={{display:"grid",gap:12}}>
+        <input required type="email" autoComplete="username" placeholder="E-mail do administrador" value={email} onChange={e=>setEmail(e.target.value)} />
+        <input required type="password" autoComplete="current-password" placeholder="Senha do administrador" value={password} onChange={e=>setPassword(e.target.value)} />
+        {error && <div className="auth-error" role="alert">{error}</div>}
+        <button className="primary full" disabled={loading}>{loading ? "Validando..." : "Entrar no painel"}</button>
+      </form>
+      <a className="admin-back" href="/">← Voltar para a Vibra</a>
     </div>
-  );
+  </div>;
 
-  if (!profile?.is_admin) return (
-    <div className="admin-page"><div className="admin-card"><h1>Acesso negado</h1><p>Esta conta não é administradora.</p><button className="primary" onClick={() => { signOut(); setSession(null); }}>Sair</button></div></div>
-  );
-
-  if (!settings) return <div className="admin-page"><div className="admin-card"><h1>Carregando painel...</h1>{error && <div className="auth-error">{error}</div>}</div></div>;
-
-  return (
-    <div className="admin-page">
-      <div className="admin-wrap">
-        <header className="admin-header">
-          <div><div className="eyebrow">PAINEL ADMIN</div><h1>Controle do site</h1><p>Altere textos, cores e banner sem editar o código.</p></div>
-          <div className="admin-actions"><a href="/">Ver site</a><button onClick={() => { signOut(); setSession(null); }}>Sair</button></div>
-        </header>
-
-        {error && <div className="auth-error admin-message">{error}</div>}
-        {status && <div className="admin-success">{status}</div>}
-
-        <section className="admin-card">
-          <h2>Textos do site</h2>
-          <div className="admin-fields">
-            {fields.map(([key, label]) => (
-              <label key={String(key)}>{label}
-                {String(settings[key] ?? "").length > 90 ? (
-                  <textarea value={String(settings[key] ?? "")} onChange={e => setSettings({ ...settings, [key]: e.target.value })} />
-                ) : (
-                  <input value={String(settings[key] ?? "")} onChange={e => setSettings({ ...settings, [key]: e.target.value })} />
-                )}
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section className="admin-card">
-          <h2>Cores em tempo real</h2>
-          <div className="color-grid">
-            {(["primary_color", "background_color", "surface_color", "text_color"] as const).map(key => (
-              <label key={key}>{key === "primary_color" ? "Cor principal" : key === "background_color" ? "Fundo" : key === "surface_color" ? "Superfícies" : "Texto"}
-                <div className="color-row"><input type="color" value={settings[key]} onChange={e => setSettings({ ...settings, [key]: e.target.value })}/><input value={settings[key]} onChange={e => setSettings({ ...settings, [key]: e.target.value })}/></div>
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section className="admin-card">
-          <h2>Banner da página inicial</h2>
-          <p className="admin-help">Escolha uma imagem do computador. Ela ficará armazenada no Lovable Cloud/Supabase.</p>
-          {settings.banner_url && <img className="admin-banner-preview" src={settings.banner_url} alt="Banner atual" />}
-          <input type="file" accept="image/*" onChange={e => changeBanner(e.target.files?.[0])} />
-          {settings.banner_url && <button className="danger-button" onClick={async () => { if (!session) return; setSettings({ ...settings, banner_url: null }); await updateSiteSettings(session, { banner_url: null }); setStatus("Banner removido."); }}>Remover banner</button>}
-        </section>
-
-        <button className="primary admin-save" onClick={save}>Salvar todas as alterações</button>
+  return <div className="admin-page" style={{minHeight:"100vh",background:"#080711",color:"#fff",padding:"28px 16px"}}>
+    <div style={{maxWidth:1080,margin:"0 auto"}}>
+      <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:28}}>
+        <div><div style={{color:"#b4ff35",fontSize:12,fontWeight:800,letterSpacing:2}}>VIBRA · ADMIN</div><h1 style={{fontSize:36,margin:"8px 0"}}>Painel de controle</h1><p style={{color:"#bcb4cc",margin:0}}>Clientes e atividade cadastrados no banco de dados.</p></div>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><a className="admin-back" href="/"><ArrowLeft size={16}/> Ver aplicativo</a><button className="primary" onClick={()=>loadUsers(session)} disabled={loading}><RefreshCw size={16}/> Atualizar</button><button className="danger-button" onClick={logout}><LogOut size={16}/> Sair</button></div>
+      </header>
+      {error && <div className="auth-error admin-message">{error}</div>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16,marginBottom:22}}>
+        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><Users color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Clientes cadastrados</p><strong style={{fontSize:34}}>{users.length}</strong></section>
+        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><Activity color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Banco de dados</p><strong style={{fontSize:23}}>Conectado</strong></section>
+        <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}><ShieldCheck color="#b4ff35"/><p style={{color:"#bcb4cc"}}>Permissões</p><strong style={{fontSize:23}}>Protegidas</strong></section>
       </div>
+      <section className="admin-card" style={{background:"#151020",border:"1px solid #342941",borderRadius:20,color:"#fff"}}>
+        <h2>Clientes Vibra</h2>
+        {loading && <p>Carregando clientes...</p>}
+        {!loading && users.length === 0 && <p style={{color:"#bcb4cc"}}>Ainda não há clientes cadastrados ou a lista não pôde ser carregada.</p>}
+        {users.length > 0 && <div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",textAlign:"left"}}><thead><tr><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>Usuário</th><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>E-mail</th><th style={{padding:12,borderBottom:"1px solid #3b304d"}}>Cadastro</th></tr></thead><tbody>{users.map(u=><tr key={u.id}><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.username}</td><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.email}</td><td style={{padding:12,borderBottom:"1px solid #30263c"}}>{u.created_at ? new Date(u.created_at).toLocaleDateString("pt-BR") : "—"}</td></tr>)}</tbody></table></div>}
+      </section>
     </div>
-  );
+  </div>;
 }
