@@ -7,7 +7,7 @@ import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRigh
 
 export const Route = createFileRoute("/")({ component: GymApp });
 
-const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #d7e1d7", borderRadius: 14, background: "#ffffff", color: "#151a15", padding: "15px 16px", outline: "none", fontSize: 14 };
+const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #29233F", borderRadius: 14, background: "#0B0C16", color: "#F8F9FF", padding: "15px 16px", outline: "none", fontSize: 14 };
 
 const navItems = [
   { name: "Visão geral", icon: Home },
@@ -183,25 +183,25 @@ function GymApp() {
     finally { setAuthBusy(false); }
   }
 
-  if (!authReady) return <div style={{minHeight:"100vh",background:"#080711",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
-  if (!session) return <div style={{minHeight:"100vh",background:"radial-gradient(ellipse at 80% 15%,#e8f5eb 0%,transparent 38%),radial-gradient(ellipse at 10% 90%,#e4f3e6 0%,transparent 35%),#f7f9f7",color:"#151a15",display:"grid",placeItems:"center",padding:"28px 16px",fontFamily:"inherit"}}>
-    <div style={{width:"min(100%,440px)",background:"rgba(255,255,255,.96)",border:"1px solid #dce5dc",borderRadius:28,padding:"clamp(24px,5vw,42px)",boxShadow:"0 25px 90px #12201218"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:30}}><span style={{fontSize:30,color:"#168a45",fontWeight:900}}>V</span><strong style={{fontSize:28,letterSpacing:-1}}>Vibra</strong></div>
-      <div style={{fontSize:11,letterSpacing:2,color:"#168a45",fontWeight:800,marginBottom:10}}>SEU ECOSSISTEMA DE BEM-ESTAR</div>
-      <h1 style={{fontSize:"clamp(30px,7vw,42px)",lineHeight:1.08,margin:"0 0 12px",letterSpacing:-1.5}}>{authMode === "signup" ? <>Comece sua <span style={{color:"#168a45"}}>evolução.</span></> : <>Bom ter você <span style={{color:"#168a45"}}>de volta.</span></>}</h1>
-      <p style={{color:"#596559",lineHeight:1.6,margin:"0 0 25px"}}>{authMode === "signup" ? "Crie sua conta para acessar treinos, nutrição, progresso e seu perfil pessoal." : "Entre na sua conta para continuar de onde parou."}</p>
+  if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  if (!session) return <div style={{minHeight:"100vh",background:"radial-gradient(ellipse at 80% 15%,#7900FF30 0%,transparent 38%),radial-gradient(ellipse at 10% 90%,#A855F720 0%,transparent 35%),#05060B",color:"#F8F9FF",display:"grid",placeItems:"center",padding:"28px 16px",fontFamily:"inherit"}}>
+    <div style={{width:"min(100%,440px)",background:"#0B0C16",border:"1px solid #29233F",borderRadius:28,padding:"clamp(24px,5vw,42px)",boxShadow:"0 25px 90px #12201218"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:30}}><span style={{fontSize:30,color:"#B7FF35",fontWeight:900}}>V</span><strong style={{fontSize:28,letterSpacing:-1}}>Vibra</strong></div>
+      <div style={{fontSize:11,letterSpacing:2,color:"#B7FF35",fontWeight:800,marginBottom:10}}>SEU ECOSSISTEMA DE BEM-ESTAR</div>
+      <h1 style={{fontSize:"clamp(30px,7vw,42px)",lineHeight:1.08,margin:"0 0 12px",letterSpacing:-1.5}}>{authMode === "signup" ? <>Comece sua <span style={{color:"#B7FF35"}}>evolução.</span></> : <>Bom ter você <span style={{color:"#B7FF35"}}>de volta.</span></>}</h1>
+      <p style={{color:"#A8B4D8",lineHeight:1.6,margin:"0 0 25px"}}>{authMode === "signup" ? "Crie sua conta para acessar treinos, nutrição, progresso e seu perfil pessoal." : "Entre na sua conta para continuar de onde parou."}</p>
       <form onSubmit={submitAuth} style={{display:"grid",gap:13}}>
         {authMode === "signup" && <input required minLength={2} autoComplete="username" placeholder="Nome de usuário" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} style={authInputStyle}/>}
         <input required type="email" autoComplete="email" placeholder="Seu e-mail" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} style={authInputStyle}/>
         <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Senha (mínimo 6 caracteres)" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
         {authError && <div role="alert" style={{color:"#ff9b9b",fontSize:13}}>{authError}</div>}
-        {authMessage && <div role="status" style={{color:"#c8ff80",fontSize:13,lineHeight:1.5}}>{authMessage}</div>}
-        {authMessage && authMode === "signup" && <button type="button" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy} style={{background:"transparent",border:"1px solid #168a45",borderRadius:999,color:"#168a45",padding:"10px 14px",fontWeight:750,cursor:"pointer"}}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
-        <button disabled={authBusy} type="submit" style={{border:0,borderRadius:999,background:"#b4ff35",color:"#10110b",padding:"15px 20px",fontWeight:850,cursor:"pointer",marginTop:5}}>{authBusy ? "Aguarde..." : authMode === "signup" ? "Criar minha conta →" : "Entrar na Vibra →"}</button>
+        {authMessage && <div role="status" style={{color:"#C8FF58",fontSize:13,lineHeight:1.5}}>{authMessage}</div>}
+        {authMessage && authMode === "signup" && <button type="button" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy} style={{background:"transparent",border:"1px solid #B7FF35",borderRadius:999,color:"#B7FF35",padding:"10px 14px",fontWeight:750,cursor:"pointer"}}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
+        <button disabled={authBusy} type="submit" style={{border:0,borderRadius:999,background:"#B7FF35",color:"#10110b",padding:"15px 20px",fontWeight:850,cursor:"pointer",marginTop:5}}>{authBusy ? "Aguarde..." : authMode === "signup" ? "Criar minha conta →" : "Entrar na Vibra →"}</button>
       </form>
       <div style={{display:"flex",alignItems:"center",gap:12,color:"#657065",fontSize:12,margin:"20px 0"}}><span style={{height:1,background:"#39304b",flex:1}}/>ou continue com<span style={{height:1,background:"#39304b",flex:1}}/></div>
       <button type="button" onClick={googleAuth} disabled={authBusy} style={{width:"100%",background:"#fff",color:"#17131f",border:0,borderRadius:999,padding:"13px 18px",fontWeight:750,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}><span style={{fontSize:18,fontWeight:900}}>G</span> Continuar com Google</button>
-      <p style={{textAlign:"center",color:"#596559",fontSize:13,marginTop:24}}>{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"} <button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}} style={{background:"none",border:0,color:"#168a45",fontWeight:800,cursor:"pointer"}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
+      <p style={{textAlign:"center",color:"#A8B4D8",fontSize:13,marginTop:24}}>{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"} <button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}} style={{background:"none",border:0,color:"#B7FF35",fontWeight:800,cursor:"pointer"}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
       <p style={{fontSize:11,color:"#687368",textAlign:"center",lineHeight:1.5}}>Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
     </div>
   </div>;
