@@ -87,32 +87,39 @@ a:hover { color: var(--green); }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
 
-/* Vibra Fitness: restaura a identidade roxo, preto e verde */
+/* Vibra design tokens: official palette */
 :root {
-  --bg: #0b0912;
-  --panel: #14111d;
-  --panel2: #1d1728;
-  --line: #30263f;
-  --text: #f6f2fb;
-  --muted: #a39aaf;
-  --green: #b7f34a;
-  --green-dark: #89c929;
+  color-scheme: dark;
+  --bg: #05060B;
+  --panel: #0B0C16;
+  --panel2: #111225;
+  --line: #29233F;
+  --text: #F8F9FF;
+  --muted: #A8B4D8;
+  --green: #B7FF35;
+  --green-dark: #8BCB22;
+  --green-soft: #C8FF58;
+  --purple: #7900FF;
+  --purple-light: #A855F7;
+  --white: #F8F9FF;
+  --success: #B7FF35;
+  --danger: #FF6B81;
+  --warning: #FFC857;
 }
-body, .gym-app { background: #0b0912; color: #f6f2fb; }
-.sidebar { background: #100d18; border-right-color: #30263f; }
-.topbar { background: rgba(11, 9, 18, .94); border-bottom-color: #30263f; }
-.stat-card, .panel { background: #14111d; border-color: #30263f; }
-.hero-workout { background: linear-gradient(115deg, #21172f 0%, #171220 55%, #182018 100%); border-color: #463258; }
-.coach-card { background: linear-gradient(145deg, #21172f, #14111d); border-color: #463258; }
-.nav-item.active { background: #2a2038; border-color: #463258; color: var(--green); }
-.nav-item:hover { background: #211a2b; }
-.stat-icon, .coach-icon { background: #2a2038; color: var(--green); }
-.date-chip, .icon-button, .outline-button { background: #14111d; border-color: #30263f; }
-.exercise-search { background: #100d18; border-color: #30263f; }
-.fit-specialist-strip { background: radial-gradient(ellipse at 0 0, #168A4525, transparent 68%), #171220; border-color: #463258; }
-#lovable-badge {
-  display: none !important;
-}
+html, body, #root { background: var(--bg); color: var(--text); }
+body, .gym-app, .fit-app { background-color: var(--bg); color: var(--text); }
+.sidebar { background: var(--panel); border-right-color: var(--line); }
+.topbar { background: rgba(11, 12, 22, .94); border-bottom-color: var(--line); }
+.stat-card, .panel { background: var(--panel); border-color: var(--line); }
+.hero-workout { background: linear-gradient(115deg, #171127 0%, #0B0C16 58%, #101321 100%); border-color: var(--line); }
+.coach-card { background: linear-gradient(145deg, #151027, var(--panel)); border-color: var(--line); }
+.nav-item.active { background: #211536; border-color: #4A2874; color: var(--green); }
+.nav-item:hover { background: #171326; color: var(--text); }
+.stat-icon, .coach-icon { background: #211536; color: var(--green); }
+.date-chip, .icon-button, .outline-button { background: var(--panel); border-color: var(--line); }
+.exercise-search { background: var(--bg); border-color: var(--line); }
+.fit-specialist-strip { background: linear-gradient(110deg, #171127, var(--panel)); border-color: var(--line); }
+#lovable-badge { display: none !important; }
 
 
 /* Mobile layout and navigation hardening */
@@ -199,4 +206,66 @@ html, body, #root { width: 100%; min-width: 0; min-height: 100%; overflow-x: cli
   .fit-app .stats-grid { grid-template-columns:minmax(0,1fr); }
   .fit-app .fit-page-actions .outline-button { padding:8px; }
   .fit-app .fit-hero-copy { padding:18px 14px; }
+}
+
+
+/* Vibra visual consistency layer — color-only overrides; layout and behavior preserved */
+:root { --focus-ring: #A855F7; --surface-hover: #171326; --border-strong: #49345F; }
+:where(button, input, textarea, select):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:where(input, textarea, select) { color: var(--text); accent-color: var(--green); }
+:where(input, textarea, select)::placeholder { color: #8793B8; opacity: 1; }
+:where(input, textarea, select):disabled, button:disabled { opacity: .55; cursor: not-allowed; }
+.fit-app .fit-profile-panel, .fit-app .fit-goal-panel,
+.fit-app .fit-workout-banner, .fit-app .fit-expert-card, .fit-app .fit-nutrition-card,
+.fit-app .fit-history-card, .fit-app .fit-library-card, .fit-app .fit-settings-card {
+  background-color: var(--panel);
+  border-color: var(--line);
+}
+.fit-app .fit-page-section > h1, .fit-app .fit-page-section h2,
+.fit-app .fit-page-section h3, .fit-app .panel-heading h3,
+.fit-app .fit-profile-panel strong, .fit-app .fit-goal-panel strong { color: var(--text); }
+.fit-app .fit-page-intro, .fit-app .fit-profile-info small,
+.fit-app .fit-goal-panel p, .fit-app .fit-expert-card p { color: var(--muted); }
+.fit-app .fit-page-section a, .fit-app .fit-inline-action, .fit-app .text-button { color: var(--green); }
+.fit-app .fit-search, .fit-app .fit-search input,
+.fit-app .fit-page-section input, .fit-app .fit-page-section textarea,
+.fit-app .fit-page-section select, .fit-app .fit-profile-info select {
+  background-color: var(--bg);
+  color: var(--text);
+  border-color: var(--line);
+}
+.fit-app .fit-search:focus-within, .fit-app .fit-page-section input:focus,
+.fit-app .fit-page-section textarea:focus, .fit-app .fit-page-section select:focus {
+  border-color: var(--purple-light);
+  box-shadow: 0 0 0 3px #A855F718;
+}
+.fit-app .fit-hero { border-color: var(--line); }
+.fit-app .fit-hero-shade { background: linear-gradient(90deg, rgba(5,6,11,.96) 0%, rgba(5,6,11,.82) 40%, rgba(5,6,11,.34) 100%), linear-gradient(0deg, rgba(5,6,11,.42), transparent 55%); }
+.fit-app .fit-float { border-color: #49345F; background: rgba(11,12,22,.88); }
+.fit-app .fit-float-icon { background: var(--purple); color: var(--white); }
+.fit-app .fit-pulse { background: var(--green); box-shadow: 0 0 0 5px #B7FF3518; }
+.fit-app .nutrition-icon, .fit-app .fit-specialist-icon { background: #211536; color: var(--purple-light); }
+.fit-app .calorie-ring { background: radial-gradient(closest-side, var(--panel) 75%, transparent 78%), conic-gradient(var(--green) 58%, #29233F 0); }
+.fit-app .nutrition-bar, .fit-app .progress-track, .fit-app .goal-track,
+.fit-app .mini-progress { background-color: #29233F; }
+.fit-app .nutrition-bar i, .fit-app .progress-track i, .fit-app .goal-track i,
+.fit-app .mini-progress i { background: var(--green); }
+.fit-app .day-cell { background: var(--bg); border-color: var(--line); color: var(--muted); }
+.fit-app .day-cell>b { color: var(--text); }
+.fit-app .day-cell.day-active { background: #211536; border-color: #5C2B8D; }
+.fit-app .day-cell.day-active>b, .fit-app .day-cell.day-active>span { color: var(--green-soft); }
+.fit-app .exercise-row, .fit-app .modal-plan-row { border-bottom-color: var(--line); color: var(--text); }
+.fit-app .exercise-search, .fit-app .goal-card, .fit-app .plan-modal,
+.fit-app .modal-close, .fit-app .start-bottom { border-color: var(--line); }
+.fit-app .goal-card { background: #10111E; }
+.fit-app .start-bottom { background: #171326; color: var(--green); }
+.fit-app .green-button, .fit-app .error-page button { background: var(--green); color: #10130D; }
+.fit-app .green-button:hover, .fit-app .error-page button:hover { background: var(--green-soft); }
+.fit-app .outline-button:hover, .fit-app .icon-button:hover, .fit-app .modal-close:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.fit-app .plan-modal { background: var(--panel); }
+.fit-app .modal-day { border-color: var(--line); color: var(--muted); }
+.fit-app .modal-day strong { color: var(--text); }
+.fit-app .fit-specialist-strip { box-shadow: none; }
+@media (prefers-reduced-motion: reduce) {
+  .fit-app *, .fit-app *::before, .fit-app *::after { scroll-behavior: auto; }
 }

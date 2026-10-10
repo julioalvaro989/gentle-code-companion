@@ -1,6 +1,6 @@
 .vibra-chat-root {
-  --vibra-purple: #A855F7;
-  --vibra-purple-soft: #C4A7FF;
+  --vibra-purple: #7900FF;
+  --vibra-purple-soft: #A855F7;
   --vibra-lime: #B7FF35;
   --vibra-panel: #05060B;
   --vibra-card: #0B0C16;
@@ -22,7 +22,7 @@
   padding: 0 19px;
   border: 1px solid #B7FF3570;
   border-radius: 999px;
-  background: linear-gradient(135deg, #24202f, #151814 68%);
+  background: linear-gradient(135deg, #211536, #0B0C16 72%);
   color: var(--vibra-lime);
   box-shadow: 0 10px 34px #0008, 0 0 0 4px #A855F715;
   cursor: pointer;
@@ -73,7 +73,7 @@
 }
 .vibra-chat-launcher:hover {
   border-color: var(--vibra-lime);
-  box-shadow: 0 14px 38px #0009, 0 0 24px #A855F72c;
+  box-shadow: 0 14px 38px #0009, 0 0 18px #7900FF20;
 }
 .vibra-chat-launcher > svg { flex: none; }
 .vibra-chat-launcher-label { color: #F8F9FF; font-size: 13px; font-weight: 750; letter-spacing: .1px; }
@@ -103,7 +103,7 @@
   height: min(570px, calc(100dvh - 125px));
   min-height: 360px;
   overflow: hidden;
-  border: 1px solid #A855F748;
+  border: 1px solid #29233F;
   border-radius: 22px;
   background: var(--vibra-panel);
   color: #F8F9FF;
@@ -129,7 +129,7 @@
   gap: 11px;
   padding: 17px 15px;
   border-bottom: 1px solid #ffffff0e;
-  background: radial-gradient(ellipse at 0 0, #A855F725, transparent 68%), #080912;
+  background: radial-gradient(ellipse at 0 0, #7900FF24, transparent 68%), #0B0C16;
 }
 .vibra-chat-brand-mark {
   display: grid;
@@ -139,7 +139,7 @@
   flex: none;
   border: 1px solid #B7FF3540;
   border-radius: 14px;
-  background: linear-gradient(145deg, #A855F738, #B7FF3515);
+  background: linear-gradient(145deg, #7900FF38, #A855F718);
   color: var(--vibra-lime);
 }
 .vibra-chat-heading { min-width: 0; flex: 1; }
@@ -165,7 +165,7 @@
   gap: 8px;
   margin: 14px 15px 0;
   padding: 10px 12px;
-  border: 1px solid #A855F728;
+  border: 1px solid #29233F;
   border-radius: 12px;
   background: linear-gradient(100deg, #A855F715, #B7FF3508);
   color: #C4C9E4;
@@ -179,7 +179,7 @@
 .vibra-chat-avatar { display: grid; place-items: center; width: 27px; height: 27px; flex: none; border: 1px solid #A855F74a; border-radius: 9px; background: #A855F720; color: var(--vibra-lime); }
 .vibra-chat-bubble { padding: 12px 14px; border: 1px solid #ffffff0d; border-radius: 15px 15px 15px 5px; background: var(--vibra-card); color: #E7EAF8; font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 .is-user .vibra-chat-bubble { border-color: #B7FF3525; border-radius: 15px 15px 5px 15px; background: linear-gradient(135deg, #B7FF351b, #A855F718); color: #F8F9FF; }
-.vibra-chat-composer { display: flex; align-items: flex-end; gap: 9px; margin: 0 13px; padding: 9px; border: 1px solid #393d35; border-radius: 15px; background: #0B0C16; transition: border-color .2s ease; }
+.vibra-chat-composer { display: flex; align-items: flex-end; gap: 9px; margin: 0 13px; padding: 9px; border: 1px solid #29233F; border-radius: 15px; background: #0B0C16; transition: border-color .2s ease; }
 .vibra-chat-composer:focus-within { border-color: #A855F7a0; box-shadow: 0 0 0 3px #A855F710; }
 .vibra-chat-composer textarea { flex: 1; width: 100%; max-height: 100px; min-height: 24px; resize: none; border: 0; outline: 0; background: transparent; color: #F8F9FF; font: inherit; font-size: 12px; line-height: 1.5; padding: 3px 2px; }
 .vibra-chat-composer textarea::placeholder { color: #8793B8; }
