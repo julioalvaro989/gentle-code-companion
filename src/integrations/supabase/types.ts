@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      fitness_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          goal: string
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          goal?: string
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          goal?: string
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      fitness_progress: {
+        Row: {
+          completed_exercises: Json
+          goal: string
+          updated_at: string
+          user_id: string
+          water_glasses: number
+        }
+        Insert: {
+          completed_exercises?: Json
+          goal?: string
+          updated_at?: string
+          user_id: string
+          water_glasses?: number
+        }
+        Update: {
+          completed_exercises?: Json
+          goal?: string
+          updated_at?: string
+          user_id?: string
+          water_glasses?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -146,6 +197,7 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      is_fitness_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
