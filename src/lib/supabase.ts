@@ -42,10 +42,33 @@ function headers(token?: string) {
   return { apikey: key, Authorization: `Bearer ${token ?? key}`, "Content-Type": "application/json" };
 }
 
+function mensagemEmPortugues(mensagem: unknown): string {
+  const original = typeof mensagem === "string" ? mensagem : "";
+  const erro = original.toLowerCase();
+  if (!original) return "Não foi possível concluir a operação. Tente novamente.";
+  if (erro.includes("user already registered") || erro.includes("already exists") || erro.includes("email address is already") || erro.includes("user_exists")) return "Já existe uma conta cadastrada com este e-mail. Entre na sua conta ou use outro endereço.";
+  if (erro.includes("invalid login credentials") || erro.includes("invalid email or password") || erro.includes("invalid_credentials")) return "E-mail ou senha incorretos. Confira os dados e tente novamente.";
+  if (erro.includes("email not confirmed") || erro.includes("email_not_confirmed")) return "Seu e-mail ainda não foi confirmado. Abra a mensagem de confirmação enviada para sua caixa de entrada.";
+  if (erro.includes("invalid email") || erro.includes("email address") && erro.includes("invalid")) return "Informe um endereço de e-mail válido.";
+  if (erro.includes("password should be at least") || erro.includes("password is too short") || erro.includes("weak_password") || erro.includes("password too short")) return "Sua senha está fraca ou muito curta. Escolha uma senha mais segura.";
+  if (erro.includes("signup is disabled") || erro.includes("signups not allowed")) return "O cadastro está temporariamente indisponível. Tente novamente mais tarde.";
+  if (erro.includes("rate limit") || erro.includes("too many requests")) return "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.";
+  if (erro.includes("failed to fetch") || erro.includes("networkerror") || erro.includes("network request failed")) return "Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.";
+  if (erro.includes("provider is not enabled")) return "Esta opção de acesso está temporariamente indisponível.";
+  // Evita exibir mensagens técnicas em inglês vindas do serviço de autenticação.
+  if (/^[\x00-\x7F]*$/.test(original) && /[a-z]{3,}/i.test(original)) return "Não foi possível validar seus dados. Confira as informações e tente novamente.";
+  return original;
+}
+
 async function request(path: string, options: RequestInit = {}, token?: string) {
-  const response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(token), ...(options.headers ?? {}) } });
+  let response: Response;
+  try {
+    response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(token), ...(options.headers ?? {}) } });
+  } catch {
+    throw new Error("Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.");
+  }
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body?.msg || body?.message || body?.error_description || "Não foi possível concluir a operação.");
+  if (!response.ok) throw new Error(mensagemEmPortugues(body?.msg || body?.message || body?.error_description || body?.error));
   return body;
 }
 
