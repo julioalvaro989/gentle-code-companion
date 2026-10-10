@@ -82,6 +82,18 @@ export async function signUp(username: string, email: string, password: string) 
   return session;
 }
 
+export async function resendSignupConfirmation(email: string): Promise<void> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email.trim(),
+    options: {
+      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+    },
+  });
+  if (error) throw error;
+}
+
 export async function signIn(email: string, password: string) {
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
