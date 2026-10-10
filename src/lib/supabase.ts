@@ -53,27 +53,48 @@ export function getStoredSession(): AuthSession | null {
   try { return JSON.parse(localStorage.getItem("investe_session") || "null"); } catch { return null; }
 }
 
+function toAuthSession(session: { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { full_name?: string; username?: string } } }): AuthSession {
+  return {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    user: {
+      id: session.user.id,
+      email: session.user.email,
+      user_metadata: session.user.user_metadata,
+    },
+  };
+}
+
 export async function signUp(username: string, email: string, password: string) {
-  const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
-  const signupPath = redirectTo ? `auth/v1/signup?redirect_to=${encodeURIComponent(redirectTo)}` : "auth/v1/signup";
-  const body = await request(signupPath, { method: "POST", body: JSON.stringify({ email, password, data: { full_name: username, username } }) });
-  if (body?.access_token) {
-    const session = body as AuthSession;
-    localStorage.setItem("investe_session", JSON.stringify(session));
-    return session;
-  }
-  return null;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: username, username },
+      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+    },
+  });
+  if (error) throw error;
+  if (!data.session) return null;
+  const session = toAuthSession(data.session);
+  localStorage.setItem("investe_session", JSON.stringify(session));
+  return session;
 }
 
 export async function signIn(email: string, password: string) {
-  const session = await request("auth/v1/token?grant_type=password", { method: "POST", body: JSON.stringify({ email, password }) }) as AuthSession;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  if (!data.session) throw new Error("Não foi possível iniciar a sessão. Tente novamente.");
+  const session = toAuthSession(data.session);
   localStorage.setItem("investe_session", JSON.stringify(session));
   return session;
 }
 
 export async function signOut() {
-  const session = getStoredSession();
-  if (session) await request("auth/v1/logout", { method: "POST" }, session.access_token).catch(() => {});
+  const { supabase } = await import("@/integrations/supabase/client");
+  await supabase.auth.signOut().catch(() => {});
   localStorage.removeItem("investe_session");
 }
 
