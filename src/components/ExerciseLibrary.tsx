@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Dumbbell, Filter, PlayCircle, Search, SlidersHorizontal, Video, X } from "lucide-react";
 import { exerciseCatalog, type ExerciseRecord } from "./exerciseCatalog";
 import "./ExerciseLibrary.css";
+import { Exercise3DViewer } from "./Exercise3DViewer";
 
 type Props = { onOpenExercise?: (id: string) => void; selectedExerciseId?: string | null; onClearSelected?: () => void };
 
@@ -57,7 +58,7 @@ export function ExerciseLibrary({ onOpenExercise, selectedExerciseId, onClearSel
   {pages>1 && <div className="exercise-pagination"><button disabled={currentPage===1} onClick={()=>setPage(p=>p-1)}><ArrowLeft size={16}/> Anterior</button><span>Página {currentPage} de {pages}</span><button disabled={currentPage===pages} onClick={()=>setPage(p=>p+1)}>Próxima <ChevronRight size={16}/></button></div>}
   {detail && <div className="exercise-detail-backdrop" role="presentation" onClick={close}><section className="exercise-detail-modal" role="dialog" aria-modal="true" aria-labelledby="exercise-detail-title" onClick={e=>e.stopPropagation()}>
    <button className="exercise-detail-close" onClick={close} aria-label="Fechar detalhes"><X size={21}/></button>
-   <div className="exercise-detail-media">{detail.videoUrl ? <video controls playsInline preload="none" poster={detail.imageUrl ?? undefined}><source src={detail.videoUrl}/></video> : detail.imageUrl ? <img src={detail.imageUrl} alt={detail.name} loading="lazy"/> : <div className="exercise-media-placeholder"><BookOpen size={34}/><strong>Demonstração em preparação</strong><span>As instruções abaixo estão disponíveis; a mídia será adicionada após verificação da fonte.</span></div>}</div>
+   <div className="exercise-detail-media"><Exercise3DViewer exerciseId={detail.id}/>{detail.videoUrl && <div className="exercise-legacy-media"><span>Vídeo demonstrativo 2D</span><video controls playsInline preload="none" poster={detail.imageUrl ?? undefined}><source src={detail.videoUrl}/></video></div>}{!detail.videoUrl && detail.imageUrl && <img src={detail.imageUrl} alt={detail.name} loading="lazy"/>}</div>
    <div className="exercise-detail-content"><span className="exercise-card-tag">{detail.primaryMuscle}</span><h2 id="exercise-detail-title">{detail.name}</h2><p className="exercise-detail-alt">{detail.alternativeName} · {detail.equipment} · {detail.location}</p>
     <div className="exercise-detail-chips"><span>{detail.difficulty}</span><span>{detail.secondaryMuscles.length ? detail.secondaryMuscles.join(", ") : "Sem músculo secundário listado"}</span></div>
     <h3>Como executar</h3><ol>{detail.instructions.map((s,i)=><li key={i}>{s}</li>)}</ol>
