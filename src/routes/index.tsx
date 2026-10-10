@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getStoredSession, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getStoredSession, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: GymApp });
@@ -42,6 +42,7 @@ function GymApp() {
   const [authError, setAuthError] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
   const [progressHydrated, setProgressHydrated] = useState(false);
   const [activeNav, setActiveNav] = useState("Visão geral");
   const [done, setDone] = useState<string[]>(["Supino com halteres"]);
@@ -124,6 +125,23 @@ function GymApp() {
     finally { setAuthBusy(false); }
   }
 
+  async function resendConfirmationEmail() {
+    if (!authEmail.trim()) {
+      setAuthError("Informe o e-mail usado no cadastro para reenviar a confirmação.");
+      return;
+    }
+    setAuthError("");
+    setResendBusy(true);
+    try {
+      await resendSignupConfirmation(authEmail.trim());
+      setAuthMessage("Solicitação enviada. Confira a caixa de entrada e o spam; se a mensagem não chegar, aguarde alguns minutos antes de tentar novamente.");
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : "Não foi possível reenviar o e-mail. Confira o endereço e tente novamente.");
+    } finally {
+      setResendBusy(false);
+    }
+  }
+
   async function googleAuth() {
     setAuthError(""); setAuthMessage(""); setAuthBusy(true);
     try {
@@ -154,6 +172,7 @@ function GymApp() {
         <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Senha (mínimo 6 caracteres)" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
         {authError && <div role="alert" style={{color:"#ff9b9b",fontSize:13}}>{authError}</div>}
         {authMessage && <div role="status" style={{color:"#c8ff80",fontSize:13,lineHeight:1.5}}>{authMessage}</div>}
+        {authMessage && authMode === "signup" && <button type="button" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy} style={{background:"transparent",border:"1px solid #168a45",borderRadius:999,color:"#168a45",padding:"10px 14px",fontWeight:750,cursor:"pointer"}}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
         <button disabled={authBusy} type="submit" style={{border:0,borderRadius:999,background:"#b4ff35",color:"#10110b",padding:"15px 20px",fontWeight:850,cursor:"pointer",marginTop:5}}>{authBusy ? "Aguarde..." : authMode === "signup" ? "Criar minha conta →" : "Entrar na Vibra →"}</button>
       </form>
       <div style={{display:"flex",alignItems:"center",gap:12,color:"#657065",fontSize:12,margin:"20px 0"}}><span style={{height:1,background:"#39304b",flex:1}}/>ou continue com<span style={{height:1,background:"#39304b",flex:1}}/></div>
