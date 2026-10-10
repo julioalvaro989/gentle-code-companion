@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { VibraChat } from "../components/VibraChat";
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const queryClient = new QueryClient();
@@ -26,7 +27,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     { property: "og:description", content: "Seu treino, sua nutrição, sua evolução." }
   ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.ico", type: "image/x-icon" }] }),
   shellComponent: ({ children }: { children: ReactNode }) => <html lang="pt-BR"><head><HeadContent /></head><body>{children}<Scripts /></body></html>,
-  component: () => { const { queryClient } = Route.useRouteContext(); return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>; },
+  component: () => {
+    const { queryClient } = Route.useRouteContext();
+    return <QueryClientProvider client={queryClient}><Outlet /><VibraChat /></QueryClientProvider>;
+  },
   errorComponent: ErrorComponent,
   notFoundComponent: () => <div className="error-page"><h1>404</h1><Link to="/">Voltar ao início</Link></div>
 });
