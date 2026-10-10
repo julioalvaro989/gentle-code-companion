@@ -100,6 +100,10 @@ function GymApp() {
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setAuthError(""); setAuthMessage("");
+    if (authMode === "signup" && !authUsername.trim()) { setAuthError("Informe seu nome de usuário."); return; }
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail.trim());
+    if (!emailValido) { setAuthError("Informe um endereço de e-mail válido."); return; }
+    if (!authPassword) { setAuthError("Informe sua senha."); return; }
     if (authMode === "signup" && authPassword !== authPasswordConfirm) { setAuthError("As senhas não coincidem."); return; }
     if (authMode === "signup" && authPassword.length < 6) { setAuthError("A senha precisa ter pelo menos 6 caracteres."); return; }
     setAuthBusy(true);
@@ -152,7 +156,7 @@ function GymApp() {
       <div style={{fontSize:11,letterSpacing:2,color:"#168a45",fontWeight:800,marginBottom:10}}>SEU ECOSSISTEMA DE BEM-ESTAR</div>
       <h1 style={{fontSize:"clamp(30px,7vw,42px)",lineHeight:1.08,margin:"0 0 12px",letterSpacing:-1.5}}>{authMode === "signup" ? <>Comece sua <span style={{color:"#168a45"}}>evolução.</span></> : <>Bom ter você <span style={{color:"#168a45"}}>de volta.</span></>}</h1>
       <p style={{color:"#596559",lineHeight:1.6,margin:"0 0 25px"}}>{authMode === "signup" ? "Crie sua conta para acessar treinos, nutrição, progresso e seu perfil pessoal." : "Entre na sua conta para continuar de onde parou."}</p>
-      <form onSubmit={submitAuth} style={{display:"grid",gap:13}}>
+      <form noValidate onSubmit={submitAuth} style={{display:"grid",gap:13}}>
         {authMode === "signup" && <input required minLength={2} autoComplete="username" placeholder="Nome de usuário" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} style={authInputStyle}/>}
         <input required type="email" autoComplete="email" placeholder="Seu e-mail" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} style={authInputStyle}/>
         <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder={authMode === "signup" ? "Senha (mínimo 6 caracteres)" : "Sua senha"} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
