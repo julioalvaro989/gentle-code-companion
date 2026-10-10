@@ -73,7 +73,7 @@ export function Exercise3DViewer({ exerciseId, compact = false }: Props) {
 }
 
 function ReactModelViewer({ asset, modelRef, speed, onError, onPlay, onPause }: {
- asset: AnimationVerification; modelRef: React.RefObject<ModelViewerElement | null>; speed: string;
+ asset: AnimationVerification; modelRef: ReactNamespace.RefObject<ModelViewerElement | null>; speed: string;
  onError: (message: string) => void; onPlay: () => void; onPause: () => void;
 }) {
  const React = requireReact();
