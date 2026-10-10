@@ -4,7 +4,7 @@ import { exerciseCatalog } from "./exerciseCatalog";
 import "./ExerciseDemoModal.css";
 import { Exercise3DViewer } from "./Exercise3DViewer";
 
-type Props = { exerciseId: string | null; workoutName?: string; onClose: () => void };
+type Props = { exerciseId: string | null; workoutName?: string | undefined; onClose: () => void };
 
 export function ExerciseDemoModal({ exerciseId, workoutName, onClose }: Props) {
  const exercise = exerciseId ? exerciseCatalog.find(item => item.id === exerciseId) : undefined;
