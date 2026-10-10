@@ -86,3 +86,30 @@ a:hover { color: var(--green); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+/* Vibra Fitness: restaura a identidade roxo, preto e verde */
+:root {
+  --bg: #0b0912;
+  --panel: #14111d;
+  --panel2: #1d1728;
+  --line: #30263f;
+  --text: #f6f2fb;
+  --muted: #a39aaf;
+  --green: #b7f34a;
+  --green-dark: #89c929;
+}
+body, .gym-app { background: #0b0912; color: #f6f2fb; }
+.sidebar { background: #100d18; border-right-color: #30263f; }
+.topbar { background: rgba(11, 9, 18, .94); border-bottom-color: #30263f; }
+.stat-card, .panel { background: #14111d; border-color: #30263f; }
+.hero-workout { background: linear-gradient(115deg, #21172f 0%, #171220 55%, #182018 100%); border-color: #463258; }
+.coach-card { background: linear-gradient(145deg, #21172f, #14111d); border-color: #463258; }
+.nav-item.active { background: #2a2038; border-color: #463258; color: var(--green); }
+.nav-item:hover { background: #211a2b; }
+.stat-icon, .coach-icon { background: #2a2038; color: var(--green); }
+.date-chip, .icon-button, .outline-button { background: #14111d; border-color: #30263f; }
+.exercise-search { background: #100d18; border-color: #30263f; }
+.fit-specialist-strip { background: radial-gradient(ellipse at 0 0, #168A4525, transparent 68%), #171220; border-color: #463258; }
+#lovable-badge {
+  display: none !important;
+}
