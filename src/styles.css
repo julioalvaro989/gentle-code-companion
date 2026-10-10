@@ -215,7 +215,7 @@ html, body, #root { width: 100%; min-width: 0; min-height: 100%; overflow-x: cli
 :where(input, textarea, select) { color: var(--text); accent-color: var(--green); }
 :where(input, textarea, select)::placeholder { color: #8793B8; opacity: 1; }
 :where(input, textarea, select):disabled, button:disabled { opacity: .55; cursor: not-allowed; }
-.fit-app .fit-page-section, .fit-app .fit-profile-panel, .fit-app .fit-goal-panel,
+.fit-app .fit-profile-panel, .fit-app .fit-goal-panel,
 .fit-app .fit-workout-banner, .fit-app .fit-expert-card, .fit-app .fit-nutrition-card,
 .fit-app .fit-history-card, .fit-app .fit-library-card, .fit-app .fit-settings-card {
   background-color: var(--panel);
