@@ -45,6 +45,7 @@ function GymApp() {
   const [resendBusy, setResendBusy] = useState(false);
   const [progressHydrated, setProgressHydrated] = useState(false);
   const [activeNav, setActiveNav] = useState("Visão geral");
+  const [navHistory, setNavHistory] = useState<string[]>([]);
   const [done, setDone] = useState<string[]>(["Supino com halteres"]);
   const [query, setQuery] = useState("");
   const [started, setStarted] = useState(false);
@@ -54,7 +55,25 @@ function GymApp() {
   const [goal, setGoal] = useState("Ganhar massa muscular");
   const [water, setWater] = useState(4);
   const filtered = exercises.filter(x => x.name.toLowerCase().includes(query.toLowerCase()));
-  const changePage = (page: string) => { setActiveNav(page); setMobileMenu(false); };
+  const changePage = (page: string) => {
+    setActiveNav((current) => {
+      if (current !== page) setNavHistory((history) => [...history, current]);
+      return page;
+    });
+    setMobileMenu(false);
+  };
+  const goBack = () => {
+    setNavHistory((history) => {
+      if (history.length === 0) {
+        setActiveNav("Visão geral");
+        return [];
+      }
+      const previous = history[history.length - 1];
+      setActiveNav(previous);
+      return history.slice(0, -1);
+    });
+    setMobileMenu(false);
+  };
   const progress = Math.round(done.length / exercises.length * 100);
 
   useEffect(() => {
@@ -192,7 +211,7 @@ function GymApp() {
     <main className="main-content" id="inicio">
       <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{await signOut();setSession(null);setProgressHydrated(false);setAuthMode("login");}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
-        {activeNav !== "Visão geral" && <button className="outline-button fit-back-button" onClick={() => changePage("Visão geral")}><ArrowLeft size={17}/> Voltar ao início</button>}
+        {activeNav !== "Visão geral" && <button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button>}
         {activeNav==="Visão geral" && <>
           <section className="welcome-row"><div><div className="section-kicker"><span/> SUA JORNADA COMEÇA AQUI</div><h1>Hoje é dia de <span>evoluir.</span></h1><p>Um passo de cada vez. Vamos construir sua melhor versão?</p></div><button className="outline-button" onClick={()=>changePage("Progresso")}><Activity size={17}/> Minha evolução</button></section>
           <section className="fit-hero">
