@@ -163,3 +163,7 @@ export async function saveFitnessProgress(session: AuthSession, progress: Pick<F
     body: JSON.stringify({ user_id: session.user.id, ...progress, updated_at: new Date().toISOString() }),
   }, session.access_token);
 }
+
+export async function listFitnessProfiles(session: AuthSession): Promise<FitnessProfile[]> {
+  return await request("rest/v1/fitness_profiles?select=*&order=created_at.desc", {}, session.access_token) as FitnessProfile[];
+}
