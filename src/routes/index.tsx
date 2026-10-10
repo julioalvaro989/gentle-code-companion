@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getStoredSession, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: GymApp });
 
-const authInputStyle: React.CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #423751", borderRadius: 14, background: "#100d1b", color: "#fff", padding: "15px 16px", outline: "none", fontSize: 14 };
+const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #423751", borderRadius: 14, background: "#100d1b", color: "#fff", padding: "15px 16px", outline: "none", fontSize: 14 };
 
 const navItems = [
   { name: "Visão geral", icon: Home },
@@ -93,7 +93,7 @@ function GymApp() {
     return () => window.clearTimeout(timer);
   }, [session, progressHydrated, done, water, goal, profileName]);
 
-  async function submitAuth(e: React.FormEvent<HTMLFormElement>) {
+  async function submitAuth(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setAuthError(""); setAuthMessage(""); setAuthBusy(true);
     try {
       let next: AuthSession | null;
