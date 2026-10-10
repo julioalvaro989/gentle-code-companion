@@ -37,6 +37,7 @@ function GymApp() {
   const [profileName, setProfileName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authPasswordConfirm, setAuthPasswordConfirm] = useState("");
   const [authUsername, setAuthUsername] = useState("");
   const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
   const [authError, setAuthError] = useState("");
@@ -98,7 +99,10 @@ function GymApp() {
   }, [session, progressHydrated, done, water, goal, profileName]);
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setAuthError(""); setAuthMessage(""); setAuthBusy(true);
+    e.preventDefault(); setAuthError(""); setAuthMessage("");
+    if (authMode === "signup" && authPassword !== authPasswordConfirm) { setAuthError("As senhas não coincidem."); return; }
+    if (authMode === "signup" && authPassword.length < 6) { setAuthError("A senha precisa ter pelo menos 6 caracteres."); return; }
+    setAuthBusy(true);
     try {
       let next: AuthSession | null;
       if (authMode === "signup") {
@@ -151,14 +155,21 @@ function GymApp() {
       <form onSubmit={submitAuth} style={{display:"grid",gap:13}}>
         {authMode === "signup" && <input required minLength={2} autoComplete="username" placeholder="Nome de usuário" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} style={authInputStyle}/>}
         <input required type="email" autoComplete="email" placeholder="Seu e-mail" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} style={authInputStyle}/>
-        <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Senha (mínimo 6 caracteres)" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
-        {authError && <div role="alert" style={{color:"#ff9b9b",fontSize:13}}>{authError}</div>}
+        <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder={authMode === "signup" ? "Senha (mínimo 6 caracteres)" : "Sua senha"} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
+        {authMode === "signup" && <>
+          <div aria-live="polite" style={{fontSize:12,color:"#596559",lineHeight:1.5,marginTop:-5}}>
+            {authPassword.length === 0 ? "Use pelo menos 6 caracteres. Uma senha maior e variada é mais segura." : authPassword.length < 6 ? "Sua senha está muito curta. Use pelo menos 6 caracteres." : (authPassword.length >= 12 && /[A-Z]/.test(authPassword) && /[a-z]/.test(authPassword) && /\d/.test(authPassword) && /[^A-Za-z0-9]/.test(authPassword)) ? "Senha forte — sua senha atende aos requisitos de segurança." : (authPassword.length >= 8 && /[A-Za-z]/.test(authPassword) && /\d/.test(authPassword)) ? "Senha razoável. Se possível, combine letras, números e símbolos." : "Sua senha está fraca. Escolha uma senha mais segura."}
+          </div>
+          <input required type="password" autoComplete="new-password" placeholder="Confirme sua senha" value={authPasswordConfirm} onChange={e=>setAuthPasswordConfirm(e.target.value)} style={authInputStyle}/>
+          {authPasswordConfirm.length > 0 && <div aria-live="polite" style={{fontSize:12,color:authPassword===authPasswordConfirm?"#168a45":"#b42318"}}>{authPassword===authPasswordConfirm ? "As senhas coincidem." : "As senhas não coincidem."}</div>}
+        </>}
+        {authError && <div role="alert" style={{color:"#b42318",fontSize:13,lineHeight:1.5}}>{authError}</div>}
         {authMessage && <div role="status" style={{color:"#c8ff80",fontSize:13,lineHeight:1.5}}>{authMessage}</div>}
         <button disabled={authBusy} type="submit" style={{border:0,borderRadius:999,background:"#b4ff35",color:"#10110b",padding:"15px 20px",fontWeight:850,cursor:"pointer",marginTop:5}}>{authBusy ? "Aguarde..." : authMode === "signup" ? "Criar minha conta →" : "Entrar na Vibra →"}</button>
       </form>
       <div style={{display:"flex",alignItems:"center",gap:12,color:"#657065",fontSize:12,margin:"20px 0"}}><span style={{height:1,background:"#39304b",flex:1}}/>ou continue com<span style={{height:1,background:"#39304b",flex:1}}/></div>
       <button type="button" onClick={googleAuth} disabled={authBusy} style={{width:"100%",background:"#fff",color:"#17131f",border:0,borderRadius:999,padding:"13px 18px",fontWeight:750,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}><span style={{fontSize:18,fontWeight:900}}>G</span> Continuar com Google</button>
-      <p style={{textAlign:"center",color:"#596559",fontSize:13,marginTop:24}}>{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"} <button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}} style={{background:"none",border:0,color:"#168a45",fontWeight:800,cursor:"pointer"}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
+      <p style={{textAlign:"center",color:"#596559",fontSize:13,marginTop:24}}>{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"} <button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");setAuthPasswordConfirm("");}} style={{background:"none",border:0,color:"#168a45",fontWeight:800,cursor:"pointer"}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
       <p style={{fontSize:11,color:"#687368",textAlign:"center",lineHeight:1.5}}>Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
     </div>
   </div>;
