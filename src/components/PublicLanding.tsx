@@ -173,15 +173,6 @@ export function PublicLanding({ onAuth }: Props) {
       </header>
       <main id="vibra-conteudo">
         <section className="vp-hero" aria-labelledby="vp-title">
-          <img
-            src={hero}
-            width={1536}
-            height={1024}
-            alt="Mulher praticando exercício com halteres em uma academia"
-            fetchPriority="high"
-            className="vp-hero-image"
-          />
-          <div className="vp-hero-shade" />
           <div className="vp-container vp-hero-content">
             <div className="vp-hero-copy">
               <p className="vp-eyebrow">
@@ -210,7 +201,16 @@ export function PublicLanding({ onAuth }: Props) {
                 <Check size={14} /> Seu objetivo. Sua rotina. Seu próximo passo.
               </p>
             </div>
-            <figure className="vp-product-preview" aria-labelledby="vp-preview-caption">
+            <div className="vp-hero-media">
+              <img
+                src={hero}
+                width={1536}
+                height={1024}
+                alt="Mulher praticando exercício com halteres em uma academia"
+                fetchPriority="high"
+                className="vp-hero-image"
+              />
+              <figure className="vp-product-preview" aria-labelledby="vp-preview-caption">
               <figcaption id="vp-preview-caption" className="vp-preview-caption">
                 <span>VISÃO DO PRODUTO</span>
                 <span>Prévia ilustrativa</span>
@@ -259,7 +259,8 @@ export function PublicLanding({ onAuth }: Props) {
                   <span>Conversa dentro da sua conta</span>
                 </div>
               </div>
-            </figure>
+              </figure>
+            </div>
           </div>
           <div className="vp-hero-footer vp-container">
             <span>CONSISTÊNCIA É UM COMEÇO.</span>
