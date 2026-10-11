@@ -51,13 +51,11 @@ export function PublicLanding({ onAuth }: Props) {
   const menuRef = useRef<HTMLButtonElement>(null);
   function goTo(id: string) {
     setMenuOpen(false);
-    document
-      .getElementById(id)
-      ?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-      });
+    document.getElementById(id)?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
   }
   const nav = [
     { id: "vibra-recursos", label: "Recursos" },
