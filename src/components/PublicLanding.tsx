@@ -177,7 +177,7 @@ export function PublicLanding({ onAuth }: Props) {
               <div className="vp-preview-session">
                 <span className="vp-preview-kicker">SEU ESPAÇO DE TREINO</span>
                 <p className="vp-preview-title">
-                  Sua sessão.
+                  Sua sessão.{" "}
                   <br />
                   Seu ritmo.
                 </p>
