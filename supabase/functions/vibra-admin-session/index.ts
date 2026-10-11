@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-const url=Deno.env.get("SUPABASE_URL")??"", pub=Deno.env.get("SUPABASE_PUBLISHABLE_KEY")??Deno.env.get("SUPABASE_ANON_KEY")??"", secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";\nconst adminEmail=(Deno.env.get("VIBRA_ADMIN_EMAIL")??"").trim().toLowerCase();
+const url=Deno.env.get("SUPABASE_URL")??"", pub=Deno.env.get("SUPABASE_PUBLISHABLE_KEY")??Deno.env.get("SUPABASE_ANON_KEY")??"", secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+const adminEmail=(Deno.env.get("VIBRA_ADMIN_EMAIL")??"").trim().toLowerCase();
 const origins=new Set((Deno.env.get("ALLOWED_ORIGINS")??"").split(",").map(x=>x.trim()).filter(Boolean));
 function out(data:unknown,status:number,origin:string){return new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin","Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"}})}
 Deno.serve(async req=>{
