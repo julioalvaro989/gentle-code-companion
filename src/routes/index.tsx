@@ -1,11 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
+import { PublicLanding } from "../components/PublicLanding";
+import { VibraChat } from "../components/VibraChat";
+import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
-export const Route = createFileRoute("/")({ component: GymApp });
+export const Route = createFileRoute("/")({ head: () => ({ meta: [
+  { title: "Vibra — Seu próximo nível" },
+  { name: "description", content: "Reúna treinos, progresso, hábitos e objetivos na Vibra. Conheça seu espaço de evolução e a Vibra AI integrada." },
+  { property: "og:title", content: "Vibra — Seu próximo nível" },
+  { property: "og:description", content: "Seu treino, seu ritmo, sua evolução. Conheça a Vibra e organize seu próximo passo." },
+  { property: "og:type", content: "website" },
+  { name: "twitter:card", content: "summary_large_image" },
+] }), component: GymApp });
 
 const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #29233F", borderRadius: 14, background: "#0B0C16", color: "#F8F9FF", padding: "15px 16px", outline: "none", fontSize: 14 };
 
@@ -39,6 +49,7 @@ function GymApp() {
   const [authPassword, setAuthPassword] = useState("");
   const [authUsername, setAuthUsername] = useState("");
   const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
+  const [showAuth, setShowAuth] = useState(false);
   const [authError, setAuthError] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
@@ -69,7 +80,7 @@ function GymApp() {
         return [];
       }
       const previous = history[history.length - 1];
-      setActiveNav(previous);
+      if (previous) setActiveNav(previous);
       return history.slice(0, -1);
     });
     setMobileMenu(false);
@@ -183,8 +194,10 @@ function GymApp() {
   }
 
   if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} />;
   if (!session) return <div style={{minHeight:"100vh",background:"radial-gradient(ellipse at 80% 15%,#7900FF30 0%,transparent 38%),radial-gradient(ellipse at 10% 90%,#A855F720 0%,transparent 35%),#05060B",color:"#F8F9FF",display:"grid",placeItems:"center",padding:"28px 16px",fontFamily:"inherit"}}>
     <div style={{width:"min(100%,440px)",background:"#0B0C16",border:"1px solid #29233F",borderRadius:28,padding:"clamp(24px,5vw,42px)",boxShadow:"0 25px 90px #12201218"}}>
+      <Button variant="ghost" className="vibra-auth-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}><ArrowLeft size={16} /> Voltar à Vibra</Button>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:30}}><span style={{fontSize:30,color:"#B7FF35",fontWeight:900}}>V</span><strong style={{fontSize:28,letterSpacing:-1}}>Vibra</strong></div>
       <div style={{fontSize:11,letterSpacing:2,color:"#B7FF35",fontWeight:800,marginBottom:10}}>SEU ECOSSISTEMA DE BEM-ESTAR</div>
       <h1 style={{fontSize:"clamp(30px,7vw,42px)",lineHeight:1.08,margin:"0 0 12px",letterSpacing:-1.5}}>{authMode === "signup" ? <>Comece sua <span style={{color:"#B7FF35"}}>evolução.</span></> : <>Bom ter você <span style={{color:"#B7FF35"}}>de volta.</span></>}</h1>
@@ -206,6 +219,7 @@ function GymApp() {
   </div>;
 
   return <div className="gym-app fit-app">
+    <VibraChat />
     <>{mobileMenu && <button type="button" className="sidebar-scrim" aria-label="Fechar menu" onClick={() => setMobileMenu(false)} />}<aside className={"sidebar " + (mobileMenu ? "sidebar-open" : "")}>
       <a className="gym-logo" href="#inicio" onClick={() => changePage("Visão geral")}><span className="logo-mark"><Dumbbell size={23} strokeWidth={2.5}/></span><span>FITPRO<span className="logo-dot">.</span><small>PERFORMANCE CLUB</small></span></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
       <div className="side-label">SEU ESPAÇO</div>
@@ -233,7 +247,7 @@ function GymApp() {
         </>}
         {activeNav==="Treinos" && <section className="fit-page-section"><div className="section-kicker"><span/> PLANO DE TREINO</div><h1>Seu treino. <span>Seu progresso.</span></h1><p className="fit-page-intro">Marque cada exercício concluído e acompanhe sua sessão em tempo real.</p><div className="fit-workout-banner"><div><span className="hero-pill"><Flame size={14}/> TREINO A · CORPO INTEIRO</span><h2>{started?"Treino em andamento":"Pronto para começar?"}</h2><p>35 minutos · 4 exercícios · Intensidade moderada</p></div><button className="green-button" onClick={()=>setStarted(!started)}>{started?"Pausar treino": "Iniciar sessão"} <Play size={16}/></button></div><div className="panel fit-exercises-panel"><div className="panel-heading"><div><h3>Lista de exercícios</h3><p>{done.length} de {exercises.length} concluídos · {progress}%</p></div><div className="fit-search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar exercício"/></div></div><div className="progress-track"><i style={{width:progress+"%"}}/></div>{filtered.map(x=><div key={x.id} className={"exercise-row "+(done.includes(x.name)?"exercise-done":"")}><button type="button" className="exercise-check" aria-label={done.includes(x.name)?"Marcar como não concluído":"Marcar como concluído"} onClick={()=>setDone(old=>old.includes(x.name)?old.filter(n=>n!==x.name):[...old,x.name])}>{done.includes(x.name)?<Check size={15}/>:<Plus size={15}/>}</button><button type="button" className="exercise-info exercise-info-button" onClick={()=>setDemoExercise({id:x.id,name:x.name})}><strong>{x.name}</strong><small>{x.detail}</small></button><span className="fit-exercise-time">{x.time}</span><button type="button" className="exercise-howto-button" onClick={()=>setDemoExercise({id:x.id,name:x.name})}><Video size={15}/> Como fazer</button></div>)}</div></section>}
         {activeNav==="Biblioteca de Exercícios" && <ExerciseLibrary />}
-        <ExerciseDemoModal exerciseId={demoExercise?.id ?? null} workoutName={demoExercise?.name} onClose={()=>setDemoExercise(null)} />
+        <ExerciseDemoModal exerciseId={demoExercise?.id ?? null} {...(demoExercise ? { workoutName: demoExercise.name } : {})} onClose={()=>setDemoExercise(null)} />
         {activeNav==="Nutrição" && <section className="fit-page-section"><div className="section-kicker"><span/> NUTRIÇÃO E BEM-ESTAR</div><h1>Coma bem. <span>Viva melhor.</span></h1><p className="fit-page-intro">Organize sua rotina alimentar e acompanhe hábitos. Planos clínicos devem ser definidos por nutricionista.</p><div className="fit-nutrition-layout"><article className="panel fit-food-summary"><div className="section-kicker">RESUMO DE HOJE</div><div className="fit-big-number">1.740 <small>/ 2.200 kcal</small></div><div className="nutrition-bar"><i/></div><div className="fit-food-stats"><span>Proteínas <b>68 / 120g</b></span><span>Carboidratos <b>142 / 250g</b></span><span>Gorduras <b>39 / 70g</b></span></div><div className="fit-water-box"><div><Apple size={19}/><strong>Hidratação</strong><small>{water} de 8 copos registrados</small></div><button className="green-button" onClick={()=>setWater(Math.min(8,water+1))}><Plus size={16}/> Adicionar água</button></div></article><article className="panel"><div className="panel-heading"><div><div className="section-kicker">SUGESTÃO DE ROTINA</div><h3>Refeições do dia</h3></div><Utensils size={20}/></div>{meals.map(m=><div className="fit-meal-row" key={m.time}><span className="fit-meal-time">{m.time}</span><div><strong>{m.meal}</strong><p>{m.food}</p><small>{m.kcal}</small></div><Check size={16}/></div>)}</article></div><div className="fit-note"><HeartPulse size={18}/> <span>Este exemplo é informativo e não substitui avaliação individual de um nutricionista.</span></div></section>}
         {activeNav==="Especialistas" && <section className="fit-page-section"><div className="section-kicker"><span/> TIME DE ESPECIALISTAS</div><h1>Orientação de <span>verdade.</span></h1><p className="fit-page-intro">Encontre profissionais para acompanhar sua jornada. Perfis abaixo são exemplos de apresentação; agendamento real exige cadastro e disponibilidade confirmados.</p><div className="fit-expert-grid"><article className="panel fit-expert-card"><div className="fit-expert-avatar fit-expert-green"><Leaf size={30}/></div><span className="fit-expert-tag">NUTRIÇÃO</span><h3>Nutricionista</h3><p>Planejamento alimentar individualizado, hábitos sustentáveis e acompanhamento.</p><div className="fit-expert-meta"><span><CalendarDays size={15}/> Consulta agendada</span><span><MessageCircle size={15}/> Acompanhamento</span></div><button className="green-button" onClick={()=>setShowVideo(true)}>Como funciona <ArrowRight size={16}/></button></article><article className="panel fit-expert-card"><div className="fit-expert-avatar fit-expert-dark"><Dumbbell size={30}/></div><span className="fit-expert-tag">TREINAMENTO</span><h3>Personal trainer</h3><p>Orientação de técnica, planejamento de exercícios e metas compatíveis com seu nível.</p><div className="fit-expert-meta"><span><CalendarDays size={15}/> Rotina personalizada</span><span><MessageCircle size={15}/> Suporte</span></div><button className="green-button" onClick={()=>setShowVideo(true)}>Como funciona <ArrowRight size={16}/></button></article></div></section>}
         {activeNav==="Progresso" && <section className="fit-page-section"><div className="section-kicker"><span/> SUA EVOLUÇÃO</div><h1>Olhe o quanto <span>já avançou.</span></h1><p className="fit-page-intro">Resumo demonstrativo para acompanhar seus hábitos e consistência.</p><div className="stats-grid"><article className="stat-card"><div className="stat-top"><span>Treinos concluídos</span><span className="stat-icon"><Dumbbell size={18}/></span></div><div className="stat-value">16 <small>este mês</small></div><div className="mini-progress"><i style={{width:"76%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Tempo ativo</span><span className="stat-icon"><Clock3 size={18}/></span></div><div className="stat-value">12h <small>40min</small></div><div className="mini-progress"><i style={{width:"68%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Consistência</span><span className="stat-icon"><Trophy size={18}/></span></div><div className="stat-value">82<small>%</small></div><div className="mini-progress"><i style={{width:"82%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Meta da semana</span><span className="stat-icon"><Target size={18}/></span></div><div className="stat-value">4 <small>/ 5 treinos</small></div><div className="mini-progress"><i style={{width:"80%"}}/></div></article></div><div className="panel fit-goal-panel"><div><div className="section-kicker">SEU OBJETIVO ATUAL</div><h3>{goal}</h3><p>Escolha uma meta para personalizar sua experiência.</p></div><select value={goal} onChange={e=>setGoal(e.target.value)}><option>Ganhar massa muscular</option><option>Perder gordura</option><option>Melhorar condicionamento</option><option>Ter mais saúde e energia</option></select></div></section>}

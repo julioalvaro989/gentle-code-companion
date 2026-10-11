@@ -1,4 +1,4 @@
-type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { full_name?: string } } };
+type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string | undefined; user_metadata?: { full_name?: string; username?: string } | undefined } };
 
 const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
 const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
@@ -76,7 +76,7 @@ export async function signUp(username: string, email: string, password: string) 
     password,
     options: {
       data: { full_name: username, username },
-      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+      ...(typeof window !== "undefined" ? { emailRedirectTo: window.location.origin } : {}),
     },
   });
   if (error) throw error;
@@ -91,7 +91,7 @@ export async function resendSignupConfirmation(email: string): Promise<void> {
     type: "signup",
     email: email.trim(),
     options: {
-      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+      ...(typeof window !== "undefined" ? { emailRedirectTo: window.location.origin } : {}),
     },
   });
   if (error) throw error;
