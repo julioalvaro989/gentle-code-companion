@@ -3,7 +3,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Activity, ArrowLeft, LogOut, Users, ShieldCheck, RefreshCw } from "lucide-react";
 import { adoptSupabaseSession, getProfile, listFitnessProfiles, signIn, signOut, type AuthSession, type FitnessProfile } from "../lib/supabase";
 
-export const Route = createFileRoute("/admin")({ component: AdminPage });
+export const Route = createFileRoute("/admin")({ head: () => ({ meta: [
+  { title: "Administração — Vibra" },
+  { name: "description", content: "Área restrita de administração de contas Vibra." },
+  { property: "og:title", content: "Administração — Vibra" },
+  { property: "og:description", content: "Acesso restrito à administração da Vibra." },
+  { property: "og:type", content: "website" },
+  { name: "twitter:card", content: "summary" },
+] }), component: AdminPage });
 
 function AdminPage() {
   const [session, setSession] = useState<AuthSession | null>(null);
