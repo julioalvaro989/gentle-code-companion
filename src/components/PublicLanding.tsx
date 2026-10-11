@@ -7,7 +7,7 @@ import {
 import { Button } from "./ui/button";
 import "./PublicLanding.css";
 
-type Props = { onAuth: (mode: "login" | "signup") => void };
+type Props = { onAuth: (mode: "login" | "signup") => void; onPlans: () => void };
 
 const resources = [
   { icon: Dumbbell, title: "Treinos com direção", copy: "Consulte exercícios, organize suas sessões e registre o que concluiu." },
@@ -101,7 +101,7 @@ function GymScene() {
   );
 }
 
-export function PublicLanding({ onAuth }: Props) {
+export function PublicLanding({ onAuth, onPlans }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
@@ -146,7 +146,7 @@ export function PublicLanding({ onAuth }: Props) {
           </nav>
           <div className="vp-header-actions">
             <Button variant="ghost" onClick={() => onAuth("login")}>Já tenho conta <ArrowRight aria-hidden="true" /></Button>
-            <Button className="vp-button vp-header-cta" onClick={() => onAuth("signup")}>Começar agora</Button>
+            <Button className="vp-button vp-header-cta" onClick={() => onPlans()}>Começar agora</Button>
             <Button ref={menuRef} size="icon" variant="ghost" className="vp-menu-toggle" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} aria-controls="vibra-menu-mobile" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X /> : <Menu />}
             </Button>
@@ -156,7 +156,7 @@ export function PublicLanding({ onAuth }: Props) {
           if (event.key === "Escape") { setMenuOpen(false); menuRef.current?.focus(); }
         }}>
           {nav.map((item) => <Button variant="ghost" key={item.id} onClick={() => goTo(item.id)}>{item.label}</Button>)}
-          <Button className="vp-button" onClick={() => onAuth("signup")}>Começar agora <ArrowRight /></Button>
+          <Button className="vp-button" onClick={() => onPlans()}>Começar agora <ArrowRight /></Button>
         </nav>}
       </header>
 
@@ -168,7 +168,7 @@ export function PublicLanding({ onAuth }: Props) {
               <h1 id="vp-title">Seu próximo nível começa com <span>inteligência.</span></h1>
               <p className="vp-hero-description">Treinos personalizados, orientação alimentar e acompanhamento da evolução com a inteligência artificial do Vibra.</p>
               <div className="vp-hero-actions">
-                <Button className="vp-button" size="lg" onClick={() => onAuth("signup")}>Começar agora <ArrowRight aria-hidden="true" /></Button>
+                <Button className="vp-button" size="lg" onClick={() => onPlans()}>Começar agora <ArrowRight aria-hidden="true" /></Button>
                 <Button variant="ghost" className="vp-discover" onClick={() => onAuth("login")}>Já tenho conta <ArrowDown aria-hidden="true" /></Button>
               </div>
               <div className="vp-hero-trust"><span><ShieldCheck size={16} /> Sua rotina, no seu espaço</span><span><Sparkles size={16} /> Vibra AI integrada</span></div>
@@ -185,7 +185,7 @@ export function PublicLanding({ onAuth }: Props) {
               <span className="vp-resource-index">0{index + 1}</span><span className="vp-resource-icon"><Icon size={23} aria-hidden="true" /></span><h3>{title}</h3><p>{copy}</p><span className="vp-resource-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
             </article>)}
           </div>
-          <div className="vp-feature-note"><span className="vp-feature-note-icon"><ClipboardCheck size={19} /></span><p><b>Feito para acompanhar sua rotina.</b><br />Os registros refletem as informações inseridas e os recursos habilitados na sua conta.</p><Button variant="ghost" onClick={() => onAuth("signup")}>Conhecer por dentro <ArrowRight size={16} /></Button></div>
+          <div className="vp-feature-note"><span className="vp-feature-note-icon"><ClipboardCheck size={19} /></span><p><b>Feito para acompanhar sua rotina.</b><br />Os registros refletem as informações inseridas e os recursos habilitados na sua conta.</p><Button variant="ghost" onClick={() => onPlans()}>Conhecer por dentro <ArrowRight size={16} /></Button></div>
         </section>
 
         <section id="vibra-como-funciona" className="vp-how vp-section vp-how-premium" aria-labelledby="vp-how-title">
@@ -229,8 +229,8 @@ export function PublicLanding({ onAuth }: Props) {
             <div className="vp-section-heading"><div><p className="vp-eyebrow">PLANOS VIBRA</p><h2 id="vp-plans-title">Escolha o ritmo.<br /><span>Construa sua rotina.</span></h2></div><p>Preços e limites propostos para planejamento comercial. A contratação só deve ser liberada depois da validação oficial.</p></div>
             <div className="vp-pricing-notice"><Clock3 size={18} /><p><b>Valores em validação — não disponíveis para contratação.</b><br />Os preços, limites de mensagens e condições precisam ser confirmados na Cakto e no backend. Nenhum pagamento é iniciado nesta página.</p></div>
             <div className="vp-pricing-grid">
-              <article className="vp-price-card"><span className="vp-price-kicker">PLANO INICIAL</span><h3>Vibra Basic</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-price-cta vp-price-cta-outline" onClick={() => onAuth("signup")}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
-              <article className="vp-price-card vp-price-featured"><span className="vp-price-recommended">PLANO EM PREPARAÇÃO</span><span className="vp-price-kicker">OPÇÃO AVANÇADA</span><h3>Vibra Premium</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-button vp-price-cta" onClick={() => onAuth("signup")}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
+              <article className="vp-price-card"><span className="vp-price-kicker">PLANO INICIAL</span><h3>Vibra Basic</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-price-cta vp-price-cta-outline" onClick={() => onPlans()}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
+              <article className="vp-price-card vp-price-featured"><span className="vp-price-recommended">PLANO EM PREPARAÇÃO</span><span className="vp-price-kicker">OPÇÃO AVANÇADA</span><h3>Vibra Premium</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-button vp-price-cta" onClick={() => onPlans()}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
             </div>
             <p className="vp-pricing-terms">Cobrança mensal planejada. Valores, recursos, limites, renovação e cancelamento precisam ser confirmados nos termos oficiais antes da oferta ao público.</p>
           </div>
@@ -244,7 +244,7 @@ export function PublicLanding({ onAuth }: Props) {
         </section>
 
         <section className="vp-final vp-container vp-final-premium">
-          <p className="vp-eyebrow">O COMEÇO É SEU</p><h2>Transforme intenção<br />em <span>movimento.</span></h2><p>Organize sua rotina com o Vibra, no seu ritmo.</p><Button className="vp-button" size="lg" onClick={() => onAuth("signup")}>Começar agora <ArrowRight /></Button>
+          <p className="vp-eyebrow">O COMEÇO É SEU</p><h2>Transforme intenção<br />em <span>movimento.</span></h2><p>Organize sua rotina com o Vibra, no seu ritmo.</p><Button className="vp-button" size="lg" onClick={() => onPlans()}>Começar agora <ArrowRight /></Button>
         </section>
       </main>
       <footer className="vp-footer vp-footer-premium"><div className="vp-container"><div className="vp-footer-top"><a className="vp-brand" href="#inicio" onClick={(event) => { event.preventDefault(); goTo("inicio"); }}><span aria-hidden="true">V</span>vibra<span className="vp-brand-dot">.</span></a><p>Seu treino. Seu ritmo. Sua evolução.</p><Button variant="ghost" onClick={() => onAuth("login")}>Entrar na minha conta <ArrowRight /></Button></div><div className="vp-footer-bottom"><span>© 2026 Vibra</span><span>Conteúdo informativo. A Vibra AI não substitui orientação profissional.</span></div></div></footer>
