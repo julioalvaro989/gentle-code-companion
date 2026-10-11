@@ -48,7 +48,7 @@ begin
  then return jsonb_build_object('admin',false,'allowed',false); end if;
  delete from public.vibra_admin_sessions where expires_at<=now() or revoked_at is not null;
  if exists(select 1 from public.vibra_admin_sessions where session_id=p_session_id and user_id=p_user_id and revoked_at is null and expires_at>now()) then
-  update public.vibra_admin_sessions set last_seen_at=now() where session_id=p_session_id;
+  update public.vibra_admin_sessions set last_seen_at=now(), expires_at=least(p_expires_at,now()+interval '12 hours') where session_id=p_session_id;
   return jsonb_build_object('admin',true,'allowed',true);
  end if;
  select count(*) into n from public.vibra_admin_sessions where user_id=p_user_id and revoked_at is null and expires_at>now();
