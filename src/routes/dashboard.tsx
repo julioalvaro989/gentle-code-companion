@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { adoptSupabaseSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessOnboarding } from "../lib/supabase";
 import { useServerFn } from "@tanstack/react-start";
 import { getTestAdminAccess } from "../lib/test-admin.functions";
 import { accessDestination, resolveVibraAccess } from "../lib/vibra-access";
@@ -24,6 +24,13 @@ function DashboardGate() {
     resolveVibraAccess(adoptSupabaseSession, checkTestAdmin)
       .then(({ session, testAdmin }) => {
         if (!active) return;
+        if (session && !testAdmin) {
+          const onboarding = await getFitnessOnboarding(session);
+          if (onboarding?.status !== "completed") {
+            window.location.replace("/onboarding");
+            return;
+          }
+        }
         const destination = accessDestination("/dashboard", Boolean(session), testAdmin);
         if (destination) window.location.replace(destination);
       })
