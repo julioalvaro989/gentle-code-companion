@@ -45,9 +45,9 @@ function OnboardingPage() {
       try {
         const current = await adoptSupabaseSession();
         if (!current) { window.location.replace("/?auth=login&next=%2Fonboarding"); return; }
+        setSession(current);
         const saved = await getFitnessOnboarding(current);
         if (!active) return;
-        setSession(current);
         if (saved?.answers) setAnswers({ ...emptyAnswers, ...saved.answers });
         if (saved?.status === "completed" && new URLSearchParams(window.location.search).get("edit") !== "1") {
           window.location.replace("/preview");
