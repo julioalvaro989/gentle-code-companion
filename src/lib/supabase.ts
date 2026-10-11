@@ -216,7 +216,7 @@ export type FitnessProfile = {
 export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
 export type VibraAccess = {
-  status: "active" | "pending" | "none";
+  status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
   planId: "basic" | "premium" | null;
   profileCompleted: boolean;
 };
@@ -253,9 +253,11 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
   );
   const subscription = rows?.[0];
   const validPeriod = !subscription?.current_period_end || new Date(subscription.current_period_end).getTime() > Date.now();
-  const status = subscription?.status === "active" && validPeriod
+  const status: VibraAccess["status"] = subscription?.status === "active" && validPeriod
     ? "active"
-    : subscription ? "pending" : "none";
+    : subscription && ["pending", "past_due", "canceled", "refunded", "failed"].includes(subscription.status)
+      ? subscription.status
+      : "none";
   const profile = status === "active" ? await getFitnessProfile(session) : null;
   return {
     status,
