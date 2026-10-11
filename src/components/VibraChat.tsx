@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent } from "react";
 import { ArrowUp, MessageCircle, Minimize2, Sparkles, X } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
+import { adoptSupabaseSession, getVibraAccess } from "../lib/supabase";
 import "./VibraChat.css";
 
 type ChatMessage = {
@@ -57,12 +58,23 @@ export function VibraChat() {
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getSession().then(({ data, error }) => {
-      if (active) setIsAuthenticated(!error && Boolean(data.session));
-    }).catch(() => { if (active) setIsAuthenticated(false); });
+    async function refreshChatAccess() {
+      try {
+        const session = await adoptSupabaseSession();
+        if (!active || !session) {
+          if (active) { setIsAuthenticated(false); setIsOpen(false); }
+          return;
+        }
+        const access = await getVibraAccess(session);
+        if (active) setIsAuthenticated(access.status === "active" && access.planId === "premium" && access.profileCompleted);
+      } catch {
+        if (active) { setIsAuthenticated(false); setIsOpen(false); }
+      }
+    }
+    void refreshChatAccess();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(Boolean(session));
-      if (!session) setIsOpen(false);
+      if (!session) { setIsAuthenticated(false); setIsOpen(false); }
+      else void refreshChatAccess();
     });
     return () => { active = false; listener.subscription.unsubscribe(); };
   }, []);
