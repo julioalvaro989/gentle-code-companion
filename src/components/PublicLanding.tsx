@@ -217,7 +217,7 @@ export function PublicLanding({ onAuth }: Props) {
                 </figcaption>
                 <div className="vp-preview-top">
                   <span className="vp-preview-wordmark">
-                    vibra<span>.</span>
+                    avirafit<span>.</span>
                   </span>
                   <UserRound size={18} aria-hidden="true" />
                 </div>
