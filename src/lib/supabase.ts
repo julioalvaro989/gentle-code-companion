@@ -122,7 +122,14 @@ export async function adoptSupabaseSession(): Promise<AuthSession | null> {
   const current = data.session;
   if (!current) return null;
   const { data: verified, error: verifyError } = await supabase.auth.getUser(current.access_token);
-  if (verifyError || !verified.user) {
+  if (verifyError) {
+    if (verifyError.status === 401 || verifyError.status === 403) {
+      await supabase.auth.signOut({ scope: "local" });
+      return null;
+    }
+    throw verifyError;
+  }
+  if (!verified.user) {
     await supabase.auth.signOut({ scope: "local" });
     return null;
   }
@@ -134,7 +141,7 @@ export async function adoptSupabaseSession(): Promise<AuthSession | null> {
 }
 
 export async function getProfile(session: AuthSession) {
-  const rows = await request("rest/v1/profiles?select=id,full_name,email,is_admin&limit=1", { method: "GET" }, session.access_token);
+  const rows = await request(`rest/v1/profiles?select=id,full_name,email,is_admin&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { method: "GET" }, session.access_token);
   return rows?.[0] ?? null;
 }
 
