@@ -931,3 +931,207 @@
   color: var(--green);
   background: var(--panel2);
 }
+
+
+/* Illustrative user stories carousel */
+.vp-stories-section {
+  overflow: hidden;
+}
+.vp-stories-heading {
+  margin-bottom: 24px;
+}
+.vp-stories-disclosure {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--vp-line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--vp-muted);
+  background: var(--vp-raised);
+  font-size: 11px;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+.vp-stories-controls,
+.vp-stories-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.vp-stories-controls {
+  margin-bottom: 16px;
+}
+.vp-stories-count {
+  color: var(--vp-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.vp-stories-arrows {
+  display: flex;
+  gap: 8px;
+}
+.vibra-public .vp-stories-arrows button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--vp-line);
+  border-radius: 50%;
+  background: var(--vp-surface);
+}
+.vibra-public .vp-stories-arrows button:hover {
+  border-color: var(--vp-purple-soft);
+  background: var(--vp-tint);
+}
+.vp-stories-track {
+  display: grid;
+  grid-auto-columns: calc((100% - 32px) / 3);
+  grid-auto-flow: column;
+  gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--vp-purple-soft) var(--vp-line);
+  padding: 3px 2px 18px;
+  outline-offset: 5px;
+  -webkit-overflow-scrolling: touch;
+}
+.vp-story-card {
+  min-width: 0;
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  border: 1px solid var(--vp-neutral-line);
+  border-radius: 14px;
+  padding: 25px;
+  background:
+    radial-gradient(ellipse at 100% 0%, var(--vp-tint), transparent 48%),
+    var(--vp-surface);
+  box-shadow: var(--vp-depth);
+}
+.vp-story-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 14px;
+}
+.vp-story-quote {
+  color: var(--vp-lime);
+  font-family: Georgia, serif;
+  font-size: 48px;
+  line-height: .8;
+}
+.vp-story-index {
+  color: var(--vp-muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: .8;
+}
+.vibra-public .vp-story-card h3 {
+  font-size: 18px;
+  line-height: 1.35;
+  margin: 0 0 13px;
+}
+.vp-story-copy {
+  color: var(--vp-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0 0 24px;
+}
+.vp-story-person {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: auto;
+  padding-top: 17px;
+  border-top: 1px solid var(--vp-line);
+}
+.vp-story-avatar {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--vp-purple-soft) 50%, transparent);
+  border-radius: 50%;
+  background: var(--vp-tint);
+  color: var(--vp-text);
+  font-size: 12px;
+  font-weight: 800;
+}
+.vp-story-person strong,
+.vp-story-person small {
+  display: block;
+}
+.vp-story-person strong {
+  font-size: 12px;
+}
+.vp-story-person small {
+  color: var(--vp-muted);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.vp-stories-bottom {
+  padding-top: 10px;
+}
+.vp-stories-bottom > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vp-muted);
+  font-size: 11px;
+}
+.vp-story-dots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.vibra-public .vp-story-dots button {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vp-muted) 42%, transparent);
+  transition: width 180ms ease, background-color 180ms ease;
+}
+.vibra-public .vp-story-dots button.is-active {
+  width: 22px;
+  background: var(--vp-lime);
+}
+@media (max-width: 900px) {
+  .vp-stories-track {
+    grid-auto-columns: calc((100% - 16px) / 2);
+  }
+  .vp-story-card {
+    padding: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .vp-stories-track {
+    grid-auto-columns: min(86%, 360px);
+    gap: 12px;
+    scroll-padding-inline: 1px;
+  }
+  .vp-story-card {
+    min-height: 315px;
+    padding: 22px;
+  }
+  .vp-stories-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .vp-story-dots {
+    justify-content: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vibra-public .vp-story-dots button {
+    transition: none;
+  }
+}
