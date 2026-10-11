@@ -26,7 +26,7 @@ function PlansRoute() {
   useEffect(() => {
     let active = true;
     resolveVibraAccess(adoptSupabaseSession, checkTestAdmin)
-      .then(({ session: current, testAdmin }) => {
+      .then(async ({ session: current, testAdmin }) => {
         if (!active) return;
         const destination = accessDestination("/plans", Boolean(current), testAdmin);
         if (destination) {
