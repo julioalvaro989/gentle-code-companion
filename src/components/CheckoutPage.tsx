@@ -12,7 +12,7 @@ export function CheckoutPage() {
   const planFromUrl = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("plan") : null;
   let storedPlan: string | null = null;
   try { storedPlan = typeof window !== "undefined" ? window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY) : null; } catch { /* URL can carry the choice. */ }
-  const planId = isVibraPlanId(planFromUrl) ? planFromUrl : isVibraPlanId(storedPlan) ? storedPlan : access?.planId ?? null;
+  const planId = access?.planId ?? (isVibraPlanId(planFromUrl) ? planFromUrl : isVibraPlanId(storedPlan) ? storedPlan : null);
   const plan = planId ? VIBRA_PLANS[planId] : null;
 
   async function verify() {
