@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   ArrowDown,
@@ -50,6 +50,53 @@ const resources = [
 export function PublicLanding({ onAuth }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
+  const publicRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = publicRef.current;
+    if (!root) return;
+
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const targets = root.querySelectorAll<HTMLElement>(
+      ".vp-section-heading, .vp-resource, .vp-ai-layout > div, " +
+        ".vp-benefit-grid > article, .vp-care-note, .vp-plans-layout > div, " +
+        ".vp-final > *, .vp-section > .vp-eyebrow, .vp-section > h2",
+    );
+    const revealed = new Set<Element>();
+    let observer: IntersectionObserver | undefined;
+
+    function enableMotion() {
+      observer?.disconnect();
+      root?.classList.remove("vp-motion-enabled");
+      if (preference.matches || !("IntersectionObserver" in window)) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("vp-revealed");
+            revealed.add(entry.target);
+            observer?.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.08 },
+      );
+      root?.classList.add("vp-motion-enabled");
+      targets.forEach((target) => {
+        if (!revealed.has(target)) observer?.observe(target);
+      });
+    }
+
+    enableMotion();
+    preference.addEventListener("change", enableMotion);
+    return () => {
+      observer?.disconnect();
+      preference.removeEventListener("change", enableMotion);
+      root.classList.remove("vp-motion-enabled");
+      targets.forEach((target) => target.classList.remove("vp-revealed"));
+    };
+  }, []);
+
   function goTo(id: string) {
     setMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({
@@ -64,7 +111,7 @@ export function PublicLanding({ onAuth }: Props) {
     { id: "vibra-planos", label: "Planos" },
   ];
   return (
-    <div className="vibra-public">
+    <div className="vibra-public" ref={publicRef}>
       <a className="vp-skip" href="#vibra-conteudo">
         Pular para o conteúdo
       </a>

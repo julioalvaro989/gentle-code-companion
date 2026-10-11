@@ -784,11 +784,93 @@
     max-width: 330px;
   }
 }
+/* Progressive enhancement: content is never hidden, even before hydration. */
+.vibra-public button,
+.vibra-public a {
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    box-shadow 220ms ease,
+    translate 220ms ease,
+    scale 180ms ease;
+}
+.vibra-public button:focus-visible {
+  box-shadow: 0 0 0 3px var(--vp-tint);
+  translate: 0 -1px;
+}
+.vibra-public button:active,
+.vibra-public a:active {
+  translate: 0 1px;
+  scale: 0.985;
+}
+.vibra-public .vp-resource,
+.vibra-public .vp-product-preview,
+.vibra-public .vp-ai-visual {
+  transition:
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    translate 240ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .vibra-public button:hover {
+    translate: 0 -1px;
+  }
+  .vibra-public .vp-resource:hover,
+  .vibra-public .vp-ai-visual:hover {
+    border-color: var(--vp-purple-soft);
+    box-shadow: 0 6px 16px var(--vp-tint);
+    translate: 0 -2px;
+  }
+  .vibra-public .vp-product-preview:hover {
+    border-color: var(--vp-purple-soft);
+    translate: 0 -2px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .vibra-public.vp-motion-enabled .vp-hero-copy {
+    animation: vp-hero-arrive 380ms ease-out;
+  }
+  .vibra-public.vp-motion-enabled .vp-product-preview {
+    animation: vp-hero-arrive 460ms ease-out;
+  }
+  .vibra-public.vp-motion-enabled .vp-revealed {
+    animation: vp-content-arrive 420ms ease-out;
+  }
+}
+@keyframes vp-hero-arrive {
+  from {
+    opacity: 0.94;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vp-content-arrive {
+  from {
+    opacity: 0.86;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .vibra-public * {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+  .vibra-public button,
+  .vibra-public a,
+  .vibra-public .vp-resource,
+  .vibra-public .vp-product-preview,
+  .vibra-public .vp-ai-visual,
+  .vibra-public .vp-revealed {
+    translate: none !important;
+    scale: none !important;
   }
 }
 
