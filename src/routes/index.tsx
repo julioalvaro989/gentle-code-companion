@@ -149,10 +149,16 @@ function GymApp() {
           try {
             access = await getVibraAccess(current);
             setAccessError("");
-          } catch {
-            // Authorization unavailable is not proof that this user lacks a plan.
-            // Keep the authenticated session and never redirect to plans on this path.
-            setAccessError("Não foi possível confirmar suas permissões agora. Atualize a página para tentar novamente.");
+          } catch (error) {
+            // Log technical diagnostics without session tokens, user email, or credentials.
+            console.error("[Vibra access] initial authorization failed", {
+              errorName: error instanceof Error ? error.name : "UnknownError",
+              message: error instanceof Error ? error.message : String(error),
+              userId: current.user.id,
+              stage: "getVibraAccess",
+              timestamp: new Date().toISOString(),
+            });
+            setAccessError("Não foi possível confirmar suas permissões agora. Verifique a conexão e tente validar novamente.");
             setAccessReady(true);
             return;
           }
@@ -293,7 +299,24 @@ function GymApp() {
   }
 
   if (!authReady || (session && !accessReady && !accessError)) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
-  if (session && accessError) return <main role="alert" style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",padding:24,color:"white"}}><section style={{maxWidth:480,textAlign:"center"}}><h1>{accessError.startsWith("As três sessões") ? "Limite de sessões administrativas" : "Não foi possível validar o acesso"}</h1><p>{accessError}</p><button type="button" onClick={() => window.location.reload()} style={{padding:"12px 18px",borderRadius:12,cursor:"pointer"}}>Tentar novamente</button></section></main>;
+  if (session && accessError) return <main role="alert" style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",padding:24,color:"white"}}><section style={{maxWidth:480,textAlign:"center"}}><h1>{accessError.startsWith("As três sessões") ? "Limite de sessões administrativas" : "Não foi possível validar o acesso"}</h1><p>{accessError}</p><button type="button" disabled={authBusy} onClick={async () => {
+    setAuthBusy(true); setAccessError(""); setAccessReady(false);
+    try {
+      const current = await adoptSupabaseSession();
+      if (!current) { setSession(null); setAuthMode("login"); setShowAuth(true); setAuthError("Sua sessão expirou. Entre novamente."); return; }
+      setSession(current);
+      const access = await getVibraAccess(current);
+      if (access.adminSessionLimit) { setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente."); return; }
+      if (access.status === "active") { window.location.assign(access.profileCompleted ? "/" : "/fitness-profile"); return; }
+      const params = new URLSearchParams(window.location.search);
+      const storedPlan = (() => { try { return window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { return null; } })();
+      const candidate = isVibraPlanId(params.get("plan")) ? params.get("plan") : isVibraPlanId(storedPlan) ? storedPlan : null;
+      window.location.assign(access.status === "pending" || access.planId || candidate ? "/checkout" + ((access.planId || candidate) ? "?plan=" + (access.planId || candidate) : "") : "/plans");
+    } catch (error) {
+      console.error("[Vibra access] manual retry failed", { errorName: error instanceof Error ? error.name : "UnknownError", message: error instanceof Error ? error.message : String(error), userId: session.user.id, stage: "retryAuthorization", timestamp: new Date().toISOString() });
+      setAccessError("A validação continua indisponível. Tente novamente em instantes; se persistir, a equipe técnica deve verificar os logs do Supabase.");
+    } finally { setAuthBusy(false); setAccessReady(true); }
+  }} style={{padding:"12px 18px",borderRadius:12,cursor:authBusy ? "wait" : "pointer",opacity:authBusy ? 0.65 : 1}}>{authBusy ? "Validando acesso…" : "Tentar novamente"}</button></section></main>;
   const publicLandingRequested = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("public") === "1";
   if (publicLandingRequested) return <PublicLanding onAuth={(mode) => window.location.assign("/?auth=" + mode)} onPlans={() => window.location.assign("/plans")} />;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
