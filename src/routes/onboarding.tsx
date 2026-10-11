@@ -32,6 +32,7 @@ const steps = [
 
 function OnboardingPage() {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [wasCompleted, setWasCompleted] = useState(false);
   const [answers, setAnswers] = useState<FitnessOnboardingAnswers>(emptyAnswers);
   const [step, setStep] = useState(0);
   const [ready, setReady] = useState(false);
@@ -49,6 +50,7 @@ function OnboardingPage() {
         const saved = await getFitnessOnboarding(current);
         if (!active) return;
         if (saved?.answers) setAnswers({ ...emptyAnswers, ...saved.answers });
+        setWasCompleted(saved?.status === "completed");
         if (saved?.status === "completed" && new URLSearchParams(window.location.search).get("edit") !== "1") {
           window.location.replace("/preview");
           return;
@@ -93,7 +95,7 @@ function OnboardingPage() {
     if (!session) return false;
     setSaving(true); setError(""); setNotice("");
     try {
-      await saveFitnessOnboarding(session, answers, "pending");
+      await saveFitnessOnboarding(session, answers, wasCompleted ? "completed" : "pending");
       setStep(nextStep);
       setNotice("Suas respostas foram salvas. Você pode continuar depois.");
       return true;
@@ -108,6 +110,7 @@ function OnboardingPage() {
     setSaving(true); setError(""); setNotice("");
     try {
       await saveFitnessOnboarding(session, answers, "completed");
+      setWasCompleted(true);
       window.location.assign("/preview");
     } catch {
       setError("Não foi possível concluir o perfil agora. Suas respostas permanecem nesta tela; tente novamente.");
