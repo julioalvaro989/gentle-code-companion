@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
 import { PublicLanding } from "../components/PublicLanding";
-import "./AuthPage.css";
+import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
@@ -220,7 +220,7 @@ function GymApp() {
           {authError && <div role="alert" className="va-message va-error">{authError}</div>}
           {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
           {authMessage && authMode === "signup" && <button type="button" className="va-resend" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
-          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/>}</button>
+          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/></>}</button>
         </form>
         <div className="va-divider"><span/>ou continue com<span/></div>
         <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
