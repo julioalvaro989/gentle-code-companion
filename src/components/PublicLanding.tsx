@@ -430,7 +430,7 @@ export function PublicLanding({ onAuth }: Props) {
                 <div className="vp-story-card-top"><span className="vp-story-quote" aria-hidden="true">“</span><span className="vp-story-index">{String(index + 1).padStart(2, "0")}</span></div>
                 <h3>{story.title}</h3>
                 <p className="vp-story-copy">“{story.text}”</p>
-                <div className="vp-story-person"><span className="vp-story-avatar" aria-hidden="true">{story.name.split(/\\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase()}</span><span><strong>{story.name}</strong><small>História ilustrativa</small></span></div>
+                <div className="vp-story-person"><span className="vp-story-avatar" aria-hidden="true">{story.name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase()}</span><span><strong>{story.name}</strong><small>História ilustrativa</small></span></div>
               </article>
             ))}
           </div>
