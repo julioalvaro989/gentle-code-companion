@@ -1,0 +1,33 @@
+name: Validate Vibra test access
+
+on:
+  push:
+    branches:
+      - feat/vibra-official-login-ui
+  pull_request:
+    branches:
+      - feat/vibra-official-login-ui
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Run authorization and navigation tests
+        run: bun test tests/vibra-access.test.ts
+      - name: Build
+        run: bun run build
+      - name: Lint
+        run: bun run lint

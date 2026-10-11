@@ -5,7 +5,10 @@ import { PublicLanding } from "../components/PublicLanding";
 import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
-import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type CSSProperties } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getTestAdminAccess } from "../lib/test-admin.functions";
+import { bounded, resolveVibraAccess } from "../lib/vibra-access";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
@@ -43,6 +46,7 @@ const meals = [
 ];
 
 function GymApp() {
+  const checkTestAdmin = useServerFn(getTestAdminAccess);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [profileName, setProfileName] = useState("");
@@ -93,6 +97,22 @@ function GymApp() {
   };
   const progress = Math.round(done.length / exercises.length * 100);
 
+  const activateInternalSession = useCallback(async (current: AuthSession) => {
+    const [profile, saved] = await bounded(Promise.all([
+      getFitnessProfile(current).catch(() => null),
+      getFitnessProgress(current).catch(() => null),
+    ])).catch(() => [null, null] as const);
+    setProfileName(profile?.username || current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Vibra");
+    if (saved) {
+      setDone(saved.completed_exercises || []);
+      setWater(saved.water_glasses || 0);
+      setGoal(saved.goal || "Ganhar massa muscular");
+    }
+    // Do not persist defaults when the read failed or no stored progress exists.
+    setProgressHydrated(Boolean(saved));
+    setSession(current);
+  }, []);
+
   useEffect(() => {
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("auth") === "login") {
       setAuthMode("login");
@@ -101,12 +121,14 @@ function GymApp() {
     let active = true;
     (async () => {
       try {
-        const current = await adoptSupabaseSession();
+        const { session: current, testAdmin } = await resolveVibraAccess(adoptSupabaseSession, checkTestAdmin);
         if (!active) return;
         if (current) {
-          // Do not expose the dashboard until a trusted subscription check is available.
-          window.location.replace("/plans");
-          return;
+          if (!testAdmin) {
+            window.location.replace("/plans");
+            return;
+          }
+          await activateInternalSession(current);
         } else {
           setProgressHydrated(false);
         }
@@ -114,7 +136,7 @@ function GymApp() {
       finally { if (active) setAuthReady(true); }
     })();
     return () => { active = false; };
-  }, []);
+  }, [checkTestAdmin, activateInternalSession]);
 
   useEffect(() => {
     if (!session || !progressHydrated) return;
@@ -144,11 +166,9 @@ function GymApp() {
         if (p?.username) setProfileName(p.username);
         else await saveFitnessProfile(next, { username: next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra", email: next.user.email || authEmail.trim(), goal });
       }
-      setSession(next); setProgressHydrated(false);
-      const saved = await getFitnessProgress(next).catch(() => null);
-      if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
-      setProgressHydrated(true);
-      window.location.assign("/plans");
+      const access = await resolveVibraAccess(async () => next, checkTestAdmin);
+      if (access.testAdmin && access.session) await activateInternalSession(access.session);
+      else window.location.assign("/plans");
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
@@ -175,14 +195,12 @@ function GymApp() {
     try {
       const next = await signInWithGoogle();
       if (next) {
-        setSession(next);
         const name = next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra";
         setProfileName(name);
         await saveFitnessProfile(next, { username: name, email: next.user.email || "", goal }).catch(() => {});
-        const saved = await getFitnessProgress(next).catch(() => null);
-        if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
-        setProgressHydrated(true);
-        window.location.assign("/plans");
+        const access = await resolveVibraAccess(async () => next, checkTestAdmin);
+        if (access.testAdmin && access.session) await activateInternalSession(access.session);
+        else window.location.assign("/plans");
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }

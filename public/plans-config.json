@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "plans": [
+    {
+      "id": "basic",
+      "name": "Vibra Basic",
+      "description": "O essencial para organizar seus treinos e construir consistência na rotina.",
+      "priceAmountCents": null,
+      "currency": "BRL",
+      "interval": null,
+      "benefits": [
+        "Treinos e organização da rotina",
+        "Acompanhamento de progresso e hábitos",
+        "Acesso ao Vibra AI com limites de utilização a definir"
+      ],
+      "aiLimits": {
+        "summary": "Limites de utilização do Vibra AI ainda serão definidos.",
+        "status": "to_define"
+      },
+      "advancedPersonalization": "not_included",
+      "status": "published"
+    },
+    {
+      "id": "premium",
+      "name": "Vibra Premium",
+      "description": "Tudo do Basic, com limites de IA planejados para serem superiores após configuração.",
+      "priceAmountCents": null,
+      "currency": "BRL",
+      "interval": null,
+      "benefits": [
+        "Todos os benefícios do Vibra Basic",
+        "Limites de utilização do Vibra AI superiores aos do Basic, ainda a configurar"
+      ],
+      "aiLimits": {
+        "summary": "Os limites do Premium serão configurados acima dos limites do Basic antes da contratação.",
+        "status": "to_define"
+      },
+      "advancedPersonalization": "under_review",
+      "status": "published"
+    }
+  ]
+}
