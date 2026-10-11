@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { adoptSupabaseSession, getVibraAccess } from "../lib/supabase";
 
 export const Route = createFileRoute("/dashboard")({
@@ -18,6 +18,10 @@ function DashboardGate() {
         if (!session) { window.location.replace("/?auth=login"); return; }
         const access = await getVibraAccess(session);
         if (!active) return;
+        if (access.adminSessionLimit) {
+          setAuthorizationUnavailable(true);
+          return;
+        }
         if (access.status !== "active") {
           window.location.replace(access.status === "pending" || access.planId ? "/checkout" : "/plans");
           return;
@@ -32,5 +36,5 @@ function DashboardGate() {
     return () => { active = false; };
   }, []);
 
-  return <main role={authorizationUnavailable ? "alert" : undefined} style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#05060B", color: "#F8F9FF" }}>{authorizationUnavailable ? <section style={{ maxWidth: 480, textAlign: "center" }}><h1>Não foi possível validar o acesso</h1><p>O serviço de autorização está temporariamente indisponível. Nenhum redirecionamento de pagamento foi realizado.</p><button type="button" onClick={() => window.location.reload()}>Tentar novamente</button></section> : "Validando autenticação, permissões e perfil…"}</main>;
+  return <main role={authorizationUnavailable ? "alert" : undefined} style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#05060B", color: "#F8F9FF" }}>{authorizationUnavailable ? <section style={{ maxWidth: 480, textAlign: "center" }}><h1>Não foi possível validar o acesso</h1><p>O serviço de autorização está temporariamente indisponível ou as três sessões administrativas já estão em uso. Nenhum redirecionamento de pagamento foi realizado.</p><button type="button" onClick={() => window.location.reload()}>Tentar novamente</button></section> : "Validando autenticação, permissões e perfil…"}</main>;
 }
