@@ -219,6 +219,7 @@ export type FitnessProfile = {
 export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
 export type VibraAccess = {
+  adminSessionLimit?: boolean;
   status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
   planId: "basic" | "premium" | null;
   profileCompleted: boolean;
@@ -247,17 +248,21 @@ export async function saveFullFitnessProfile(session: AuthSession, profile: Fitn
   }, session.access_token);
 }
 
-async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boolean;allowed:boolean}> {
+async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boolean;allowed:boolean;reason?:string}> {
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase.functions.invoke("vibra-admin-session", {
       body: { action: "claim" },
     });
-    if (error || !data) return { admin: false, allowed: false };
-    return { admin: data.admin === true, allowed: data.allowed === true };
-  } catch {
-    // Fail closed: an unavailable admin-session service never grants access.
-    return { admin: false, allowed: false };
+    if (error) throw new Error("Não foi possível validar as permissões de acesso.");
+    if (!data || typeof data.admin !== "boolean" || typeof data.allowed !== "boolean") {
+      throw new Error("O serviço de autorização retornou uma resposta inválida.");
+    }
+    return { admin: data.admin, allowed: data.allowed, reason: typeof data.reason === "string" ? data.reason : undefined };
+  } catch (error) {
+    // Do not reinterpret an authorization-service failure as a confirmed non-admin.
+    // Callers must keep the user in a loading/error state rather than redirect to plans.
+    throw error instanceof Error ? error : new Error("Não foi possível validar as permissões de acesso.");
   }
 }
 
@@ -270,7 +275,7 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
   if (administrative.admin && !administrative.allowed) {
     // The server denied this authenticated session because the three-session
     // cap is full. Never fall back to paid access for a denied admin session.
-    return { status: "none", planId: null, profileCompleted: false };
+    return { status: "none", planId: null, profileCompleted: false, adminSessionLimit: administrative.reason === "session_limit" };
   }
   const rows = await request(
     "rest/v1/vibra_subscriptions?select=plan_id,status,current_period_end&user_id=eq." +

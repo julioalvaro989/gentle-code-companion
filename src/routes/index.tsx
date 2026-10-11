@@ -60,6 +60,7 @@ function GymApp() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [accessReady, setAccessReady] = useState(false);
+  const [accessError, setAccessError] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<VibraPlanId | null>(null);
   const [profileName, setProfileName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
@@ -144,7 +145,17 @@ function GymApp() {
           setProfileName(name);
           // Resolve backend authorization first. Admin sessions must be registered
           // before RLS-protected profile/progress reads are attempted.
-          const access = await getVibraAccess(current).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+          let access: Awaited<ReturnType<typeof getVibraAccess>>;
+          try {
+            access = await getVibraAccess(current);
+            setAccessError("");
+          } catch {
+            // Authorization unavailable is not proof that this user lacks a plan.
+            // Keep the authenticated session and never redirect to plans on this path.
+            setAccessError("Não foi possível confirmar suas permissões agora. Atualize a página para tentar novamente.");
+            setAccessReady(true);
+            return;
+          }
           const profile = await getFitnessProfile(current).catch(() => null);
           if (profile?.username) setProfileName(profile.username);
           const saved = await getFitnessProgress(current).catch(() => null);
@@ -158,6 +169,11 @@ function GymApp() {
           let fromStorage: string | null = null;
           try { fromStorage = window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { /* Ignore unavailable storage. */ }
           const chosenPlan = isVibraPlanId(fromUrl) ? fromUrl : isVibraPlanId(fromStorage) ? fromStorage : null;
+          if (access.adminSessionLimit) {
+            setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+            setAccessReady(true);
+            return;
+          }
           if (access.status !== "active") {
             const nextPlan = access.planId || chosenPlan;
             window.location.replace(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
@@ -214,14 +230,20 @@ function GymApp() {
       const saved = await getFitnessProgress(next).catch(() => null);
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
-      const access = await getVibraAccess(next).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+      const access = await getVibraAccess(next);
+      setAccessReady(true);
+      if (access.adminSessionLimit) {
+        setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+        setAccessReady(true);
+        return;
+      }
       if (access.status === "active") {
         window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
       } else {
         const nextPlan = access.planId || selectedPlan;
         window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
       }
-    } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
+    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
 
@@ -253,18 +275,25 @@ function GymApp() {
         const saved = await getFitnessProgress(next).catch(() => null);
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
-        const access = await getVibraAccess(next).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+        const access = await getVibraAccess(next);
+        setAccessReady(true);
+        if (access.adminSessionLimit) {
+          setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+          setAccessReady(true);
+          return;
+        }
         if (access.status === "active") window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
         else {
           const nextPlan = access.planId || selectedPlan;
           window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
         }
       }
-    } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
+    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
   }
 
-  if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  if (!authReady || (session && !accessReady && !accessError)) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  if (session && accessError) return <main role="alert" style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",padding:24,color:"white"}}><section style={{maxWidth:480,textAlign:"center"}}><h1>{accessError.startsWith("As três sessões") ? "Limite de sessões administrativas" : "Não foi possível validar o acesso"}</h1><p>{accessError}</p><button type="button" onClick={() => window.location.reload()} style={{padding:"12px 18px",borderRadius:12,cursor:"pointer"}}>Tentar novamente</button></section></main>;
   const publicLandingRequested = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("public") === "1";
   if (publicLandingRequested) return <PublicLanding onAuth={(mode) => window.location.assign("/?auth=" + mode)} onPlans={() => window.location.assign("/plans")} />;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
