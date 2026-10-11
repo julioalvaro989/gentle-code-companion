@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
 import { PublicLanding } from "../components/PublicLanding";
+import "./AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
@@ -195,27 +196,44 @@ function GymApp() {
 
   if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} />;
-  if (!session) return <div style={{minHeight:"100vh",background:"radial-gradient(ellipse at 80% 15%,#7900FF30 0%,transparent 38%),radial-gradient(ellipse at 10% 90%,#A855F720 0%,transparent 35%),#05060B",color:"#F8F9FF",display:"grid",placeItems:"center",padding:"28px 16px",fontFamily:"inherit"}}>
-    <div style={{width:"min(100%,440px)",background:"#0B0C16",border:"1px solid #29233F",borderRadius:28,padding:"clamp(24px,5vw,42px)",boxShadow:"0 25px 90px #12201218"}}>
-      <Button variant="ghost" className="vibra-auth-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}><ArrowLeft size={16} /> Voltar à Vibra</Button>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:30}}><span style={{fontSize:30,color:"#B7FF35",fontWeight:900}}>V</span><strong style={{fontSize:28,letterSpacing:-1}}>Vibra</strong></div>
-      <div style={{fontSize:11,letterSpacing:2,color:"#B7FF35",fontWeight:800,marginBottom:10}}>SEU ECOSSISTEMA DE BEM-ESTAR</div>
-      <h1 style={{fontSize:"clamp(30px,7vw,42px)",lineHeight:1.08,margin:"0 0 12px",letterSpacing:-1.5}}>{authMode === "signup" ? <>Comece sua <span style={{color:"#B7FF35"}}>evolução.</span></> : <>Bom ter você <span style={{color:"#B7FF35"}}>de volta.</span></>}</h1>
-      <p style={{color:"#A8B4D8",lineHeight:1.6,margin:"0 0 25px"}}>{authMode === "signup" ? "Crie sua conta para acessar treinos, nutrição, progresso e seu perfil pessoal." : "Entre na sua conta para continuar de onde parou."}</p>
-      <form onSubmit={submitAuth} style={{display:"grid",gap:13}}>
-        {authMode === "signup" && <input required minLength={2} autoComplete="username" placeholder="Nome de usuário" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} style={authInputStyle}/>}
-        <input required type="email" autoComplete="email" placeholder="Seu e-mail" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} style={authInputStyle}/>
-        <input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Senha (mínimo 6 caracteres)" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} style={authInputStyle}/>
-        {authError && <div role="alert" style={{color:"#ff9b9b",fontSize:13}}>{authError}</div>}
-        {authMessage && <div role="status" style={{color:"#C8FF58",fontSize:13,lineHeight:1.5}}>{authMessage}</div>}
-        {authMessage && authMode === "signup" && <button type="button" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy} style={{background:"transparent",border:"1px solid #B7FF35",borderRadius:999,color:"#B7FF35",padding:"10px 14px",fontWeight:750,cursor:"pointer"}}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
-        <button disabled={authBusy} type="submit" style={{border:0,borderRadius:999,background:"#B7FF35",color:"#10110b",padding:"15px 20px",fontWeight:850,cursor:"pointer",marginTop:5}}>{authBusy ? "Aguarde..." : authMode === "signup" ? "Criar minha conta →" : "Entrar na Vibra →"}</button>
-      </form>
-      <div style={{display:"flex",alignItems:"center",gap:12,color:"#657065",fontSize:12,margin:"20px 0"}}><span style={{height:1,background:"#39304b",flex:1}}/>ou continue com<span style={{height:1,background:"#39304b",flex:1}}/></div>
-      <button type="button" onClick={googleAuth} disabled={authBusy} style={{width:"100%",background:"#fff",color:"#17131f",border:0,borderRadius:999,padding:"13px 18px",fontWeight:750,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}><span style={{fontSize:18,fontWeight:900}}>G</span> Continuar com Google</button>
-      <p style={{textAlign:"center",color:"#A8B4D8",fontSize:13,marginTop:24}}>{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"} <button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}} style={{background:"none",border:0,color:"#B7FF35",fontWeight:800,cursor:"pointer"}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
-      <p style={{fontSize:11,color:"#687368",textAlign:"center",lineHeight:1.5}}>Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
-    </div>
+  if (!session) return <div className="vibra-auth-page">
+    <div className="va-background va-background-purple" aria-hidden="true" />
+    <div className="va-background va-background-lime" aria-hidden="true" />
+    <main className="va-layout">
+      <section className="va-story" aria-label="Sobre o Vibra">
+        <button type="button" className="va-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}>
+          <ArrowLeft size={16} /> Voltar ao início
+        </button>
+        <div className="va-brand"><span className="va-brand-mark"><Activity size={23} strokeWidth={2.6} /></span><span>vibra<span>.</span></span></div>
+        <div className="va-story-copy">
+          <div className="va-eyebrow"><Sparkles size={14} /> SEU ESPAÇO DE EVOLUÇÃO</div>
+          <h1>Seu ritmo.<br />Sua jornada.<br /><span>Seu próximo nível.</span></h1>
+          <p>Treinos, hábitos e evolução em um só lugar. Continue construindo uma rotina que faz sentido para você.</p>
+        </div>
+        <div className="va-story-footer"><span><Dumbbell size={16}/> TREINO</span><i /><span><Target size={16}/> FOCO</span><i /><span><TrendingUp size={16}/> EVOLUÇÃO</span></div>
+      </section>
+      <section className="va-auth-panel" aria-labelledby="va-title">
+        <div className="va-panel-top"><span className="va-mobile-brand"><span className="va-brand-mark"><Activity size={20}/></span> vibra<span>.</span></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
+        <div className="va-form-heading">
+          <div className="va-form-eyebrow">{authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
+          <h2 id="va-title">{authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
+          <p>{authMode === "signup" ? "Crie sua conta e organize os próximos passos da sua jornada." : "Entre para continuar de onde você parou."}</p>
+        </div>
+        <form className="va-form" onSubmit={submitAuth}>
+          {authMode === "signup" && <label>Nome de usuário<input required minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
+          <label>E-mail<input required type="email" autoComplete="email" placeholder="voce@exemplo.com" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} /></label>
+          <label>Senha<input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Mínimo de 6 caracteres" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} /></label>
+          {authError && <div role="alert" className="va-message va-error">{authError}</div>}
+          {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
+          {authMessage && authMode === "signup" && <button type="button" className="va-resend" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
+          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/>}</button>
+        </form>
+        <div className="va-divider"><span/>ou continue com<span/></div>
+        <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
+        <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
+        <p className="va-disclaimer">Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
+      </section>
+    </main>
   </div>;
 
   return <div className="gym-app fit-app">
