@@ -26,7 +26,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     { property: "og:description", content: "Seu treino, sua nutrição, sua evolução." }
   ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.ico", type: "image/x-icon" }] }),
   shellComponent: ({ children }: { children: ReactNode }) => <html lang="pt-BR"><head><HeadContent /></head><body>{children}<Scripts /></body></html>,
-  component: () => {
+  component: function RootContent() {
     const { queryClient } = Route.useRouteContext();
     return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>;
   },
