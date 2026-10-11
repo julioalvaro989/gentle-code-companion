@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: responseHeaders(origin) });
   if (req.method !== "POST") return jsonError("Método não permitido.", 405, origin);
 
-  const tokenMatch = (req.headers.get("Authorization") ?? "").match(/^Bearer\\s+([^\\s]+)$/i);
+  const tokenMatch = (req.headers.get("Authorization") ?? "").match(/^Bearer\s+([^\s]+)$/i);
   if (!tokenMatch) return jsonError("Autenticação necessária.", 401, origin);
   const accessToken = tokenMatch[1];
 
