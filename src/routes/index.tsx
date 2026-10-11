@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
 import { PublicLanding } from "../components/PublicLanding";
-import "./AuthPage.css";
+import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
