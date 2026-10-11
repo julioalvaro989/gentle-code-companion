@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent } from "react";
 import { ArrowUp, MessageCircle, Minimize2, Sparkles, X } from "lucide-react";
+import { supabase } from "../integrations/supabase/client";
 import "./VibraChat.css";
 
 type ChatMessage = {
@@ -42,6 +43,7 @@ export function VibraChat() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
   const [isSending, setIsSending] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
@@ -52,6 +54,18 @@ export function VibraChat() {
   const pendingRef = useRef<Position | null>(null);
   const suppressClickRef = useRef(false);
   const hasSavedPositionRef = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (active) setIsAuthenticated(!error && Boolean(data.session));
+    }).catch(() => { if (active) setIsAuthenticated(false); });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+      if (!session) setIsOpen(false);
+    });
+    return () => { active = false; listener.subscription.unsubscribe(); };
+  }, []);
 
   // Position updates stay outside React rendering, including panel alignment.
   const place = useCallback((desired: Position) => {
@@ -210,9 +224,11 @@ export function VibraChat() {
       if (!supabaseUrl || !publishableKey) {
         throw new Error("O serviço de IA não está configurado neste ambiente.");
       }
+      const { data: authData, error: authError } = await supabase.auth.getSession();
+      if (authError || !authData.session) throw new Error("Entre na sua conta para usar o chat Vibra AI.");
       const response = await fetch(`${supabaseUrl}/functions/v1/fitness-chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
+        headers: { "Content-Type": "application/json", apikey: publishableKey, Authorization: `Bearer ${authData.session.access_token}` },
         body: JSON.stringify({
           messages: history.filter((message) => message.role !== "assistant" || message.id !== welcomeMessage.id)
             .slice(-12).map(({ role, content }) => ({ role, content })),
@@ -233,6 +249,8 @@ export function VibraChat() {
       setIsSending(false);
     }
   }
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="vibra-chat-root">

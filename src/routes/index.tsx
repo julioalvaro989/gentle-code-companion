@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ExerciseLibrary } from "../components/ExerciseLibrary";
 import { ExerciseDemoModal } from "../components/ExerciseDemoModal";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getStoredSession, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: GymApp });
@@ -85,8 +85,7 @@ function GymApp() {
     let active = true;
     (async () => {
       try {
-        let current = getStoredSession();
-        if (!current) current = await adoptSupabaseSession();
+        const current = await adoptSupabaseSession();
         if (!active) return;
         if (current) {
           setSession(current);
@@ -107,7 +106,7 @@ function GymApp() {
         } else {
           setProgressHydrated(false);
         }
-      } catch (e) { console.error("Falha ao restaurar sessão", e); }
+      } catch { setSession(null); setProgressHydrated(false); }
       finally { if (active) setAuthReady(true); }
     })();
     return () => { active = false; };
@@ -116,8 +115,8 @@ function GymApp() {
   useEffect(() => {
     if (!session || !progressHydrated) return;
     const timer = window.setTimeout(() => {
-      saveFitnessProgress(session, { completed_exercises: done, water_glasses: water, goal }).catch(e => console.error("Falha ao sincronizar progresso", e));
-      saveFitnessProfile(session, { username: profileName || "Aluno Vibra", email: session.user.email || "", goal }).catch(e => console.error("Falha ao sincronizar perfil", e));
+      saveFitnessProgress(session, { completed_exercises: done, water_glasses: water, goal }).catch(() => {});
+      saveFitnessProfile(session, { username: profileName || "Aluno Vibra", email: session.user.email || "", goal }).catch(() => {});
     }, 500);
     return () => window.clearTimeout(timer);
   }, [session, progressHydrated, done, water, goal, profileName]);
@@ -214,7 +213,7 @@ function GymApp() {
       <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
     </aside></>
     <main className="main-content" id="inicio">
-      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{await signOut();setSession(null);setProgressHydrated(false);setAuthMode("login");}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
+      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("A sessão local foi encerrada, mas o provedor não confirmou o logout remoto."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
         {activeNav==="Visão geral" && <>
