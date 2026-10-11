@@ -112,6 +112,13 @@ function GymApp() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      // A return-to-public-landing navigation must not be redirected back to
+      // checkout merely because this browser still has a pending session.
+      if (params.get("public") === "1") {
+        setAuthReady(true);
+        setAccessReady(true);
+        return;
+      }
       const requestedAuth = params.get("auth");
       if (requestedAuth === "login" || requestedAuth === "signup") {
         setAuthMode(requestedAuth);
@@ -256,6 +263,8 @@ function GymApp() {
   }
 
   if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  const publicLandingRequested = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("public") === "1";
+  if (publicLandingRequested) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
   if (!session) return <div className="vibra-auth-page">
     <div className="va-background va-background-purple" aria-hidden="true" />
