@@ -9,14 +9,27 @@ import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
-export const Route = createFileRoute("/")({ head: () => ({ meta: [
-  { title: "Vibra — Seu próximo nível" },
-  { name: "description", content: "Reúna treinos, progresso, hábitos e objetivos na Vibra. Conheça seu espaço de evolução e a Vibra AI integrada." },
-  { property: "og:title", content: "Vibra — Seu próximo nível" },
-  { property: "og:description", content: "Seu treino, seu ritmo, sua evolução. Conheça a Vibra e organize seu próximo passo." },
-  { property: "og:type", content: "website" },
-  { name: "twitter:card", content: "summary_large_image" },
-] }), component: GymApp });
+const publicSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, "");
+
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Vibra | Fitness com inteligência artificial para sua rotina" },
+      { name: "description", content: "Organize treinos, hábitos e objetivos com o Vibra. Consulte exercícios, acompanhe seus registros e converse com a Vibra AI dentro da sua conta." },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
+      { property: "og:site_name", content: "Vibra" },
+      { property: "og:title", content: "Vibra | Seu próximo nível começa com inteligência" },
+      { property: "og:description", content: "Treinos, hábitos e acompanhamento da rotina em um só lugar, com a Vibra AI como apoio." },
+      { property: "og:type", content: "website" },
+      ...(publicSiteUrl ? [{ property: "og:url", content: publicSiteUrl }, { name: "twitter:url", content: publicSiteUrl }] : []),
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Vibra | Seu próximo nível começa com inteligência" },
+      { name: "twitter:description", content: "Organize treinos, hábitos e objetivos com a Vibra." },
+    ],
+    links: publicSiteUrl ? [{ rel: "canonical", href: publicSiteUrl }] : [],
+  }),
+  component: GymApp,
+});
 
 const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #29233F", borderRadius: 14, background: "#0B0C16", color: "#F8F9FF", padding: "15px 16px", outline: "none", fontSize: 14 };
 

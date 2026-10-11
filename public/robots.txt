@@ -1,14 +1,9 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Rotas privadas ou de acesso autenticado
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /plans
+
+# Configure a URL absoluta do sitemap após confirmar o domínio público oficial.
