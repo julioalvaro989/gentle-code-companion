@@ -231,6 +231,7 @@ function GymApp() {
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
       const access = await getVibraAccess(next);
+      setAccessReady(true);
       if (access.adminSessionLimit) {
         setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
         setAccessReady(true);
@@ -242,7 +243,7 @@ function GymApp() {
         const nextPlan = access.planId || selectedPlan;
         window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
       }
-    } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
+    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
 
@@ -275,6 +276,7 @@ function GymApp() {
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
         const access = await getVibraAccess(next);
+        setAccessReady(true);
         if (access.adminSessionLimit) {
           setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
           setAccessReady(true);
@@ -286,7 +288,7 @@ function GymApp() {
           window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
         }
       }
-    } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
+    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
   }
 
