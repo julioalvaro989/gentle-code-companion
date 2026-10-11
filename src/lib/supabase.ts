@@ -43,7 +43,15 @@ function headers(token?: string) {
 }
 
 async function request(path: string, options: RequestInit = {}, token?: string) {
-  const response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(token), ...(options.headers ?? {}) } });
+  let currentToken = token;
+  if (token) {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (!data.session) throw new Error("Sua sessão expirou. Entre novamente.");
+    currentToken = data.session.access_token;
+  }
+  const response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(currentToken), ...(options.headers ?? {}) } });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body?.msg || body?.message || body?.error_description || "Não foi possível concluir a operação.");
   return body;
