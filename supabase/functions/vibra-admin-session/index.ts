@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const url=Deno.env.get("SUPABASE_URL")??"", pub=Deno.env.get("SUPABASE_PUBLISHABLE_KEY")??Deno.env.get("SUPABASE_ANON_KEY")??"", secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
-const adminEmail=(Deno.env.get("VIBRA_ADMIN_EMAIL")??"").trim().toLowerCase();
 const origins=new Set((Deno.env.get("ALLOWED_ORIGINS")??"").split(",").map(x=>x.trim()).filter(Boolean));
 function out(data:unknown,status:number,origin:string){return new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin","Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"}})}
 Deno.serve(async req=>{
@@ -18,9 +17,6 @@ Deno.serve(async req=>{
   claims=JSON.parse(atob(parts[1].replace(/-/g,"+").replace(/_/g,"/")));
   body=await req.json();
  }catch{return out({error:"Autenticação necessária."},401,origin)}
- // Private server-side allowlist; database role and registered session remain authoritative.
- if(!adminEmail||typeof user.email!=="string"||user.email.trim().toLowerCase()!==adminEmail)
-  return out({admin:false,allowed:false},200,origin);
  const sid=claims.session_id, exp=claims.exp;
  if(typeof sid!=="string"||!/^[0-9a-f-]{36}$/i.test(sid)||typeof exp!=="number"||exp*1000<=Date.now())return out({admin:false,allowed:false},200,origin);
  const h={apikey:secret,Authorization:"Bearer "+secret,"Content-Type":"application/json"};
