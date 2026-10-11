@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BookOpen, CircleHelp, Dumbbell, X } from "lucide-react";
 import { exerciseCatalog } from "./exerciseCatalog";
+import { ExerciseMovementGraphic } from "./ExerciseMovementGraphic";
 import "./ExerciseDemoModal.css";
 
 type Props = { exerciseId: string | null; workoutName?: string; onClose: () => void };
