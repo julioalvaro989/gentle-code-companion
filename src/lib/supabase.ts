@@ -244,7 +244,31 @@ export async function saveFullFitnessProfile(session: AuthSession, profile: Fitn
   }, session.access_token);
 }
 
+async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boolean;allowed:boolean}> {
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.functions.invoke("vibra-admin-session", {
+      body: { action: "claim" },
+    });
+    if (error || !data) return { admin: false, allowed: false };
+    return { admin: data.admin === true, allowed: data.allowed === true };
+  } catch {
+    // Fail closed: an unavailable admin-session service never grants access.
+    return { admin: false, allowed: false };
+  }
+}
+
 export async function getVibraAccess(session: AuthSession): Promise<VibraAccess> {
+  const administrative = await getAdministrativeAccess(session);
+  if (administrative.admin && administrative.allowed) {
+    const profile = await getFitnessProfile(session).catch(() => null);
+    return { status: "active", planId: null, profileCompleted: profile?.profile_completed === true };
+  }
+  if (administrative.admin && !administrative.allowed) {
+    // The server denied this authenticated session because the three-session
+    // cap is full. Never fall back to paid access for a denied admin session.
+    return { status: "none", planId: null, profileCompleted: false };
+  }
   const rows = await request(
     "rest/v1/vibra_subscriptions?select=plan_id,status,current_period_end&user_id=eq." +
       encodeURIComponent(session.user.id) + "&order=updated_at.desc&limit=1",
