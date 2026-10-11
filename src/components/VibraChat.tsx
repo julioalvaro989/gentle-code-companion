@@ -12,7 +12,7 @@ type ChatMessage = {
 const welcomeMessage: ChatMessage = {
   id: 1,
   role: "assistant",
-  content: "Oi! 👋 Eu sou a Vibra AI. Posso ajudar com treinos, exercícios, academia, hábitos saudáveis e dúvidas gerais. O que você gostaria de saber?",
+  content: "Oi! 👋 Eu sou a Avirafit AI. Posso ajudar com treinos, exercícios, academia, hábitos saudáveis e dúvidas gerais. O que você gostaria de saber?",
 };
 
 const positionStorageKey = "vibra-chat-launcher-position";
@@ -225,7 +225,7 @@ export function VibraChat() {
         throw new Error("O serviço de IA não está configurado neste ambiente.");
       }
       const { data: authData, error: authError } = await supabase.auth.getSession();
-      if (authError || !authData.session) throw new Error("Entre na sua conta para usar o chat Vibra AI.");
+      if (authError || !authData.session) throw new Error("Entre na sua conta para usar o chat Avirafit AI.");
       const response = await fetch(`${supabaseUrl}/functions/v1/fitness-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json", apikey: publishableKey, Authorization: `Bearer ${authData.session.access_token}` },
@@ -347,9 +347,9 @@ export function VibraChat() {
         ref={launcherRef}
         type="button"
         className={`vibra-chat-launcher ${isOpen ? "is-open" : ""}`}
-        aria-label={isOpen ? "Fechar Vibra AI" : "Abrir chat Vibra AI"}
+        aria-label={isOpen ? "Fechar Avirafit AI" : "Abrir chat Avirafit AI"}
         aria-expanded={isOpen}
-        title="Vibra AI · arraste para reposicionar"
+        title="Avirafit AI · arraste para reposicionar"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}
