@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, CircleAlert, Dumbbell, Leaf, LoaderCircle, Sparkles, Target } from "lucide-react";
-import { adoptSupabaseSession, getFitnessOnboarding, saveFitnessOnboarding, type AuthSession, type FitnessOnboardingAnswers } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessOnboarding, saveFitnessOnboarding, SupabaseRequestError, type AuthSession, type FitnessOnboardingAnswers } from "../lib/supabase";
 import "./onboarding.css";
 
 export const Route = createFileRoute("/onboarding")({
@@ -36,7 +36,7 @@ function OnboardingPage() {
   const [answers, setAnswers] = useState<FitnessOnboardingAnswers>(emptyAnswers);
   const [step, setStep] = useState(0);
   const [ready, setReady] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);\n  const savingRef = useRef(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -91,30 +91,67 @@ function OnboardingPage() {
     return "";
   };
 
+  const describeSaveError = (error: unknown, operation: "draft" | "complete") => {
+    const requestError = error instanceof SupabaseRequestError ? error : null;
+    const status = requestError?.status;
+    const code = requestError?.code;
+    const safeMessage = requestError?.message || (error instanceof Error ? error.message : "Erro desconhecido");
+    // Never log tokens, the session object, user identifiers, or the questionnaire answers.
+    console.error("[onboarding] Supabase save failed", {
+      operation,
+      status: status ?? null,
+      code: code ?? null,
+      message: safeMessage,
+      details: requestError?.details ?? null,
+      hint: requestError?.hint ?? null,
+    });
+
+    if (status === 401 || status === 403 || code === "SESSION_MISSING") {
+      return "Sua sessão expirou ou não tem autorização para salvar. Suas respostas continuam nesta tela; entre novamente em outra aba e tente de novo.";
+    }
+    if (status === 400 || code === "PRIMARY_GOAL_REQUIRED") {
+      return "Confira o objetivo selecionado e tente salvar novamente.";
+    }
+    if (status === 404 || code === "PGRST205" || code === "42P01" || code === "42703") {
+      return "O banco ainda não reconhece a estrutura do questionário. A equipe precisa aplicar/verificar a migration do onboarding no Supabase.";
+    }
+    if (status === 409 || code === "23505" || code === "23503" || code === "23514") {
+      return "O banco recusou os dados por uma regra de integridade. Confira as respostas e tente novamente.";
+    }
+    if (code === "NETWORK_ERROR") {
+      return "Não foi possível conectar ao Supabase. Confira sua conexão e tente novamente.";
+    }
+    return operation === "draft"
+      ? "Não foi possível salvar suas respostas. Tente novamente; seus dados continuam preenchidos nesta tela."
+      : "Não foi possível concluir o perfil. Suas respostas continuam preenchidas nesta tela; tente novamente.";
+  };
+
   const saveDraft = async (nextStep: number) => {
-    if (!session) return false;
+    if (!session || savingRef.current) return false;
+    savingRef.current = true;
     setSaving(true); setError(""); setNotice("");
     try {
       await saveFitnessOnboarding(session, answers, wasCompleted ? "completed" : "pending");
       setStep(nextStep);
       setNotice("Suas respostas foram salvas. Você pode continuar depois.");
       return true;
-    } catch {
-      setError("Não foi possível salvar suas respostas. Verifique a conexão e tente novamente.");
+    } catch (saveError) {
+      setError(describeSaveError(saveError, "draft"));
       return false;
-    } finally { setSaving(false); }
+    } finally { savingRef.current = false; setSaving(false); }
   };
 
   const complete = async () => {
-    if (!session) return;
+    if (!session || savingRef.current) return;
+    savingRef.current = true;
     setSaving(true); setError(""); setNotice("");
     try {
       await saveFitnessOnboarding(session, answers, "completed");
       setWasCompleted(true);
       window.location.assign("/preview");
-    } catch {
-      setError("Não foi possível concluir o perfil agora. Suas respostas permanecem nesta tela; tente novamente.");
-    } finally { setSaving(false); }
+    } catch (saveError) {
+      setError(describeSaveError(saveError, "complete"));
+    } finally { savingRef.current = false; setSaving(false); }
   };
 
   const goNext = async () => {
