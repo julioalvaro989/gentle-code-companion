@@ -108,6 +108,9 @@ export async function signIn(email: string, password: string) {
 
 export async function signOut() {
   const { supabase } = await import("@/integrations/supabase/client");
+  // Best-effort server-side release before local/remote logout. Expiry and the
+  // database cap remain the fallback if the browser is offline.
+  try { await supabase.functions.invoke("vibra-admin-session", { body: { action: "release" } }); } catch { /* Server expiry is the fallback. */ }
   try { localStorage.removeItem("investe_session"); } catch { /* Storage can be unavailable. */ }
   const { error } = await supabase.auth.signOut();
   if (!error) return;
