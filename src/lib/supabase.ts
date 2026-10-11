@@ -224,3 +224,66 @@ export async function saveFitnessProgress(session: AuthSession, progress: Pick<F
 export async function listFitnessProfiles(session: AuthSession): Promise<FitnessProfile[]> {
   return await request("rest/v1/fitness_profiles?select=*&order=created_at.desc", {}, session.access_token) as FitnessProfile[];
 }
+
+
+export type FitnessOnboardingAnswers = {
+  primaryGoal: string;
+  secondaryGoals: string[];
+  age: string;
+  heightCm: string;
+  currentWeightKg: string;
+  desiredWeightKg: string;
+  experience: string;
+  currentlyTraining: string;
+  daysPerWeek: string;
+  sessionMinutes: string;
+  trainingLocation: string;
+  weeklyTime: string;
+  preferredTime: string;
+  equipment: string[];
+  challenges: string[];
+  foodBudget: string;
+  foodBudgetPeriod: "weekly" | "monthly";
+  mealsPerDay: string;
+  preferredFoods: string[];
+  dislikedFoods: string;
+  dietaryRestrictions: string;
+  allergies: string;
+};
+
+export type FitnessOnboardingRecord = {
+  user_id: string;
+  answers: FitnessOnboardingAnswers;
+  status: "pending" | "completed";
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+};
+
+export async function getFitnessOnboarding(session: AuthSession): Promise<FitnessOnboardingRecord | null> {
+  const rows = await request(
+    "rest/v1/fitness_onboarding_profiles?select=user_id,answers,status,created_at,updated_at,completed_at&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1",
+    { method: "GET" },
+    session.access_token,
+  );
+  return rows?.[0] ?? null;
+}
+
+export async function saveFitnessOnboarding(
+  session: AuthSession,
+  answers: FitnessOnboardingAnswers,
+  status: "pending" | "completed" = "pending",
+): Promise<void> {
+  const now = new Date().toISOString();
+  await request("rest/v1/fitness_onboarding_profiles?on_conflict=user_id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      answers,
+      status,
+      updated_at: now,
+      completed_at: status === "completed" ? now : null,
+    }),
+  }, session.access_token);
+}
