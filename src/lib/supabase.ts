@@ -256,7 +256,7 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
   const status = subscription?.status === "active" && validPeriod
     ? "active"
     : subscription ? "pending" : "none";
-  const profile = await getFitnessProfile(session);
+  const profile = status === "active" ? await getFitnessProfile(session) : null;
   return {
     status,
     planId: subscription?.plan_id === "basic" || subscription?.plan_id === "premium" ? subscription.plan_id : null,
