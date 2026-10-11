@@ -36,7 +36,8 @@ function OnboardingPage() {
   const [answers, setAnswers] = useState<FitnessOnboardingAnswers>(emptyAnswers);
   const [step, setStep] = useState(0);
   const [ready, setReady] = useState(false);
-  const [saving, setSaving] = useState(false);\n  const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
