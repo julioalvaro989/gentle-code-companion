@@ -23,3 +23,10 @@
 .vibra-plans-footnote{margin-top:24px;color:#777e9a;font-size:12px;text-align:center}
 @media(max-width:520px){.vibra-plans-back{margin-bottom:32px}.vibra-plans-brand{margin-bottom:34px}.vibra-plans-shell h1{letter-spacing:-1.8px}.vibra-plans-card{border-radius:19px}}
 @media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+.vibra-plans-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px}
+.vibra-plans-price{font-size:clamp(30px,5vw,42px);font-weight:850;letter-spacing:-1.5px;color:#f8f9ff;margin-top:20px}
+.vibra-plans-period{font-size:13px;color:#a8b4d8;margin-top:3px}
+.vibra-plans-benefits{list-style:none;padding:0;margin:22px 0;display:grid;gap:12px}
+.vibra-plans-benefits li{display:flex;align-items:flex-start;gap:9px;color:#d5d8e9;font-size:14px;line-height:1.5}
+.vibra-plans-benefits li svg{color:#b7ff35;flex:0 0 auto;margin-top:2px}
