@@ -170,7 +170,7 @@ function GymApp() {
       const access = await resolveVibraAccess(async () => next, checkTestAdmin);
       if (access.testAdmin && access.session) await activateInternalSession(access.session);
       else {
-        const onboarding = await getFitnessOnboarding(next).catch(() => null);
+        const onboarding = await getFitnessOnboarding(next);
         window.location.assign(onboarding?.status === "completed" ? "/plans" : "/onboarding");
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
@@ -205,7 +205,7 @@ function GymApp() {
         const access = await resolveVibraAccess(async () => next, checkTestAdmin);
         if (access.testAdmin && access.session) await activateInternalSession(access.session);
         else {
-          const onboarding = await getFitnessOnboarding(next).catch(() => null);
+          const onboarding = await getFitnessOnboarding(next);
           window.location.assign(onboarding?.status === "completed" ? "/plans" : "/onboarding");
         }
       }
