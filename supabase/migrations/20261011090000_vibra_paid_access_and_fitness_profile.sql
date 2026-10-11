@@ -85,10 +85,15 @@ set search_path = public, pg_temp
 as $vibra$
   select exists (
     select 1
-    from public.vibra_subscriptions s
-    where s.user_id = auth.uid()
-      and s.status = 'active'
-      and (s.current_period_end is null or s.current_period_end > now())
+    from (
+      select s.status, s.current_period_end
+      from public.vibra_subscriptions s
+      where s.user_id = auth.uid()
+      order by s.updated_at desc
+      limit 1
+    ) latest
+    where latest.status = 'active'
+      and (latest.current_period_end is null or latest.current_period_end > now())
   );
 $vibra$;
 
