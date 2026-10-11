@@ -13,10 +13,10 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSign
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({ head: () => ({ meta: [
-  { title: "Vibra — Seu próximo nível" },
-  { name: "description", content: "Reúna treinos, progresso, hábitos e objetivos na Vibra. Conheça seu espaço de evolução e a Vibra AI integrada." },
-  { property: "og:title", content: "Vibra — Seu próximo nível" },
-  { property: "og:description", content: "Seu treino, seu ritmo, sua evolução. Conheça a Vibra e organize seu próximo passo." },
+  { title: "Avirafit — Seu próximo nível" },
+  { name: "description", content: "Reúna treinos, progresso, hábitos e objetivos na Avirafit. Conheça seu espaço de evolução e a Avirafit AI integrada." },
+  { property: "og:title", content: "Avirafit — Seu próximo nível" },
+  { property: "og:description", content: "Seu treino, seu ritmo, sua evolução. Conheça a Avirafit e organize seu próximo passo." },
   { property: "og:type", content: "website" },
   { name: "twitter:card", content: "summary_large_image" },
 ] }), component: GymApp });
@@ -102,7 +102,7 @@ function GymApp() {
       getFitnessProfile(current).catch(() => null),
       getFitnessProgress(current).catch(() => null),
     ])).catch(() => [null, null] as const);
-    setProfileName(profile?.username || current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Vibra");
+    setProfileName(profile?.username || current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Avirafit");
     if (saved) {
       setDone(saved.completed_exercises || []);
       setWater(saved.water_glasses || 0);
@@ -142,7 +142,7 @@ function GymApp() {
     if (!session || !progressHydrated) return;
     const timer = window.setTimeout(() => {
       saveFitnessProgress(session, { completed_exercises: done, water_glasses: water, goal }).catch(() => {});
-      saveFitnessProfile(session, { username: profileName || "Aluno Vibra", email: session.user.email || "", goal }).catch(() => {});
+      saveFitnessProfile(session, { username: profileName || "Aluno Avirafit", email: session.user.email || "", goal }).catch(() => {});
     }, 500);
     return () => window.clearTimeout(timer);
   }, [session, progressHydrated, done, water, goal, profileName]);
@@ -161,10 +161,10 @@ function GymApp() {
         await saveFitnessProfile(next, { username: authUsername.trim(), email: authEmail.trim(), goal });
       } else {
         next = await signIn(authEmail.trim(), authPassword);
-        setProfileName(next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra");
+        setProfileName(next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Avirafit");
         const p = await getFitnessProfile(next).catch(() => null);
         if (p?.username) setProfileName(p.username);
-        else await saveFitnessProfile(next, { username: next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra", email: next.user.email || authEmail.trim(), goal });
+        else await saveFitnessProfile(next, { username: next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Avirafit", email: next.user.email || authEmail.trim(), goal });
       }
       const access = await resolveVibraAccess(async () => next, checkTestAdmin);
       if (access.testAdmin && access.session) await activateInternalSession(access.session);
@@ -195,7 +195,7 @@ function GymApp() {
     try {
       const next = await signInWithGoogle();
       if (next) {
-        const name = next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra";
+        const name = next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Avirafit";
         setProfileName(name);
         await saveFitnessProfile(next, { username: name, email: next.user.email || "", goal }).catch(() => {});
         const access = await resolveVibraAccess(async () => next, checkTestAdmin);
@@ -206,17 +206,17 @@ function GymApp() {
     finally { setAuthBusy(false); }
   }
 
-  if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
+  if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Avirafit...</div>;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} />;
   if (!session) return <div className="vibra-auth-page">
     <div className="va-background va-background-purple" aria-hidden="true" />
     <div className="va-background va-background-lime" aria-hidden="true" />
     <main className="va-layout">
-      <section className="va-story" aria-label="Sobre o Vibra">
+      <section className="va-story" aria-label="Sobre a Avirafit">
         <button type="button" className="va-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}>
           <ArrowLeft size={16} /> Voltar ao início
         </button>
-        <div className="va-brand"><span className="va-brand-mark"><Activity size={23} strokeWidth={2.6} /></span><span>vibra<span>.</span></span></div>
+        <div className="va-brand"><span className="va-brand-mark"><Activity size={23} strokeWidth={2.6} /></span><span>avirafit<span>.</span></span></div>
         <div className="va-story-copy">
           <div className="va-eyebrow"><Sparkles size={14} /> SEU ESPAÇO DE EVOLUÇÃO</div>
           <h1>Seu ritmo.<br />Sua jornada.<br /><span>Seu próximo nível.</span></h1>
@@ -238,12 +238,12 @@ function GymApp() {
           {authError && <div role="alert" className="va-message va-error">{authError}</div>}
           {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
           {authMessage && authMode === "signup" && <button type="button" className="va-resend" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
-          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/></>}</button>
+          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Avirafit <ArrowRight size={17}/></>}</button>
         </form>
         <div className="va-divider"><span/>ou continue com<span/></div>
         <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
         <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
-        <p className="va-disclaimer">Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
+        <p className="va-disclaimer">Ao continuar, você concorda em usar a Avirafit de forma responsável.</p>
       </section>
     </main>
   </div>;
@@ -251,13 +251,13 @@ function GymApp() {
   return <div className="gym-app fit-app">
     <VibraChat />
     <>{mobileMenu && <button type="button" className="sidebar-scrim" aria-label="Fechar menu" onClick={() => setMobileMenu(false)} />}<aside className={"sidebar " + (mobileMenu ? "sidebar-open" : "")}>
-      <a className="gym-logo" href="#inicio" onClick={() => changePage("Visão geral")}><span className="logo-mark"><Dumbbell size={23} strokeWidth={2.5}/></span><span>FITPRO<span className="logo-dot">.</span><small>PERFORMANCE CLUB</small></span></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
+      <a className="gym-logo" href="#inicio" onClick={() => changePage("Visão geral")}><span className="logo-mark"><Dumbbell size={23} strokeWidth={2.5}/></span><span>AVIRAFIT<span className="logo-dot">.</span><small>PERFORMANCE CLUB</small></span></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
       <div className="side-label">SEU ESPAÇO</div>
       <nav className="side-nav">{navItems.map(({name,icon:Icon})=><button key={name} className={"nav-item "+(activeNav===name?"active":"")} onClick={()=>changePage(name)}><Icon size={18}/>{name}{name==="Treinos"&&<span className="nav-count">4</span>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
+      <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>{profileName || "Aluno Avirafit"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
     </aside></>
     <main className="main-content" id="inicio">
-      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
+      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> AVIRAFIT<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
         {activeNav==="Visão geral" && <>
@@ -281,8 +281,8 @@ function GymApp() {
         {activeNav==="Nutrição" && <section className="fit-page-section"><div className="section-kicker"><span/> NUTRIÇÃO E BEM-ESTAR</div><h1>Coma bem. <span>Viva melhor.</span></h1><p className="fit-page-intro">Organize sua rotina alimentar e acompanhe hábitos. Planos clínicos devem ser definidos por nutricionista.</p><div className="fit-nutrition-layout"><article className="panel fit-food-summary"><div className="section-kicker">RESUMO DE HOJE</div><div className="fit-big-number">1.740 <small>/ 2.200 kcal</small></div><div className="nutrition-bar"><i/></div><div className="fit-food-stats"><span>Proteínas <b>68 / 120g</b></span><span>Carboidratos <b>142 / 250g</b></span><span>Gorduras <b>39 / 70g</b></span></div><div className="fit-water-box"><div><Apple size={19}/><strong>Hidratação</strong><small>{water} de 8 copos registrados</small></div><button className="green-button" onClick={()=>setWater(Math.min(8,water+1))}><Plus size={16}/> Adicionar água</button></div></article><article className="panel"><div className="panel-heading"><div><div className="section-kicker">SUGESTÃO DE ROTINA</div><h3>Refeições do dia</h3></div><Utensils size={20}/></div>{meals.map(m=><div className="fit-meal-row" key={m.time}><span className="fit-meal-time">{m.time}</span><div><strong>{m.meal}</strong><p>{m.food}</p><small>{m.kcal}</small></div><Check size={16}/></div>)}</article></div><div className="fit-note"><HeartPulse size={18}/> <span>Este exemplo é informativo e não substitui avaliação individual de um nutricionista.</span></div></section>}
         {activeNav==="Especialistas" && <section className="fit-page-section"><div className="section-kicker"><span/> TIME DE ESPECIALISTAS</div><h1>Orientação de <span>verdade.</span></h1><p className="fit-page-intro">Encontre profissionais para acompanhar sua jornada. Perfis abaixo são exemplos de apresentação; agendamento real exige cadastro e disponibilidade confirmados.</p><div className="fit-expert-grid"><article className="panel fit-expert-card"><div className="fit-expert-avatar fit-expert-green"><Leaf size={30}/></div><span className="fit-expert-tag">NUTRIÇÃO</span><h3>Nutricionista</h3><p>Planejamento alimentar individualizado, hábitos sustentáveis e acompanhamento.</p><div className="fit-expert-meta"><span><CalendarDays size={15}/> Consulta agendada</span><span><MessageCircle size={15}/> Acompanhamento</span></div><button className="green-button" onClick={()=>setShowVideo(true)}>Como funciona <ArrowRight size={16}/></button></article><article className="panel fit-expert-card"><div className="fit-expert-avatar fit-expert-dark"><Dumbbell size={30}/></div><span className="fit-expert-tag">TREINAMENTO</span><h3>Personal trainer</h3><p>Orientação de técnica, planejamento de exercícios e metas compatíveis com seu nível.</p><div className="fit-expert-meta"><span><CalendarDays size={15}/> Rotina personalizada</span><span><MessageCircle size={15}/> Suporte</span></div><button className="green-button" onClick={()=>setShowVideo(true)}>Como funciona <ArrowRight size={16}/></button></article></div></section>}
         {activeNav==="Progresso" && <section className="fit-page-section"><div className="section-kicker"><span/> SUA EVOLUÇÃO</div><h1>Olhe o quanto <span>já avançou.</span></h1><p className="fit-page-intro">Resumo demonstrativo para acompanhar seus hábitos e consistência.</p><div className="stats-grid"><article className="stat-card"><div className="stat-top"><span>Treinos concluídos</span><span className="stat-icon"><Dumbbell size={18}/></span></div><div className="stat-value">16 <small>este mês</small></div><div className="mini-progress"><i style={{width:"76%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Tempo ativo</span><span className="stat-icon"><Clock3 size={18}/></span></div><div className="stat-value">12h <small>40min</small></div><div className="mini-progress"><i style={{width:"68%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Consistência</span><span className="stat-icon"><Trophy size={18}/></span></div><div className="stat-value">82<small>%</small></div><div className="mini-progress"><i style={{width:"82%"}}/></div></article><article className="stat-card"><div className="stat-top"><span>Meta da semana</span><span className="stat-icon"><Target size={18}/></span></div><div className="stat-value">4 <small>/ 5 treinos</small></div><div className="mini-progress"><i style={{width:"80%"}}/></div></article></div><div className="panel fit-goal-panel"><div><div className="section-kicker">SEU OBJETIVO ATUAL</div><h3>{goal}</h3><p>Escolha uma meta para personalizar sua experiência.</p></div><select value={goal} onChange={e=>setGoal(e.target.value)}><option>Ganhar massa muscular</option><option>Perder gordura</option><option>Melhorar condicionamento</option><option>Ter mais saúde e energia</option></select></div></section>}
-        {(activeNav==="Meu perfil"||activeNav==="Configurações") && <section className="fit-page-section"><div className="section-kicker"><span/> CONTA E PREFERÊNCIAS</div><h1>Seu espaço, <span>do seu jeito.</span></h1><p className="fit-page-intro">Gerencie suas preferências e o foco da sua jornada fitness.</p><div className="panel fit-profile-panel"><div className="fit-profile-avatar">{(profileName||"V").slice(0,2).toUpperCase()}</div><div className="fit-profile-info"><h3>{profileName || "Aluno Vibra"}</h3><p>{session.user.email || "Conta Vibra"}</p><label htmlFor="fit-goal">Meu objetivo principal</label><select id="fit-goal" value={goal} onChange={e=>setGoal(e.target.value)}><option>Ganhar massa muscular</option><option>Perder gordura</option><option>Melhorar condicionamento</option><option>Ter mais saúde e energia</option></select></div></div><div className="fit-note"><Settings size={18}/><span>Seu perfil está conectado à sua conta. Seu progresso e suas preferências são salvos na nuvem.</span></div></section>}
-        <footer className="app-footer"><span>© 2026 FITPRO PERFORMANCE CLUB</span><span>Feito para sua melhor versão <span className="footer-heart">♥</span></span></footer>
+        {(activeNav==="Meu perfil"||activeNav==="Configurações") && <section className="fit-page-section"><div className="section-kicker"><span/> CONTA E PREFERÊNCIAS</div><h1>Seu espaço, <span>do seu jeito.</span></h1><p className="fit-page-intro">Gerencie suas preferências e o foco da sua jornada fitness.</p><div className="panel fit-profile-panel"><div className="fit-profile-avatar">{(profileName||"V").slice(0,2).toUpperCase()}</div><div className="fit-profile-info"><h3>{profileName || "Aluno Avirafit"}</h3><p>{session.user.email || "Conta Avirafit"}</p><label htmlFor="fit-goal">Meu objetivo principal</label><select id="fit-goal" value={goal} onChange={e=>setGoal(e.target.value)}><option>Ganhar massa muscular</option><option>Perder gordura</option><option>Melhorar condicionamento</option><option>Ter mais saúde e energia</option></select></div></div><div className="fit-note"><Settings size={18}/><span>Seu perfil está conectado à sua conta. Seu progresso e suas preferências são salvos na nuvem.</span></div></section>}
+        <footer className="app-footer"><span>© 2026 AVIRAFIT</span><span>Feito para sua melhor versão <span className="footer-heart">♥</span></span></footer>
       </div>
     </main>
     {showVideo&&<div className="modal-backdrop" onClick={()=>setShowVideo(false)}><section className="plan-modal fit-modal" onClick={e=>e.stopPropagation()}><button className="modal-close" aria-label="Fechar" onClick={()=>setShowVideo(false)}><X size={20}/></button><div className="section-kicker">PRÓXIMOS PASSOS</div><h2>Acompanhamento profissional</h2><p className="modal-subtitle">Esta área está preparada para receber perfis verificados, horários disponíveis e contato seguro quando o serviço profissional for conectado.</p><div className="fit-modal-list"><span><Check size={16}/> Perfil e credenciais do profissional</span><span><Check size={16}/> Agenda e disponibilidade</span><span><Check size={16}/> Canal de contato protegido</span></div><button className="green-button modal-done" onClick={()=>setShowVideo(false)}>Entendi <Check size={17}/></button></section></div>}
