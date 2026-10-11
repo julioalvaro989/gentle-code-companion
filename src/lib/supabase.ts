@@ -253,11 +253,15 @@ async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boo
     const { data, error } = await supabase.functions.invoke("vibra-admin-session", {
       body: { action: "claim" },
     });
-    if (error || !data) return { admin: false, allowed: false };
-    return { admin: data.admin === true, allowed: data.allowed === true };
-  } catch {
-    // Fail closed: an unavailable admin-session service never grants access.
-    return { admin: false, allowed: false };
+    if (error) throw new Error("Não foi possível validar as permissões de acesso.");
+    if (!data || typeof data.admin !== "boolean" || typeof data.allowed !== "boolean") {
+      throw new Error("O serviço de autorização retornou uma resposta inválida.");
+    }
+    return { admin: data.admin, allowed: data.allowed };
+  } catch (error) {
+    // Do not reinterpret an authorization-service failure as a confirmed non-admin.
+    // Callers must keep the user in a loading/error state rather than redirect to plans.
+    throw error instanceof Error ? error : new Error("Não foi possível validar as permissões de acesso.");
   }
 }
 
