@@ -6,7 +6,8 @@ import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 const publicSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, "");
@@ -58,6 +59,8 @@ const meals = [
 function GymApp() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [accessReady, setAccessReady] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<VibraPlanId | null>(null);
   const [profileName, setProfileName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
@@ -107,9 +110,21 @@ function GymApp() {
   const progress = Math.round(done.length / exercises.length * 100);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("auth") === "login") {
-      setAuthMode("login");
-      setShowAuth(true);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const requestedAuth = params.get("auth");
+      if (requestedAuth === "login" || requestedAuth === "signup") {
+        setAuthMode(requestedAuth);
+        setShowAuth(true);
+      }
+      const fromUrl = params.get("plan");
+      let fromStorage: string | null = null;
+      try { fromStorage = window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { /* URL parameter remains available. */ }
+      const chosen = isVibraPlanId(fromUrl) ? fromUrl : isVibraPlanId(fromStorage) ? fromStorage : null;
+      if (chosen) {
+        setSelectedPlan(chosen);
+        try { window.localStorage.setItem(VIBRA_SELECTED_PLAN_KEY, chosen); } catch { /* Selection remains in component state. */ }
+      }
     }
     let active = true;
     (async () => {
@@ -128,11 +143,28 @@ function GymApp() {
             setWater(saved.water_glasses ?? 0);
             setGoal(saved.goal || "Ganhar massa muscular");
           }
+          const params = new URLSearchParams(window.location.search);
+          const fromUrl = params.get("plan");
+          let fromStorage: string | null = null;
+          try { fromStorage = window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { /* Ignore unavailable storage. */ }
+          const chosenPlan = isVibraPlanId(fromUrl) ? fromUrl : isVibraPlanId(fromStorage) ? fromStorage : null;
+          const access = await getVibraAccess(current).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+          if (access.status !== "active") {
+            const nextPlan = access.planId || chosenPlan;
+            window.location.replace(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
+            return;
+          }
+          if (!access.profileCompleted) {
+            window.location.replace("/fitness-profile");
+            return;
+          }
           setProgressHydrated(true);
+          setAccessReady(true);
         } else {
           setProgressHydrated(false);
+          setAccessReady(true);
         }
-      } catch { setSession(null); setProgressHydrated(false); }
+      } catch { setSession(null); setProgressHydrated(false); setAccessReady(true); }
       finally { if (active) setAuthReady(true); }
     })();
     return () => { active = false; };
@@ -148,7 +180,12 @@ function GymApp() {
   }, [session, progressHydrated, done, water, goal, profileName]);
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setAuthError(""); setAuthMessage(""); setAuthBusy(true);
+    e.preventDefault(); setAuthError(""); setAuthMessage("");
+    if (authMode === "signup" && !selectedPlan) {
+      window.location.assign("/plans");
+      return;
+    }
+    setAuthBusy(true);
     try {
       let next: AuthSession | null;
       if (authMode === "signup") {
@@ -158,19 +195,23 @@ function GymApp() {
           return;
         }
         setProfileName(authUsername.trim());
-        await saveFitnessProfile(next, { username: authUsername.trim(), email: authEmail.trim(), goal });
       } else {
         next = await signIn(authEmail.trim(), authPassword);
         setProfileName(next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra");
         const p = await getFitnessProfile(next).catch(() => null);
         if (p?.username) setProfileName(p.username);
-        else await saveFitnessProfile(next, { username: next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra", email: next.user.email || authEmail.trim(), goal });
       }
       setSession(next); setProgressHydrated(false);
       const saved = await getFitnessProgress(next).catch(() => null);
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
-      window.location.assign(authMode === "signup" ? "/plans" : "/");
+      const access = await getVibraAccess(next).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+      if (access.status === "active") {
+        window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
+      } else {
+        const nextPlan = access.planId || selectedPlan;
+        window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
+      }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
@@ -200,18 +241,22 @@ function GymApp() {
         setSession(next);
         const name = next.user.user_metadata?.full_name || next.user.email?.split("@")[0] || "Aluno Vibra";
         setProfileName(name);
-        await saveFitnessProfile(next, { username: name, email: next.user.email || "", goal }).catch(() => {});
         const saved = await getFitnessProgress(next).catch(() => null);
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
-        window.location.assign("/");
+        const access = await getVibraAccess(next).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
+        if (access.status === "active") window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
+        else {
+          const nextPlan = access.planId || selectedPlan;
+          window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
+        }
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
   }
 
   if (!authReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
-  if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} />;
+  if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
   if (!session) return <div className="vibra-auth-page">
     <div className="va-background va-background-purple" aria-hidden="true" />
     <div className="va-background va-background-lime" aria-hidden="true" />
@@ -234,6 +279,7 @@ function GymApp() {
           <div className="va-form-eyebrow">{authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
           <h2 id="va-title">{authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
           <p>{authMode === "signup" ? "Crie sua conta e organize os próximos passos da sua jornada." : "Entre para continuar de onde você parou."}</p>
+          {authMode === "signup" && selectedPlan && <div className="va-message va-success">Plano selecionado: <strong>{VIBRA_PLANS[selectedPlan].name} · {VIBRA_PLANS[selectedPlan].priceLabel}/mês</strong>. A cobrança só libera o acesso após confirmação real.</div> }
         </div>
         <form className="va-form" onSubmit={submitAuth}>
           {authMode === "signup" && <label>Nome de usuário<input required minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
@@ -251,6 +297,8 @@ function GymApp() {
       </section>
     </main>
   </div>;
+
+  if (!accessReady) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Verificando pagamento e acesso...</div>;
 
   return <div className="gym-app fit-app">
     <VibraChat />
