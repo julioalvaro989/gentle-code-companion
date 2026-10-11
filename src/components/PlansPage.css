@@ -23,3 +23,14 @@
 .vibra-plans-footnote{margin-top:24px;color:#777e9a;font-size:12px;text-align:center}
 @media(max-width:520px){.vibra-plans-back{margin-bottom:32px}.vibra-plans-brand{margin-bottom:34px}.vibra-plans-shell h1{letter-spacing:-1.8px}.vibra-plans-card{border-radius:19px}}
 @media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+.vibra-plans-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+.vibra-plans-options .vibra-plans-card{display:flex;flex-direction:column;min-width:0}
+.vibra-plan-price{font-size:clamp(28px,4vw,38px);font-weight:850;letter-spacing:-1.2px;color:#f8f9ff!important;margin:8px 0 22px!important}
+.vibra-plan-price span{font-size:13px;font-weight:500;letter-spacing:0;color:#a8b4d8}
+.vibra-plan-features{display:grid;gap:13px;list-style:none;padding:0;margin:0 0 28px;color:#d4d7e8;font-size:14px;line-height:1.5;flex:1}
+.vibra-plan-features li{display:flex;align-items:flex-start;gap:9px}
+.vibra-plan-features svg{flex:0 0 auto;color:#b7ff35;margin-top:2px}
+.vibra-plans-options .vibra-plans-cta{width:100%;justify-content:center}
+.vibra-plans-card-premium{border-color:rgba(183,255,53,.55);box-shadow:0 28px 80px rgba(183,255,53,.07)}
+@media(max-width:640px){.vibra-plans-options{grid-template-columns:1fr}.vibra-plans-options .vibra-plans-card{padding:24px}}
