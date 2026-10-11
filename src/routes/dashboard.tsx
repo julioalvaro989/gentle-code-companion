@@ -1,25 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { adoptSupabaseSession } from "../lib/supabase";
+import { adoptSupabaseSession, getVibraAccess } from "../lib/supabase";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Vibra" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Vibra" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: DashboardGate,
 });
 
 function DashboardGate() {
   useEffect(() => {
     let active = true;
-    adoptSupabaseSession()
-      .then((session) => {
+    (async () => {
+      try {
+        const session = await adoptSupabaseSession();
         if (!active) return;
-        // No trusted subscription-entitlement endpoint/schema exists yet.
-        // Fail closed: authenticated users must complete the plans/access step.
-        window.location.replace(session ? "/plans" : "/?auth=login");
-      })
-      .catch(() => { if (active) window.location.replace("/?auth=login"); });
+        if (!session) { window.location.replace("/?auth=login"); return; }
+        const access = await getVibraAccess(session);
+        if (!active) return;
+        if (access.status !== "active") {
+          window.location.replace(access.status === "pending" || access.planId ? "/checkout" : "/plans");
+          return;
+        }
+        window.location.replace(access.profileCompleted ? "/" : "/fitness-profile");
+      } catch {
+        if (active) window.location.replace("/checkout");
+      }
+    })();
     return () => { active = false; };
   }, []);
 
-  return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#05060B", color: "#F8F9FF" }}>Validando seu acesso...</main>;
+  return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#05060B", color: "#F8F9FF" }}>Validando pagamento, perfil e acesso…</main>;
 }

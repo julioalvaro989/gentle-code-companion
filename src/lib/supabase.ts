@@ -195,20 +195,79 @@ export async function uploadBanner(session: AuthSession, file: File) {
 export type { AuthSession };
 
 
-export type FitnessProfile = { id: string; username: string; email: string; goal: string; created_at?: string };
+export type FitnessProfile = {
+  id: string;
+  username: string;
+  email: string;
+  goal: string;
+  birth_date?: string | null;
+  weight_kg?: number | null;
+  height_cm?: number | null;
+  primary_goal?: "emagrecimento" | "hipertrofia" | "condicionamento" | "saude_geral" | null;
+  experience_level?: "iniciante" | "intermediario" | "avancado" | null;
+  weekly_frequency?: number | null;
+  training_location?: "academia" | "casa" | "outro" | null;
+  preferences?: string | null;
+  physical_limitations?: string | null;
+  profile_completed?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
+export type VibraAccess = {
+  status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
+  planId: "basic" | "premium" | null;
+  profileCompleted: boolean;
+};
 
 export async function getFitnessProfile(session: AuthSession): Promise<FitnessProfile | null> {
   const rows = await request("rest/v1/fitness_profiles?select=*&id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
   return rows?.[0] ?? null;
 }
+
+// Patch only the legacy editable fields so saving dashboard preferences never
+// overwrites the extended fitness questionnaire.
 export async function saveFitnessProfile(session: AuthSession, profile: Pick<FitnessProfile, "username" | "email" | "goal">): Promise<void> {
+  await request("rest/v1/fitness_profiles?id=eq." + encodeURIComponent(session.user.id), {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ ...profile, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
+
+export async function saveFullFitnessProfile(session: AuthSession, profile: FitnessProfileInput): Promise<void> {
   await request("rest/v1/fitness_profiles?on_conflict=id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify({ id: session.user.id, ...profile, updated_at: new Date().toISOString() }),
   }, session.access_token);
 }
+
+export async function getVibraAccess(session: AuthSession): Promise<VibraAccess> {
+  const rows = await request(
+    "rest/v1/vibra_subscriptions?select=plan_id,status,current_period_end&user_id=eq." +
+      encodeURIComponent(session.user.id) + "&order=updated_at.desc&limit=1",
+    {},
+    session.access_token,
+  );
+  const subscription = rows?.[0];
+  const validPeriod = !subscription?.current_period_end || new Date(subscription.current_period_end).getTime() > Date.now();
+  const status: VibraAccess["status"] = subscription?.status === "active" && validPeriod
+    ? "active"
+    : subscription?.status === "active" && !validPeriod
+      ? "past_due"
+      : subscription && ["pending", "past_due", "canceled", "refunded", "failed"].includes(subscription.status)
+        ? subscription.status
+        : "none";
+  const profile = status === "active" ? await getFitnessProfile(session) : null;
+  return {
+    status,
+    planId: subscription?.plan_id === "basic" || subscription?.plan_id === "premium" ? subscription.plan_id : null,
+    profileCompleted: profile?.profile_completed === true,
+  };
+}
+
 export async function getFitnessProgress(session: AuthSession): Promise<FitnessProgress | null> {
   const rows = await request("rest/v1/fitness_progress?select=*&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
   return rows?.[0] ?? null;

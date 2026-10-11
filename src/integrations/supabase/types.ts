@@ -16,28 +16,100 @@ export type Database = {
     Tables: {
       fitness_profiles: {
         Row: {
+          birth_date: string | null
           created_at: string
           email: string
+          experience_level: string | null
           goal: string
+          height_cm: number | null
           id: string
+          physical_limitations: string | null
+          preferences: string | null
+          primary_goal: string | null
+          profile_completed: boolean
+          training_location: string | null
           updated_at: string
           username: string
+          weight_kg: number | null
+          weekly_frequency: number | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string
+          email: string
+          experience_level?: string | null
+          goal?: string
+          height_cm?: number | null
+          id: string
+          physical_limitations?: string | null
+          preferences?: string | null
+          primary_goal?: string | null
+          profile_completed?: boolean
+          training_location?: string | null
+          updated_at?: string
+          username: string
+          weight_kg?: number | null
+          weekly_frequency?: number | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string
+          email?: string
+          experience_level?: string | null
+          goal?: string
+          height_cm?: number | null
+          id?: string
+          physical_limitations?: string | null
+          preferences?: string | null
+          primary_goal?: string | null
+          profile_completed?: boolean
+          training_location?: string | null
+          updated_at?: string
+          username?: string
+          weight_kg?: number | null
+          weekly_frequency?: number | null
+        }
+        Relationships: []
+      }
+      vibra_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          paid_at: string | null
+          plan_id: string
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          email: string
-          goal?: string
-          id: string
+          current_period_end?: string | null
+          id?: string
+          paid_at?: string | null
+          plan_id: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
           updated_at?: string
-          username: string
+          user_id: string
         }
         Update: {
           created_at?: string
-          email?: string
-          goal?: string
+          current_period_end?: string | null
           id?: string
+          paid_at?: string | null
+          plan_id?: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
           updated_at?: string
-          username?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as PlansRouteImport } from './routes/plans'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as FitnessProfileRouteImport } from './routes/fitness-profile'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +36,32 @@ const PlansRoute = PlansRouteImport.update({
   path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FitnessProfileRoute = FitnessProfileRouteImport.update({
+  id: '/fitness-profile',
+  path: '/fitness-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/plans': typeof PlansRoute
+  '/checkout': typeof CheckoutRoute
+  '/fitness-profile': typeof FitnessProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/plans': typeof PlansRoute
+  '/checkout': typeof CheckoutRoute
+  '/fitness-profile': typeof FitnessProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,15 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/plans': typeof PlansRoute
+  '/checkout': typeof CheckoutRoute
+  '/fitness-profile': typeof FitnessProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/dashboard' | '/plans'
+  fullPaths: '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/dashboard' | '/plans'
-  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans'
+  to: '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
+  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +85,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
   PlansRoute: typeof PlansRoute
+  CheckoutRoute: typeof CheckoutRoute
+  FitnessProfileRoute: typeof FitnessProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +119,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fitness-profile': {
+      id: '/fitness-profile'
+      path: '/fitness-profile'
+      fullPath: '/fitness-profile'
+      preLoaderRoute: typeof FitnessProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +141,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
   PlansRoute: PlansRoute,
+  CheckoutRoute: CheckoutRoute,
+  FitnessProfileRoute: FitnessProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
