@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { BookOpen, CircleHelp, Dumbbell, X } from "lucide-react";
 import { exerciseCatalog } from "./exerciseCatalog";
-import { ExerciseMovementGraphic } from "./ExerciseMovementGraphic";
 import "./ExerciseDemoModal.css";
 
 type Props = { exerciseId: string | null; workoutName?: string; onClose: () => void };
@@ -24,11 +23,7 @@ export function ExerciseDemoModal({ exerciseId, workoutName, onClose }: Props) {
     <p>Este exercício ainda não está associado a um registro da Biblioteca de Exercícios. O treino foi mantido sem alterações.</p>
     <p className="exercise-demo-note">Situação: cadastro não encontrado. Associe o exercício a um ID estável do catálogo para disponibilizar suas instruções.</p>
    </div> : <>
-    <div className="exercise-demo-visual">
-     {exercise.videoUrl ? <video controls playsInline preload="none" poster={exercise.imageUrl ?? undefined}><source src={exercise.videoUrl}/></video>
-      : exercise.imageUrl ? <img src={exercise.imageUrl} alt={exercise.name} loading="lazy"/>
-      : <ExerciseMovementGraphic exerciseId={exercise.id} exerciseName={exercise.name} />}
-    </div>
+    
     <div className="exercise-demo-body">
      <span className="exercise-demo-kicker">{exercise.primaryMuscle}</span>
      <h2 id="exercise-demo-title">{exercise.name}</h2>
