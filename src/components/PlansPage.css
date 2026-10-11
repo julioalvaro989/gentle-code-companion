@@ -1,7 +1,7 @@
 .vibra-plans-page{position:relative;isolation:isolate;min-height:100vh;overflow:hidden;background:#05060b;color:#f8f9ff;padding:clamp(24px,5vw,64px) 20px;font-family:inherit}
 .vibra-plans-glow{position:absolute;z-index:-1;inset:-10% -20% auto;height:560px;background:radial-gradient(ellipse at 20% 20%,rgba(121,0,255,.28),transparent 55%),radial-gradient(ellipse at 80% 10%,rgba(183,255,53,.09),transparent 45%);pointer-events:none}
 .vibra-plans-shell{width:min(100%,760px);margin:0 auto}
-.vibra-plans-back{display:inline-flex;align-items:center;gap:8px;color:#c9c9dd;text-decoration:none;font-size:14px;margin-bottom:46px}
+.vibra-plans-back{display:inline-flex;align-items:center;gap:8px;color:#c9c9dd;text-decoration:none;font-size:14px;margin-bottom:46px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit}
 .vibra-plans-back:hover{color:#b7ff35}
 .vibra-plans-brand{display:flex;align-items:center;gap:7px;font-size:25px;font-weight:850;letter-spacing:-1.4px;margin-bottom:44px}
 .vibra-plans-brand>span:first-child{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#b7ff35;color:#090b0e;font-size:20px}
