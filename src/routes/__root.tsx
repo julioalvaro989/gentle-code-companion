@@ -20,9 +20,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({ meta: [
     { charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" },
-    { title: "FitPro — Seu aplicativo fitness" },
-    { name: "description", content: "Organize treinos, nutrição, progresso e acompanhamento fitness com o FitPro." },
-    { property: "og:title", content: "FitPro" },
+    { title: "Avirafit — Seu aplicativo fitness" },
+    { name: "description", content: "Organize treinos, nutrição, progresso e acompanhamento fitness com a Avirafit." },
+    { property: "og:title", content: "Avirafit" },
     { property: "og:description", content: "Seu treino, sua nutrição, sua evolução." }
   ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.ico", type: "image/x-icon" }] }),
   shellComponent: ({ children }: { children: ReactNode }) => <html lang="pt-BR"><head><HeadContent /></head><body>{children}<Scripts /></body></html>,
