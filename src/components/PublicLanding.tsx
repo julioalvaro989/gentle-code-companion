@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Activity, ArrowDown, ArrowRight, Check, ChevronLeft, ChevronRight,
+  ArrowDown, ArrowRight, Check, ChevronLeft, ChevronRight,
   Dumbbell, Menu, MessageCircle, ShieldCheck, Sparkles, Target,
   TrendingUp, UserRound, X, Zap, Clock3, Salad, ClipboardCheck,
 } from "lucide-react";
