@@ -77,7 +77,7 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
-  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans'
+  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans' | '/checkout' | '/fitness-profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
