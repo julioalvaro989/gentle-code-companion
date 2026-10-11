@@ -25,7 +25,13 @@ alter table public.fitness_profiles
   add constraint fitness_profiles_weight_kg_check
     check (weight_kg is null or weight_kg between 20 and 500) not valid,
   add constraint fitness_profiles_height_cm_check
-    check (height_cm is null or height_cm between 80 and 250) not valid;
+    check (height_cm is null or height_cm between 80 and 250) not valid,
+  add constraint fitness_profiles_training_location_check
+    check (training_location is null or training_location in ('academia','casa','outro')) not valid,
+  add constraint fitness_profiles_preferences_length_check
+    check (preferences is null or char_length(preferences) <= 1500) not valid,
+  add constraint fitness_profiles_limitations_length_check
+    check (physical_limitations is null or char_length(physical_limitations) <= 1000) not valid;
 
 create table if not exists public.vibra_subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -45,6 +51,34 @@ create table if not exists public.vibra_subscriptions (
 
 create index if not exists vibra_subscriptions_user_status_idx
   on public.vibra_subscriptions (user_id, status, current_period_end desc);
+
+-- Completion is derived in the database rather than trusted from a browser flag.
+create or replace function public.set_vibra_profile_completion()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $profile$
+begin
+  new.profile_completed :=
+    char_length(trim(coalesce(new.username, ''))) >= 2
+    and new.weight_kg is not null
+    and new.height_cm is not null
+    and new.primary_goal is not null
+    and new.experience_level is not null
+    and new.weekly_frequency is not null
+    and new.training_location is not null;
+  return new;
+end;
+$profile$;
+
+drop trigger if exists set_vibra_profile_completion on public.fitness_profiles;
+create trigger set_vibra_profile_completion
+  before insert or update of username, weight_kg, height_cm, primary_goal,
+    experience_level, weekly_frequency, training_location, profile_completed
+  on public.fitness_profiles
+  for each row execute function public.set_vibra_profile_completion();
+
+revoke all on function public.set_vibra_profile_completion() from public, anon, authenticated;
 
 alter table public.fitness_profiles enable row level security;
 alter table public.vibra_subscriptions enable row level security;
