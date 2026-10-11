@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Dumbbell, Filter, PlayCircle, Search, SlidersHorizontal, Video, X } from "lucide-react";
 import { exerciseCatalog, type ExerciseRecord } from "./exerciseCatalog";
-import { ExerciseMovementGraphic } from "./ExerciseMovementGraphic";
 import "./ExerciseLibrary.css";
 
 type Props = { onOpenExercise?: (id: string) => void; selectedExerciseId?: string | null; onClearSelected?: () => void };
@@ -58,7 +57,7 @@ export function ExerciseLibrary({ onOpenExercise, selectedExerciseId, onClearSel
   {pages>1 && <div className="exercise-pagination"><button disabled={currentPage===1} onClick={()=>setPage(p=>p-1)}><ArrowLeft size={16}/> Anterior</button><span>Página {currentPage} de {pages}</span><button disabled={currentPage===pages} onClick={()=>setPage(p=>p+1)}>Próxima <ChevronRight size={16}/></button></div>}
   {detail && <div className="exercise-detail-backdrop" role="presentation" onClick={close}><section className="exercise-detail-modal" role="dialog" aria-modal="true" aria-labelledby="exercise-detail-title" onClick={e=>e.stopPropagation()}>
    <button className="exercise-detail-close" onClick={close} aria-label="Fechar detalhes"><X size={21}/></button>
-   <div className="exercise-detail-media">{detail.videoUrl ? <video controls playsInline preload="none" poster={detail.imageUrl ?? undefined}><source src={detail.videoUrl}/></video> : detail.imageUrl ? <img src={detail.imageUrl} alt={detail.name} loading="lazy"/> : <ExerciseMovementGraphic exerciseId={detail.id} exerciseName={detail.name} />}</div>
+   
    <div className="exercise-detail-content"><span className="exercise-card-tag">{detail.primaryMuscle}</span><h2 id="exercise-detail-title">{detail.name}</h2><p className="exercise-detail-alt">{detail.alternativeName} · {detail.equipment} · {detail.location}</p>
     <div className="exercise-detail-chips"><span>{detail.difficulty}</span><span>{detail.secondaryMuscles.length ? detail.secondaryMuscles.join(", ") : "Sem músculo secundário listado"}</span></div>
     <h3>Como executar</h3><ol>{detail.instructions.map((s,i)=><li key={i}>{s}</li>)}</ol>
