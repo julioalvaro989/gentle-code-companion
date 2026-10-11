@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   ArrowDown,
+  ArrowLeft,
   ArrowRight,
   Check,
   Dumbbell,
@@ -51,6 +52,34 @@ export function PublicLanding({ onAuth }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
   const publicRef = useRef<HTMLDivElement>(null);
+  const storiesTrackRef = useRef<HTMLDivElement>(null);
+  const [activeStory, setActiveStory] = useState(0);
+
+  const stories = [
+    { name: "Luana Paiva", title: "Encontrando uma rotina", text: "Eu sempre começava animada, mas tinha dificuldade para manter uma rotina. Ter os treinos organizados e saber o que fazer em cada dia tornou tudo mais simples para mim." },
+    { name: "Gabriel Santos", title: "Mais organização", text: "Eu treinava sem muito planejamento e acabava repetindo exercícios sem saber se estava evoluindo. Com uma rotina mais estruturada, comecei a acompanhar melhor meus treinos." },
+    { name: "Beatriz Oliveira", title: "Superando a insegurança", text: "No começo, eu ficava perdida com tantos exercícios diferentes. Ter uma orientação mais clara me ajudou a me sentir mais confiante para seguir meu treino." },
+    { name: "Leo Maromba", title: "Treinando com estratégia", text: "Mesmo gostando de musculação, percebi que precisava organizar melhor meus treinos. Agora consigo visualizar minha rotina e acompanhar o que estou fazendo." },
+    { name: "Julia Beltro", title: "Voltando a cuidar de mim", text: "Minha rotina era corrida e eu sempre deixava os treinos para depois. Ter um plano mais organizado me ajudou a encaixar esse momento no meu dia." },
+    { name: "Ana Beatriz", title: "Um passo de cada vez", text: "Eu achava que precisava mudar tudo de uma vez. Aprendi a valorizar a consistência e a construir uma rotina que faça sentido para mim." },
+    { name: "Thales", title: "Menos improviso", text: "Eu chegava à academia sem saber exatamente por onde começar. Organizar os exercícios antes do treino tornou minha experiência muito mais prática." },
+    { name: "Icaro Junior", title: "Evoluindo com consistência", text: "Eu queria levar meus treinos mais a sério, mas faltava organização. Acompanhar minha rotina me ajuda a ter mais clareza sobre o próximo passo." },
+  ];
+
+  function moveStories(direction: -1 | 1) {
+    const track = storiesTrackRef.current;
+    if (!track) return;
+    const card = track.querySelector<HTMLElement>(".vp-story-card");
+    const step = card ? card.offsetWidth + 16 : track.clientWidth;
+    track.scrollBy({ left: direction * step, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+
+  function goToStory(index: number) {
+    const track = storiesTrackRef.current;
+    const cards = track?.querySelectorAll<HTMLElement>(".vp-story-card");
+    cards?.[index]?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest", inline: "start" });
+    setActiveStory(index);
+  }
 
   useEffect(() => {
     const root = publicRef.current;
@@ -373,6 +402,39 @@ export function PublicLanding({ onAuth }: Props) {
             de educação física, nutrição ou saúde. Resultados variam conforme sua rotina e suas
             condições individuais.
           </p>
+        </section>
+        <section className="vp-stories-section vp-section vp-container" aria-labelledby="vp-stories-title">
+          <div className="vp-section-heading vp-stories-heading">
+            <div>
+              <p className="vp-eyebrow"><HeartPulse size={15} /> HISTÓRIAS DE EVOLUÇÃO</p>
+              <h2 id="vp-stories-title">Cada evolução começa<br /><span>com uma história.</span></h2>
+            </div>
+            <p>Descubra como uma rotina mais organizada, treinos personalizados e o apoio da inteligência artificial podem ajudar você a dar o próximo passo.</p>
+          </div>
+          <div className="vp-stories-disclosure">Histórias ilustrativas — personagens e relatos fictícios para demonstração.</div>
+          <div className="vp-stories-controls">
+            <span className="vp-stories-count" aria-live="polite">História {activeStory + 1} de {stories.length}</span>
+            <div className="vp-stories-arrows">
+              <Button variant="ghost" size="icon" aria-label="História anterior" onClick={() => moveStories(-1)}><ArrowLeft /></Button>
+              <Button variant="ghost" size="icon" aria-label="Próxima história" onClick={() => moveStories(1)}><ArrowRight /></Button>
+            </div>
+          </div>
+          <div className="vp-stories-track" ref={storiesTrackRef} role="region" aria-label="Carrossel de histórias ilustrativas" tabIndex={0}
+            onScroll={(event) => {
+              const track = event.currentTarget;
+              const card = track.querySelector<HTMLElement>(".vp-story-card");
+              if (card) setActiveStory(Math.min(stories.length - 1, Math.max(0, Math.round(track.scrollLeft / (card.offsetWidth + 16)))));
+            }}>
+            {stories.map((story, index) => (
+              <article className="vp-story-card" key={story.name} aria-label={`História ${index + 1}: ${story.name}`}>
+                <div className="vp-story-card-top"><span className="vp-story-quote" aria-hidden="true">“</span><span className="vp-story-index">{String(index + 1).padStart(2, "0")}</span></div>
+                <h3>{story.title}</h3>
+                <p className="vp-story-copy">“{story.text}”</p>
+                <div className="vp-story-person"><span className="vp-story-avatar" aria-hidden="true">{story.name.split(/\\s+/).map((part) => part[0]).slice(0, 2).join("").toUpperCase()}</span><span><strong>{story.name}</strong><small>História ilustrativa</small></span></div>
+              </article>
+            ))}
+          </div>
+          <div className="vp-stories-bottom"><span>Deslize para descobrir mais histórias <ArrowRight size={15} /></span><div className="vp-story-dots" role="group" aria-label="Escolher história">{stories.map((story, index) => <button key={story.name} type="button" aria-label={`Ir para história ${index + 1}: ${story.name}`} aria-current={activeStory === index ? "true" : undefined} className={activeStory === index ? "is-active" : ""} onClick={() => goToStory(index)} />)}</div></div>
         </section>
         <section id="vibra-planos" className="vp-plans-band">
           <div className="vp-container vp-plans-layout">
