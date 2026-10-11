@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock3, ShieldCheck } from "lucide-react";
 import { Button } from "./ui/button";
+import { signOut } from "../lib/supabase";
 import "./PlansPage.css";
 
 export function PlansPage() {
@@ -10,9 +11,11 @@ export function PlansPage() {
     <main className="vibra-plans-page">
       <div className="vibra-plans-glow" aria-hidden="true" />
       <div className="vibra-plans-shell">
-        <a className="vibra-plans-back" href="/">
-          <ArrowLeft size={16} /> Voltar para a Vibra
-        </a>
+        <button className="vibra-plans-back" type="button" onClick={async () => {
+          try { await signOut(); } finally { window.location.replace("/"); }
+        }}>
+          <ArrowLeft size={16} /> Sair e voltar para a Vibra
+        </button>
         <div className="vibra-plans-brand"><span>V</span> vibra<span>.</span></div>
         <p className="vibra-plans-eyebrow"><ShieldCheck size={15} /> ACESSO E PLANOS</p>
         <h1>Seu próximo passo,<br /><span>no seu ritmo.</span></h1>
