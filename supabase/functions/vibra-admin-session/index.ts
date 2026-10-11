@@ -18,6 +18,9 @@ Deno.serve(async req=>{
   claims=JSON.parse(atob(parts[1].replace(/-/g,"+").replace(/_/g,"/")));
   body=await req.json();
  }catch{return out({error:"Autenticação necessária."},401,origin)}
+ // Private server-side allowlist; database role and registered session remain authoritative.
+ if(!adminEmail||typeof user.email!=="string"||user.email.trim().toLowerCase()!==adminEmail)
+  return out({admin:false,allowed:false},200,origin);
  const sid=claims.session_id, exp=claims.exp;
  if(typeof sid!=="string"||!/^[0-9a-f-]{36}$/i.test(sid)||typeof exp!=="number"||exp*1000<=Date.now())return out({admin:false,allowed:false},200,origin);
  const h={apikey:secret,Authorization:"Bearer "+secret,"Content-Type":"application/json"};
