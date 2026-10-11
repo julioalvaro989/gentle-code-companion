@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { adoptSupabaseSession, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessOnboarding, type AuthSession } from "../lib/supabase";
 import { PlansPage } from "../components/PlansPage";
 import { useServerFn } from "@tanstack/react-start";
 import { getTestAdminAccess } from "../lib/test-admin.functions";
@@ -32,6 +32,13 @@ function PlansRoute() {
         if (destination) {
           window.location.replace(destination);
           return;
+        }
+        if (!testAdmin) {
+          const onboarding = await getFitnessOnboarding(current);
+          if (onboarding?.status !== "completed") {
+            window.location.replace("/onboarding");
+            return;
+          }
         }
         setSession(current);
       })
