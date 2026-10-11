@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Check,
   Dumbbell,
+  Droplets,
   HeartPulse,
   Menu,
   Sparkles,
@@ -135,8 +136,9 @@ export function PublicLanding({ onAuth }: Props) {
           />
           <div className="vp-hero-shade" />
           <div className="vp-container vp-hero-content">
+            <div className="vp-hero-copy">
             <p className="vp-eyebrow">
-              <Zap size={14} /> MOVIMENTO COM PROPÓSITO
+              <Zap size={14} /> VIBRA / MOVIMENTO COM PROPÓSITO
             </p>
             <h1 id="vp-title">
               Seu próximo nível começa com um plano <span>feito para você.</span>
@@ -160,6 +162,34 @@ export function PublicLanding({ onAuth }: Props) {
             <p className="vp-hero-note">
               <Check size={14} /> Seu objetivo. Sua rotina. Seu próximo passo.
             </p>
+            </div>
+            <figure className="vp-product-preview" aria-labelledby="vp-preview-caption">
+              <figcaption id="vp-preview-caption" className="vp-preview-caption">
+                <span>VISÃO DO PRODUTO</span><span>Prévia ilustrativa</span>
+              </figcaption>
+              <div className="vp-preview-top">
+                <span className="vp-preview-wordmark">vibra<span>.</span></span>
+                <UserRound size={18} aria-hidden="true" />
+              </div>
+              <div className="vp-preview-session">
+                <span className="vp-preview-kicker">SEU ESPAÇO DE TREINO</span>
+                <p className="vp-preview-title">Sua sessão.<br />Seu ritmo.</p>
+                <p>Organize o treino e acompanhe o que concluiu.</p>
+                <div className="vp-preview-exercises">
+                  <Dumbbell size={22} aria-hidden="true" />
+                  <div><strong>Exercícios</strong><span>Consulte sua sessão</span></div>
+                  <ArrowRight size={18} aria-hidden="true" />
+                </div>
+              </div>
+              <dl className="vp-preview-habits">
+                <div><dt><Droplets size={18} aria-hidden="true" /> Hidratação</dt><dd>Seu registro de hábitos</dd></div>
+                <div><dt><Target size={18} aria-hidden="true" /> Objetivo</dt><dd>Seu foco, por perto</dd></div>
+              </dl>
+              <div className="vp-preview-ai">
+                <Sparkles size={21} aria-hidden="true" />
+                <div><strong>Vibra AI</strong><span>Conversa dentro da sua conta</span></div>
+              </div>
+            </figure>
           </div>
           <div className="vp-hero-footer vp-container">
             <span>CONSISTÊNCIA É UM COMEÇO.</span>
