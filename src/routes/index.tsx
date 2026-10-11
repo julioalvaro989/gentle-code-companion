@@ -94,12 +94,19 @@ function GymApp() {
   const progress = Math.round(done.length / exercises.length * 100);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("auth") === "login") {
+      setAuthMode("login");
+      setShowAuth(true);
+    }
     let active = true;
     (async () => {
       try {
         const current = await adoptSupabaseSession();
         if (!active) return;
         if (current) {
+          // The app has no trusted subscription-entitlement source yet. Never assume premium access.
+          window.location.replace("/plans");
+          return;
           setSession(current);
           const metaName = current.user.user_metadata?.full_name || current.user.user_metadata?.username || "";
           setProfileName(metaName || current.user.email?.split("@")[0] || "Aluno Vibra");
@@ -156,6 +163,7 @@ function GymApp() {
       const saved = await getFitnessProgress(next).catch(() => null);
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
+      window.location.assign("/plans");
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
@@ -189,6 +197,7 @@ function GymApp() {
         const saved = await getFitnessProgress(next).catch(() => null);
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
+        window.location.assign("/plans");
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
