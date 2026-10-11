@@ -169,6 +169,11 @@ function GymApp() {
           let fromStorage: string | null = null;
           try { fromStorage = window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { /* Ignore unavailable storage. */ }
           const chosenPlan = isVibraPlanId(fromUrl) ? fromUrl : isVibraPlanId(fromStorage) ? fromStorage : null;
+          if (access.adminSessionLimit) {
+            setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+            setAccessReady(true);
+            return;
+          }
           if (access.status !== "active") {
             const nextPlan = access.planId || chosenPlan;
             window.location.replace(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
@@ -276,7 +281,7 @@ function GymApp() {
   }
 
   if (!authReady || (session && !accessReady && !accessError)) return <div style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",color:"white"}}>Carregando seu espaço Vibra...</div>;
-  if (session && accessError) return <main role="alert" style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",padding:24,color:"white"}}><section style={{maxWidth:480,textAlign:"center"}}><h1>Não foi possível validar o acesso</h1><p>{accessError}</p><button type="button" onClick={() => window.location.reload()} style={{padding:"12px 18px",borderRadius:12,cursor:"pointer"}}>Tentar novamente</button></section></main>;
+  if (session && accessError) return <main role="alert" style={{minHeight:"100vh",background:"#05060B",display:"grid",placeItems:"center",padding:24,color:"white"}}><section style={{maxWidth:480,textAlign:"center"}}><h1>{accessError.startsWith("As três sessões") ? "Limite de sessões administrativas" : "Não foi possível validar o acesso"}</h1><p>{accessError}</p><button type="button" onClick={() => window.location.reload()} style={{padding:"12px 18px",borderRadius:12,cursor:"pointer"}}>Tentar novamente</button></section></main>;
   const publicLandingRequested = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("public") === "1";
   if (publicLandingRequested) return <PublicLanding onAuth={(mode) => window.location.assign("/?auth=" + mode)} onPlans={() => window.location.assign("/plans")} />;
   if (!session && !showAuth) return <PublicLanding onAuth={(mode) => { setAuthMode(mode); setAuthError(""); setAuthMessage(""); setShowAuth(true); window.scrollTo({ top: 0, behavior: "instant" }); }} onPlans={() => window.location.assign("/plans")} />;
