@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState, type FormEvent, type CSSProperties } 
 import { useServerFn } from "@tanstack/react-start";
 import { getTestAdminAccess } from "../lib/test-admin.functions";
 import { bounded, resolveVibraAccess } from "../lib/vibra-access";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessOnboarding, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({ head: () => ({ meta: [
@@ -125,7 +125,8 @@ function GymApp() {
         if (!active) return;
         if (current) {
           if (!testAdmin) {
-            window.location.replace("/plans");
+            const onboarding = await getFitnessOnboarding(current).catch(() => null);
+            window.location.replace(onboarding?.status === "completed" ? "/plans" : "/onboarding");
             return;
           }
           await activateInternalSession(current);
@@ -168,7 +169,10 @@ function GymApp() {
       }
       const access = await resolveVibraAccess(async () => next, checkTestAdmin);
       if (access.testAdmin && access.session) await activateInternalSession(access.session);
-      else window.location.assign("/plans");
+      else {
+        const onboarding = await getFitnessOnboarding(next).catch(() => null);
+        window.location.assign(onboarding?.status === "completed" ? "/plans" : "/onboarding");
+      }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
