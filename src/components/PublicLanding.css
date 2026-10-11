@@ -611,3 +611,54 @@
   color: var(--green);
   background: var(--panel2);
 }
+
+/* Landing page motion and new explainer sections */
+@keyframes vp-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes vp-glow { 0%,100%{box-shadow:0 0 0 0 #c4ff3b00} 50%{box-shadow:0 0 28px 2px #c4ff3b22} }
+@keyframes vp-orbit { to{transform:rotate(360deg)} }
+.vp-hero-image { animation: vp-hero-reveal 1.2s ease-out both; }
+@keyframes vp-hero-reveal { from{transform:scale(1.06);filter:brightness(.75)} to{transform:scale(1);filter:brightness(1)} }
+.vp-resource,.vp-benefit-grid article,.vp-step { transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease; }
+.vp-resource:hover,.vp-benefit-grid article:hover,.vp-step:hover { transform:translateY(-6px);border-color:#963bff80;box-shadow:0 14px 36px #0003; }
+.vp-ai-symbol { animation:vp-float 4s ease-in-out infinite; }
+.vp-ai-visual { animation:vp-glow 5s ease-in-out infinite; }
+.vp-how .vp-section-heading { margin-bottom:38px; }
+.vp-steps { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; }
+.vp-step { position:relative;overflow:hidden;padding:28px;border:1px solid var(--vp-line);border-radius:10px;background:linear-gradient(145deg,var(--vp-surface),#0a0b12); }
+.vp-step-number { position:absolute;right:18px;top:12px;font-size:44px;font-weight:850;color:#963bff1f;line-height:1; }
+.vp-step-icon { width:48px;height:48px;display:grid;place-items:center;border-radius:12px;background:#c4ff3b12;color:var(--vp-lime);margin-bottom:24px; }
+.vp-step h3 { margin-bottom:10px; }
+.vp-step p,.vp-about-layout p:not(.vp-eyebrow) { color:var(--vp-muted);font-size:14px;line-height:1.85; }
+.vp-about-band { border-block:1px solid var(--vp-line);background:radial-gradient(ellipse at 18% 50%,#963bff14,transparent 42%),var(--vp-band); }
+.vp-about-layout { display:grid;grid-template-columns:.8fr 1.2fr;gap:70px;align-items:center;padding-block:78px; }
+.vp-about-layout h2 { font-size:42px;line-height:1.15;margin:0; }
+.vp-about-layout h2 span { color:var(--vp-lime); }
+.vp-about-layout > div:last-child { max-width:600px; }
+.vp-about-orbit { position:relative;display:grid;place-items:center;min-height:290px; }
+.vp-orbit { position:absolute;width:230px;height:230px;border:1px solid #963bff66;border-radius:50%; }
+.vp-orbit-two { width:170px;height:170px;border-color:#c4ff3b55; }
+.vp-orbit-core { display:grid;place-items:center;width:96px;height:96px;border-radius:28px;background:#c4ff3b16;color:var(--vp-lime);border:1px solid #c4ff3b55;animation:vp-float 4s ease-in-out infinite; }
+.vp-orbit-dot { position:absolute;width:12px;height:12px;left:calc(50% + 108px);top:calc(50% - 104px);border-radius:50%;background:var(--vp-lime);box-shadow:0 0 18px #c4ff3b99;animation:vp-orbit 9s linear infinite;transform-origin:-108px 104px; }
+.vp-faq-list { max-width:900px;margin-inline:auto;border-top:1px solid var(--vp-line); }
+.vp-faq-list details { border-bottom:1px solid var(--vp-line);padding:0 4px; }
+.vp-faq-list summary { display:flex;align-items:center;justify-content:space-between;gap:18px;list-style:none;cursor:pointer;padding:22px 4px;font-size:16px;font-weight:650; }
+.vp-faq-list summary::-webkit-details-marker { display:none; }
+.vp-faq-list summary span { color:var(--vp-lime);font-size:24px;transition:transform .2s ease;flex:none; }
+.vp-faq-list details[open] summary span { transform:rotate(45deg); }
+.vp-faq-list details p { margin:0;padding:0 36px 22px 4px;color:var(--vp-muted);font-size:14px;line-height:1.8; }
+.vp-final { position:relative;overflow:hidden; }
+.vp-final .vp-button { animation:vp-glow 3.5s ease-in-out infinite; }
+@media(max-width:700px) {
+ .vp-steps { grid-template-columns:1fr; }
+ .vp-about-layout { grid-template-columns:1fr;gap:22px;padding-block:54px; }
+ .vp-about-orbit { min-height:220px; }
+ .vp-orbit { width:180px;height:180px; }
+ .vp-orbit-two { width:136px;height:136px; }
+ .vp-orbit-dot { left:calc(50% + 82px);top:calc(50% - 82px);transform-origin:-82px 82px; }
+ .vp-about-layout h2 { font-size:34px; }
+ .vp-faq-list summary { font-size:14px;padding-block:18px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .vp-hero-image,.vp-ai-symbol,.vp-ai-visual,.vp-orbit-core,.vp-orbit-dot,.vp-final .vp-button { animation:none !important; }
+ .vp-resource,.vp-benefit-grid article,.vp-step { transition:none !important; }
+}
