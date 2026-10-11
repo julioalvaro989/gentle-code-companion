@@ -1,0 +1,25 @@
+.vibra-plans-page{position:relative;isolation:isolate;min-height:100vh;overflow:hidden;background:#05060b;color:#f8f9ff;padding:clamp(24px,5vw,64px) 20px;font-family:inherit}
+.vibra-plans-glow{position:absolute;z-index:-1;inset:-10% -20% auto;height:560px;background:radial-gradient(ellipse at 20% 20%,rgba(121,0,255,.28),transparent 55%),radial-gradient(ellipse at 80% 10%,rgba(183,255,53,.09),transparent 45%);pointer-events:none}
+.vibra-plans-shell{width:min(100%,760px);margin:0 auto}
+.vibra-plans-back{display:inline-flex;align-items:center;gap:8px;color:#c9c9dd;text-decoration:none;font-size:14px;margin-bottom:46px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit}
+.vibra-plans-back:hover{color:#b7ff35}
+.vibra-plans-brand{display:flex;align-items:center;gap:7px;font-size:25px;font-weight:850;letter-spacing:-1.4px;margin-bottom:44px}
+.vibra-plans-brand>span:first-child{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#b7ff35;color:#090b0e;font-size:20px}
+.vibra-plans-brand>span:last-child{color:#b7ff35;margin-left:-7px}
+.vibra-plans-eyebrow{display:flex;align-items:center;gap:8px;color:#b7ff35;font-size:12px;font-weight:800;letter-spacing:1.8px;margin:0 0 16px}
+.vibra-plans-shell h1{font-size:clamp(38px,7vw,64px);line-height:1.04;letter-spacing:-2.8px;margin:0;max-width:700px}
+.vibra-plans-shell h1 span{color:#b7ff35}
+.vibra-plans-intro{max-width:620px;color:#a8b4d8;font-size:16px;line-height:1.8;margin:22px 0 32px}
+.vibra-plans-card{padding:clamp(24px,5vw,38px);border:1px solid #30284a;border-radius:24px;background:linear-gradient(145deg,rgba(21,19,37,.96),rgba(10,11,19,.98));box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.vibra-plans-card-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:rgba(183,255,53,.1);color:#b7ff35;margin-bottom:22px}
+.vibra-plans-status{display:inline-flex;border:1px solid rgba(183,255,53,.28);border-radius:999px;padding:7px 10px;color:#b7ff35;font-size:10px;font-weight:800;letter-spacing:1.3px}
+.vibra-plans-card h2{font-size:clamp(25px,4vw,34px);letter-spacing:-.8px;margin:18px 0 10px}
+.vibra-plans-card p{color:#a8b4d8;line-height:1.75;margin:0 0 24px}
+.vibra-plans-cta{min-height:48px!important;border-radius:13px!important;background:#b7ff35!important;color:#080a0c!important;font-weight:800!important}
+.vibra-plans-cta:hover{background:#caff67!important}
+.vibra-plans-card small{display:block;color:#858ba8;font-size:12px;line-height:1.6;margin-top:18px}
+.vibra-plans-confirmation{display:flex;align-items:flex-start;gap:10px;color:#d9fca0;background:rgba(183,255,53,.08);border:1px solid rgba(183,255,53,.2);padding:14px;border-radius:12px;line-height:1.5}
+.vibra-plans-confirmation svg{flex:0 0 auto;margin-top:2px}
+.vibra-plans-footnote{margin-top:24px;color:#777e9a;font-size:12px;text-align:center}
+@media(max-width:520px){.vibra-plans-back{margin-bottom:32px}.vibra-plans-brand{margin-bottom:34px}.vibra-plans-shell h1{letter-spacing:-1.8px}.vibra-plans-card{border-radius:19px}}
+@media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
