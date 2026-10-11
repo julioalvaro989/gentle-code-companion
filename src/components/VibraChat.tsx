@@ -334,7 +334,7 @@ export function VibraChat() {
               aria-label="Adicionar mensagem"
               disabled={!draft.trim() || isSending}
             >
-              isSending ? <span aria-hidden="true">…</span> : <ArrowUp size={19} />
+              {isSending ? <span aria-hidden="true">…</span> : <ArrowUp size={19} />}
             </button>
           </form>
           <p className="vibra-chat-disclaimer">
