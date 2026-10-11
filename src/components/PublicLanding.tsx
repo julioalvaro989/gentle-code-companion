@@ -9,6 +9,7 @@ import {
   Menu,
   Sparkles,
   Target,
+  TrendingUp,
   UserRound,
   X,
   Zap,
@@ -58,9 +59,11 @@ export function PublicLanding({ onAuth }: Props) {
     });
   }
   const nav = [
+    { id: "vibra-como-funciona", label: "Como funciona" },
     { id: "vibra-recursos", label: "Recursos" },
+    { id: "vibra-sobre", label: "Sobre" },
     { id: "vibra-ai", label: "Vibra AI" },
-    { id: "vibra-planos", label: "Planos" },
+    { id: "vibra-faq", label: "FAQ" },
   ];
   return (
     <div className="vibra-public">
@@ -199,6 +202,12 @@ export function PublicLanding({ onAuth }: Props) {
             ))}
           </div>
         </section>
+        <section id="vibra-sobre" className="vp-about-band">
+          <div className="vp-container vp-about-layout">
+            <div className="vp-about-orbit" aria-hidden="true"><span className="vp-orbit orbit-one" /><span className="vp-orbit orbit-two" /><span className="vp-orbit-core"><Dumbbell size={36} /></span><span className="vp-orbit-dot" /></div>
+            <div><p className="vp-eyebrow"><HeartPulse size={15} /> SOBRE A VIBRA</p><h2>Feita para acompanhar <span>seu movimento.</span></h2><p>A Vibra é um espaço digital para aproximar treino, hábitos e metas. A proposta é ajudar você a se organizar, entender sua rotina e construir consistência sem prometer resultados instantâneos.</p><p>Seu ritmo importa. Respeite seus limites e procure orientação profissional sempre que precisar.</p><Button className="vp-button" onClick={() => onAuth("signup")}>Fazer parte <ArrowRight /></Button></div>
+          </div>
+        </section>
         <section id="vibra-ai" className="vp-ai-band">
           <div className="vp-container vp-ai-layout">
             <div>
@@ -272,6 +281,17 @@ export function PublicLanding({ onAuth }: Props) {
             de educação física, nutrição ou saúde. Resultados variam conforme sua rotina e suas
             condições individuais.
           </p>
+        </section>
+        <section id="vibra-faq" className="vp-section vp-container vp-faq" aria-labelledby="vp-faq-title">
+          <div className="vp-section-heading"><div><p className="vp-eyebrow">DÚVIDAS FREQUENTES</p><h2 id="vp-faq-title">Perguntas que <span>valem a pena.</span></h2></div><p>Veja respostas rápidas sobre o uso da plataforma.</p></div>
+          <div className="vp-faq-list">
+            <details><summary>Como começo a usar a Vibra?<span aria-hidden="true">+</span></summary><p>Clique em “Começar agora”, crie sua conta e entre para acessar as ferramentas disponíveis no aplicativo.</p></details>
+            <details><summary>A Vibra funciona no celular?<span aria-hidden="true">+</span></summary><p>Sim. A interface é preparada para telas de celular e computador. Você pode acessar pelo navegador do seu dispositivo.</p></details>
+            <details><summary>Posso acompanhar meus treinos e hábitos?<span aria-hidden="true">+</span></summary><p>Você pode consultar exercícios, registrar sessões e manter objetivos e hábitos reunidos no seu espaço pessoal, conforme os recursos disponíveis na sua conta.</p></details>
+            <details><summary>A Vibra AI substitui um profissional de saúde ou educação física?<span aria-hidden="true">+</span></summary><p>Não. A IA oferece informações gerais e pode cometer erros. Para recomendações individuais, lesões, doenças ou dúvidas importantes, procure um profissional qualificado.</p></details>
+            <details><summary>Quanto custa usar a Vibra?<span aria-hidden="true">+</span></summary><p>Os valores e condições dos planos ainda não estão publicados nesta página. Não há contratação ou pagamento por meio desta landing page.</p></details>
+            <details><summary>Como crio minha conta?<span aria-hidden="true">+</span></summary><p>Use qualquer botão “Começar agora” para abrir o cadastro e seguir as instruções na tela.</p></details>
+          </div>
         </section>
         <section id="vibra-planos" className="vp-plans-band">
           <div className="vp-container vp-plans-layout">
