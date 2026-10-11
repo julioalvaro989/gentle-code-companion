@@ -27,7 +27,7 @@ export function ExerciseDemoModal({ exerciseId, workoutName, onClose }: Props) {
     <div className="exercise-demo-visual">
      {exercise.videoUrl ? <video controls playsInline preload="none" poster={exercise.imageUrl ?? undefined}><source src={exercise.videoUrl}/></video>
       : exercise.imageUrl ? <img src={exercise.imageUrl} alt={exercise.name} loading="lazy"/>
-      : <div className="exercise-demo-no-media"><Dumbbell size={34}/><strong>Demonstração visual ainda não cadastrada</strong><span>Consulte as instruções antes de executar o movimento.</span></div>}
+      : <ExerciseMovementGraphic exerciseId={exercise.id} exerciseName={exercise.name} />}
     </div>
     <div className="exercise-demo-body">
      <span className="exercise-demo-kicker">{exercise.primaryMuscle}</span>
