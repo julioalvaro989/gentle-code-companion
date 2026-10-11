@@ -200,7 +200,7 @@
   border-top: 2px solid var(--vp-purple-soft);
   border-radius: 8px;
   background: var(--vp-bg);
-  box-shadow: 14px 18px 0 var(--vp-tint);
+  box-shadow: 8px 12px 0 var(--vp-tint);
   overflow: hidden;
 }
 .vp-preview-caption {
@@ -209,7 +209,8 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 12px 22px;
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1.5;
   color: var(--vp-muted);
   border-bottom: 1px solid var(--vp-line);
 }
@@ -224,6 +225,14 @@
   padding: 20px 26px 0;
   color: var(--vp-muted);
 }
+.vibra-public .vp-preview-top > svg,
+.vibra-public .vp-preview-exercises > svg,
+.vibra-public .vp-preview-habits svg,
+.vibra-public .vp-preview-ai > svg,
+.vibra-public .vp-resource-icon svg {
+  flex-shrink: 0;
+  stroke-width: 1.75;
+}
 .vp-preview-wordmark {
   font-size: 23px;
   font-weight: 750;
@@ -236,7 +245,7 @@
   padding: 26px;
 }
 .vp-preview-kicker {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--vp-muted);
 }
 .vp-preview-title {
@@ -301,7 +310,7 @@
 }
 .vp-preview-habits dd {
   color: var(--vp-muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.6;
   margin: 9px 0 0;
 }
@@ -391,7 +400,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--vp-tint);
   color: var(--vp-purple-soft);
   margin-bottom: 25px;
@@ -449,7 +458,7 @@
   text-align: center;
   border: 1px solid var(--vp-line);
   border-radius: 8px;
-  background: linear-gradient(145deg, var(--vp-tint), var(--vp-surface));
+  background: var(--vp-surface);
   position: relative;
 }
 .vp-ai-symbol {
@@ -458,13 +467,13 @@
   aspect-ratio: 1;
   width: 112px;
   margin: 0 auto 24px;
-  border: 1px solid var(--vp-purple);
-  border-radius: 28px;
+  border: 1px solid var(--vp-line);
+  border-radius: 8px;
+  background: var(--vp-tint);
   color: var(--vp-purple-soft);
-  transform: rotate(-6deg);
 }
 .vp-ai-symbol svg {
-  transform: rotate(6deg);
+  stroke-width: 1.75;
 }
 .vp-ai-name {
   font-size: 28px;
@@ -658,6 +667,11 @@
   .vp-hero-image {
     object-position: 66% center;
   }
+  .vp-hero-shade {
+    background:
+      linear-gradient(90deg, var(--vp-bg), transparent 130%),
+      linear-gradient(0deg, var(--vp-bg), transparent 65%);
+  }
   .vibra-public {
     --vp-overlay:
       linear-gradient(90deg, #05060bd9, #05060b75), linear-gradient(0deg, #05060b 0%, #05060b00 50%);
@@ -690,7 +704,7 @@
     font-size: 11px;
   }
   .vp-product-preview {
-    box-shadow: 7px 8px 0 var(--vp-tint);
+    box-shadow: 4px 6px 0 var(--vp-tint);
   }
   .vp-preview-top {
     padding: 14px 20px 0;
