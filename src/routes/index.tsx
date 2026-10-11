@@ -225,7 +225,7 @@ function GymApp() {
         <div className="va-story-footer"><span><Dumbbell size={16}/> TREINO</span><i /><span><Target size={16}/> FOCO</span><i /><span><TrendingUp size={16}/> EVOLUÇÃO</span></div>
       </section>
       <section className="va-auth-panel" aria-labelledby="va-title">
-        <div className="va-panel-top"><span className="va-mobile-brand"><span className="va-brand-mark"><Activity size={20}/></span> vibra<span>.</span></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
+        <div className="va-panel-top"><span className="va-mobile-brand"><span className="va-brand-mark"><Activity size={20}/></span> avirafit<span>.</span></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
         <div className="va-form-heading">
           <div className="va-form-eyebrow">{authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
           <h2 id="va-title">{authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
