@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Activity, ArrowDown, ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight,
-  Dumbbell, HeartPulse, Menu, MessageCircle, ShieldCheck, Sparkles, Target,
+  Activity, ArrowDown, ArrowRight, Check, ChevronLeft, ChevronRight,
+  Dumbbell, Menu, MessageCircle, ShieldCheck, Sparkles, Target,
   TrendingUp, UserRound, X, Zap, Clock3, Salad, ClipboardCheck,
 } from "lucide-react";
 import { Button } from "./ui/button";
