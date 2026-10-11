@@ -49,10 +49,6 @@ async function request(path: string, options: RequestInit = {}, token?: string) 
   return body;
 }
 
-export function getStoredSession(): AuthSession | null {
-  try { return JSON.parse(localStorage.getItem("investe_session") || "null"); } catch { return null; }
-}
-
 function toAuthSession(session: { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { full_name?: string; username?: string } } }): AuthSession {
   return {
     access_token: session.access_token,
@@ -78,7 +74,6 @@ export async function signUp(username: string, email: string, password: string) 
   if (error) throw error;
   if (!data.session) return null;
   const session = toAuthSession(data.session);
-  localStorage.setItem("investe_session", JSON.stringify(session));
   return session;
 }
 
@@ -100,14 +95,14 @@ export async function signIn(email: string, password: string) {
   if (error) throw error;
   if (!data.session) throw new Error("Não foi possível iniciar a sessão. Tente novamente.");
   const session = toAuthSession(data.session);
-  localStorage.setItem("investe_session", JSON.stringify(session));
   return session;
 }
 
 export async function signOut() {
   const { supabase } = await import("@/integrations/supabase/client");
-  await supabase.auth.signOut().catch(() => {});
-  localStorage.removeItem("investe_session");
+  try { localStorage.removeItem("investe_session"); } catch { /* Storage can be unavailable. */ }
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 }
 
 export async function signInWithGoogle() {
@@ -120,16 +115,22 @@ export async function signInWithGoogle() {
 
 export async function adoptSupabaseSession(): Promise<AuthSession | null> {
   const { supabase } = await import("@/integrations/supabase/client");
-  const { data } = await supabase.auth.getSession();
-  const s = data.session;
-  if (!s) return null;
-  const session: AuthSession = {
-    access_token: s.access_token,
-    refresh_token: s.refresh_token,
-    user: { id: s.user.id, email: s.user.email, user_metadata: s.user.user_metadata },
+  // Remove the old duplicate cache; Supabase Auth storage is the only session source.
+  try { localStorage.removeItem("investe_session"); } catch { /* Storage can be unavailable. */ }
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  const current = data.session;
+  if (!current) return null;
+  const { data: verified, error: verifyError } = await supabase.auth.getUser(current.access_token);
+  if (verifyError || !verified.user) {
+    await supabase.auth.signOut({ scope: "local" });
+    return null;
+  }
+  return {
+    access_token: current.access_token,
+    refresh_token: current.refresh_token,
+    user: { id: verified.user.id, email: verified.user.email, user_metadata: verified.user.user_metadata },
   };
-  localStorage.setItem("investe_session", JSON.stringify(session));
-  return session;
 }
 
 export async function getProfile(session: AuthSession) {
