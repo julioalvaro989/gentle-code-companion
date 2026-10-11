@@ -42,7 +42,7 @@ const resources = [
   },
   {
     icon: Sparkles,
-    title: "Vibra AI integrada",
+    title: "Avirafit AI integrada",
     copy: "Converse sobre exercícios, treinos e hábitos dentro da sua conta.",
   },
 ];
@@ -107,7 +107,7 @@ export function PublicLanding({ onAuth }: Props) {
   }
   const nav = [
     { id: "vibra-recursos", label: "Recursos" },
-    { id: "vibra-ai", label: "Vibra AI" },
+    { id: "vibra-ai", label: "Avirafit AI" },
     { id: "vibra-planos", label: "Planos" },
   ];
   return (
@@ -118,7 +118,7 @@ export function PublicLanding({ onAuth }: Props) {
       <header className="vp-header">
         <div className="vp-container vp-header-inner">
           <span className="vp-brand">
-            <span aria-hidden="true">V</span>vibra<span className="vp-brand-dot">.</span>
+            <span aria-hidden="true">A</span>avirafit<span className="vp-brand-dot">.</span>
           </span>
           <nav className="vp-desktop-nav" aria-label="Menu principal">
             {nav.map((item) => (
@@ -176,14 +176,14 @@ export function PublicLanding({ onAuth }: Props) {
           <div className="vp-container vp-hero-content">
             <div className="vp-hero-copy">
               <p className="vp-eyebrow">
-                <Zap size={14} /> VIBRA / MOVIMENTO COM PROPÓSITO
+                <Zap size={14} /> AVIRAFIT / MOVIMENTO COM PROPÓSITO
               </p>
               <h1 id="vp-title">
                 Seu próximo nível começa com um plano <span>feito para você.</span>
               </h1>
               <p className="vp-hero-description">
                 Mais clareza para treinar. Mais espaço para evoluir. Reúna treinos, hábitos e
-                objetivos na Vibra, no seu ritmo.
+                objetivos na Avirafit, no seu ritmo.
               </p>
               <div className="vp-hero-actions">
                 <Button className="vp-button" size="lg" onClick={() => onAuth("signup")}>
@@ -194,7 +194,7 @@ export function PublicLanding({ onAuth }: Props) {
                   className="vp-discover"
                   onClick={() => goTo("vibra-recursos")}
                 >
-                  Conhecer a Vibra <ArrowDown />
+                  Conhecer a Avirafit <ArrowDown />
                 </Button>
               </div>
               <p className="vp-hero-note">
@@ -255,7 +255,7 @@ export function PublicLanding({ onAuth }: Props) {
                 <div className="vp-preview-ai">
                   <Sparkles size={21} aria-hidden="true" />
                   <div>
-                    <strong>Vibra AI</strong>
+                    <strong>Avirafit AI</strong>
                     <span>Conversa dentro da sua conta</span>
                   </div>
                 </div>
@@ -304,7 +304,7 @@ export function PublicLanding({ onAuth }: Props) {
           <div className="vp-container vp-ai-layout">
             <div>
               <p className="vp-eyebrow">
-                <Sparkles size={15} /> VIBRA AI
+                <Sparkles size={15} /> AVIRAFIT AI
               </p>
               <h2>
                 Uma conversa.
@@ -312,7 +312,7 @@ export function PublicLanding({ onAuth }: Props) {
                 <span>Novas possibilidades.</span>
               </h2>
               <p>
-                Um apoio para suas dúvidas sobre treinos, exercícios e hábitos. A Vibra AI faz parte
+                Um apoio para suas dúvidas sobre treinos, exercícios e hábitos. A Avirafit AI faz parte
                 do seu espaço autenticado, quando você precisar de uma conversa para seguir em
                 frente.
               </p>
@@ -326,12 +326,12 @@ export function PublicLanding({ onAuth }: Props) {
             </div>
             <div
               className="vp-ai-visual"
-              aria-label="Ilustração da Vibra AI, sem conversa interativa"
+              aria-label="Ilustração da Avirafit AI, sem conversa interativa"
             >
               <div className="vp-ai-symbol">
                 <Sparkles size={52} strokeWidth={1.4} />
               </div>
-              <span className="vp-ai-name">Vibra AI</span>
+              <span className="vp-ai-name">Avirafit AI</span>
               <p>Seu espaço de conversa.</p>
               <div className="vp-ai-topics">
                 <span>Treinos</span>
@@ -369,7 +369,7 @@ export function PublicLanding({ onAuth }: Props) {
             </article>
           </div>
           <p className="vp-care-note">
-            <HeartPulse size={20} /> A Vibra e a Vibra AI não substituem orientação de profissionais
+            <HeartPulse size={20} /> A Avirafit e a Avirafit AI não substituem orientação de profissionais
             de educação física, nutrição ou saúde. Resultados variam conforme sua rotina e suas
             condições individuais.
           </p>
@@ -377,7 +377,7 @@ export function PublicLanding({ onAuth }: Props) {
         <section id="vibra-planos" className="vp-plans-band">
           <div className="vp-container vp-plans-layout">
             <div>
-              <p className="vp-eyebrow">PLANOS VIBRA</p>
+              <p className="vp-eyebrow">PLANOS AVIRAFIT</p>
               <h2>
                 Seu próximo passo,
                 <br />
@@ -415,7 +415,7 @@ export function PublicLanding({ onAuth }: Props) {
         <div className="vp-container">
           <div className="vp-footer-top">
             <span className="vp-brand">
-              <span aria-hidden="true">V</span>vibra<span className="vp-brand-dot">.</span>
+              <span aria-hidden="true">A</span>avirafit<span className="vp-brand-dot">.</span>
             </span>
             <p>Seu treino. Seu ritmo. Sua evolução.</p>
             <Button variant="ghost" onClick={() => onAuth("login")}>
@@ -423,7 +423,7 @@ export function PublicLanding({ onAuth }: Props) {
             </Button>
           </div>
           <div className="vp-footer-bottom">
-            <span>© 2026 Vibra</span>
+            <span>© 2026 Avirafit</span>
             <span>
               Termos de uso e política de privacidade serão disponibilizados quando publicados.
             </span>
