@@ -7,10 +7,10 @@ import { accessDestination, resolveVibraAccess } from "../lib/vibra-access";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [
-    { title: "Meu espaço — Vibra" },
-    { name: "description", content: "Acesso ao espaço de treinos, hábitos e progresso da Vibra." },
-    { property: "og:title", content: "Meu espaço — Vibra" },
-    { property: "og:description", content: "Seu espaço de treinos e evolução na Vibra." },
+    { title: "Meu espaço — Avirafit" },
+    { name: "description", content: "Acesso ao espaço de treinos, hábitos e progresso da Avirafit." },
+    { property: "og:title", content: "Meu espaço — Avirafit" },
+    { property: "og:description", content: "Seu espaço de treinos e evolução na Avirafit." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
