@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, CheckCircle2, Clock3, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock3, ShieldCheck } from "lucide-react";
 import { Button } from "./ui/button";
 import { signOut } from "../lib/supabase";
 import "./PlansPage.css";
 
 export function PlansPage() {
-  const [interestRegistered, setInterestRegistered] = useState(false);
-
   return (
     <main className="vibra-plans-page">
       <div className="vibra-plans-glow" aria-hidden="true" />
@@ -31,16 +29,10 @@ export function PlansPage() {
             Estamos finalizando as informações de planos, preços, benefícios e contratação.
             Até que exista uma verificação segura de assinatura ativa, o acesso à área premium permanece bloqueado.
           </p>
-          {interestRegistered ? (
-            <div className="vibra-plans-confirmation" role="status">
-              <CheckCircle2 size={18} /> Interesse registrado nesta sessão. Nenhuma contratação foi realizada.
-            </div>
-          ) : (
-            <Button className="vibra-plans-cta" onClick={() => setInterestRegistered(true)}>
-              Tenho interesse em conhecer os planos
-            </Button>
-          )}
-          <small>Este registro é temporário e não altera sua conta nem cria uma assinatura.</small>
+          <Button className="vibra-plans-cta" onClick={() => window.location.assign("/")}>
+            Continuar para o aplicativo <ArrowRight size={17} />
+          </Button>
+          <small>Você já pode acessar a página inicial e explorar as funcionalidades disponíveis na sua conta. Nenhuma contratação ou pagamento será realizado.</small>
         </section>
         <p className="vibra-plans-footnote">A Vibra não solicita pagamento nesta página.</p>
       </div>
