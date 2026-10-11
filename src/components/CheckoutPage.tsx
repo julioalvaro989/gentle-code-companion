@@ -46,6 +46,13 @@ export function CheckoutPage() {
         {checking ? <RefreshCw size={20}/> : providerMissing ? <ShieldAlert size={20} color="#ffbd69"/> : access?.status === "pending" ? <Clock3 size={20} color="#ffbd69"/> : <Clock3 size={20}/>}
         <div><strong>{checking ? "Verificando status…" : providerMissing ? "Verificação indisponível" : access && access.status !== "none" && access.status !== "active" ? (access.status === "pending" ? "Pagamento ainda não confirmado" : "Assinatura não ativa") : "Checkout ainda não configurado"}</strong><p style={{ margin: "6px 0 0", color: "#c3bfd2", lineHeight: 1.6, fontSize: 14 }}>{checking ? "Aguarde enquanto consultamos o registro de acesso." : error || (access && access.status !== "none" && access.status !== "active" ? "O último status registrado é " + access.status + ". O acesso continua bloqueado até uma confirmação válida e atual do provedor." : "Não foi encontrada uma integração de cobrança validada neste projeto. Nenhuma cobrança foi iniciada e não é possível marcar o pagamento como aprovado por aqui.")}</p></div>
       </div>
+      <button
+        type="button"
+        onClick={() => window.location.assign("/?public=1")}
+        style={{ display: "flex", width: "100%", justifyContent: "center", alignItems: "center", gap: 10, marginTop: 14, border: "1px solid #51406f", borderRadius: 12, padding: "13px 16px", background: "linear-gradient(110deg, rgba(92,57,133,.22), rgba(185,243,91,.04))", color: "#f8f7ff", fontWeight: 700, cursor: "pointer" }}
+      >
+        <ArrowLeft size={16} color="#b9f35b" /> Voltar para a página inicial
+      </button>
       <p style={{ color: "#8f8aa4", fontSize: 12, lineHeight: 1.6, marginTop: 16 }}>Conta: {session?.user.email || "validando sessão"} · O retorno a esta página não libera acesso por si só.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 24 }}>
         <button type="button" onClick={() => void verify()} disabled={checking} style={{ display: "inline-flex", gap: 8, alignItems: "center", border: 0, borderRadius: 12, padding: "12px 16px", background: "#b9f35b", color: "#14141d", fontWeight: 800, cursor: checking ? "wait" : "pointer" }}><RefreshCw size={16}/> Verificar novamente</button>
