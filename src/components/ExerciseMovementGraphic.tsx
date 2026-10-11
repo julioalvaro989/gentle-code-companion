@@ -43,7 +43,7 @@ export function ExerciseMovementGraphic({ exerciseId, exerciseName }: Props) {
     const found = records.find(item => {
      const name = normalize(item.name ?? "");
      return targetTerms.some(term => name === term || name.includes(term) || term.includes(name));
-    }) ?? records.find(item => item.gifUrl || item.imageUrl);
+    });
     const url = found?.gifUrl || found?.imageUrl;
     if (active && url) setMediaUrl(url);
     else if (active) setFailed(true);
