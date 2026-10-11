@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { exerciseCatalog } from "./exerciseCatalog";
 
 type Props = { exerciseId: string; exerciseName: string };
 type ApiExercise = { name?: string; gifUrl?: string; imageUrl?: string; exerciseId?: string };
@@ -31,7 +32,9 @@ export function ExerciseMovementGraphic({ exerciseId, exerciseName }: Props) {
   setMediaUrl(null);
   setLoading(true);
   setFailed(false);
-  const terms = aliases[exerciseId] ?? [exerciseName, exerciseName.replace(/\s+(livre|alternado|com halteres|com halter)$/i, "")];
+  const catalogEntry = exerciseCatalog.find(item => item.id === exerciseId);
+  const terms = [...(aliases[exerciseId] ?? []), catalogEntry?.alternativeName ?? "", exerciseName]
+   .map(term => term.trim()).filter(Boolean).filter((term, index, all) => all.indexOf(term) === index);
   (async () => {
    try {
     const responses = await Promise.all(terms.slice(0, 2).map(term =>
@@ -39,10 +42,10 @@ export function ExerciseMovementGraphic({ exerciseId, exerciseName }: Props) {
       .then(response => response.ok ? response.json() : null).catch(() => null)
     ));
     const records: ApiExercise[] = responses.flatMap(value => Array.isArray(value) ? value : Array.isArray(value?.data) ? value.data : Array.isArray(value?.exercises) ? value.exercises : []);
-    const targetTerms = terms.map(normalize);
+    const targetTerms = terms.map(normalize).filter(term => term.length >= 4);
     const found = records.find(item => {
      const name = normalize(item.name ?? "");
-     return targetTerms.some(term => name === term || name.includes(term) || term.includes(name));
+     return targetTerms.some(term => name === term || name.includes(term));
     });
     const url = found?.gifUrl || found?.imageUrl;
     if (active && url) setMediaUrl(url);
