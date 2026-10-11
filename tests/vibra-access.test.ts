@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { authorizeTestAdmin } from "./test-admin-policy.server";
-import { accessDestination, bounded, resolveVibraAccess } from "./vibra-access";
+import { authorizeTestAdmin } from "../src/lib/test-admin-policy.server";
+import { accessDestination, bounded, resolveVibraAccess } from "../src/lib/vibra-access";
 
 const allowedId = "00000000-0000-4000-8000-000000000001";
 const otherId = "00000000-0000-4000-8000-000000000002";
