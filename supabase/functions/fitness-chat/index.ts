@@ -5,6 +5,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const openAiKey = Deno.env.get("OPENAI_API_KEY") ?? "";
+const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const allowedOrigins = new Set((Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((value) => value.trim()).filter(Boolean));
 const requestsByUser = new Map<string, number[]>();
 const MAX_BODY_BYTES = 32 * 1024;
@@ -42,12 +43,41 @@ function rateLimitExceeded(userId: string): boolean {
   return false;
 }
 
+function buildFitnessSystemContext(profile: Record<string, unknown> | null, messages: Array<{ role: "user" | "assistant"; content: string }>): string {
+  const base = "Você é a Vibra AI, assistente virtual fitness, e conversa em português brasileiro salvo se o usuário pedir outro idioma. Ajude com exercícios, treino, hábitos e nutrição esportiva geral. Não invente funcionalidades, preços ou dados pessoais. Para questões médicas, lesões, dietas clínicas ou medicamentos, não diagnostique nem prescreva e recomende profissional habilitado; em emergência, oriente buscar atendimento. Priorize técnica segura e progressão gradual. Nunca afirme que é humano. Este contexto é privado e pertence somente ao usuário autenticado desta solicitação.";
+  if (!profile) return base;
+  const birthDate = typeof profile.birth_date === "string" ? new Date(profile.birth_date) : null;
+  let age: number | null = null;
+  if (birthDate && Number.isFinite(birthDate.getTime())) {
+    age = new Date().getFullYear() - birthDate.getFullYear();
+    const beforeBirthday = new Date().getMonth() < birthDate.getMonth() || (new Date().getMonth() === birthDate.getMonth() && new Date().getDate() < birthDate.getDate());
+    if (beforeBirthday) age -= 1;
+  }
+  const context = {
+    objetivo: profile.primary_goal ?? null,
+    idade: age !== null && age >= 13 && age <= 110 ? age : null,
+    peso_kg: typeof profile.weight_kg === "number" ? profile.weight_kg : null,
+    altura_cm: typeof profile.height_cm === "number" ? profile.height_cm : null,
+    experiencia: profile.experience_level ?? null,
+    frequencia_semanal: profile.weekly_frequency ?? null,
+    local_treino: profile.training_location ?? null,
+    preferencias: profile.preferences ?? null,
+  };
+  const latest = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
+  const needsSafetyContext = /trein|exerc|dor|les[aã]o|limita|mobilidade|agach|supino|corrid|cardio|along|recupera/i.test(latest);
+  const limitations = typeof profile.physical_limitations === "string" ? profile.physical_limitations.trim() : "";
+  const safetyNote = needsSafetyContext && limitations
+    ? ` Limitações físicas informadas pelo usuário (considere somente para segurança e adequação da resposta): ${limitations.slice(0, 1000)}.`
+    : "";
+  return `${base}\nContexto fitness autorizado para esta conversa (JSON): ${JSON.stringify(context)}.${safetyNote}`;
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
   if (!origin || !allowedOrigins.has(origin)) {
     return new Response("Origem não autorizada.", { status: 403, headers: { "Cache-Control": "no-store" } });
   }
-  if (!supabaseUrl || !supabaseKey || !openAiKey || allowedOrigins.size === 0) {
+  if (!supabaseUrl || !supabaseKey || !serviceRoleKey || !openAiKey || allowedOrigins.size === 0) {
     return jsonError("O serviço de IA não está configurado corretamente.", 503, origin);
   }
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: responseHeaders(origin) });
@@ -69,6 +99,46 @@ Deno.serve(async (req: Request) => {
     userId = user.id;
   } catch {
     return jsonError("Não foi possível validar sua sessão agora.", 503, origin);
+  }
+
+  // Access is derived server-side from the authenticated identity. The browser
+  // cannot create or promote subscription rows; only trusted backend code can.
+  let subscription: { plan_id?: string; status?: string; current_period_end?: string | null } | null = null;
+  try {
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/vibra_subscriptions?select=plan_id,status,current_period_end&user_id=eq.${encodeURIComponent(userId)}&order=updated_at.desc&limit=1`,
+      { headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } },
+    );
+    if (!response.ok) return jsonError("Não foi possível validar seu acesso. Tente novamente mais tarde.", 503, origin);
+    const rows = await response.json();
+    subscription = Array.isArray(rows) ? rows[0] ?? null : null;
+  } catch {
+    return jsonError("Não foi possível validar seu acesso. Tente novamente mais tarde.", 503, origin);
+  }
+  const periodValid = !subscription?.current_period_end || new Date(subscription.current_period_end).getTime() > Date.now();
+  if (!subscription || subscription.status !== "active" || !periodValid) {
+    return jsonError("Seu pagamento ainda não está confirmado ou sua assinatura não está ativa. O acesso ao chat permanece bloqueado.", 402, origin);
+  }
+  // The Basic plan does not include Vibra AI. Do not infer Premium from a client
+  // selection or a successful Basic payment.
+  if (subscription.plan_id !== "premium") {
+    return jsonError("O chat Vibra AI está disponível apenas no plano Premium ativo.", 403, origin);
+  }
+
+  let fitnessProfile: Record<string, unknown> | null = null;
+  try {
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/fitness_profiles?select=username,birth_date,weight_kg,height_cm,primary_goal,experience_level,weekly_frequency,training_location,preferences,physical_limitations,profile_completed&id=eq.${encodeURIComponent(userId)}&limit=1`,
+      { headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } },
+    );
+    if (!response.ok) return jsonError("Não foi possível carregar seu perfil fitness com segurança.", 503, origin);
+    const rows = await response.json();
+    fitnessProfile = Array.isArray(rows) ? rows[0] ?? null : null;
+  } catch {
+    return jsonError("Não foi possível carregar seu perfil fitness com segurança.", 503, origin);
+  }
+  if (!fitnessProfile || fitnessProfile.profile_completed !== true) {
+    return jsonError("Conclua seu perfil fitness antes de usar o chat.", 403, origin);
   }
 
   if (rateLimitExceeded(userId)) return jsonError("Muitas mensagens em pouco tempo. Aguarde um minuto e tente novamente.", 429, origin);
@@ -140,7 +210,7 @@ Deno.serve(async (req: Request) => {
         temperature: 0.5,
         max_tokens: 900,
         messages: [
-          { role: "system", content: "Você é a Vibra AI, assistente virtual do FitPro — FORMA Fitness Club, e conversa sempre em português brasileiro, salvo se o cliente pedir outro idioma. Ajude o cliente com qualquer pergunta que você consiga responder com segurança e honestidade: musculação, exercícios, execução e técnica, séries e repetições, objetivos de condicionamento, cardio, alongamento, mobilidade, recuperação, descanso, hábitos saudáveis, nutrição esportiva geral, hidratação, equipamentos, academias, motivação, organização da rotina e como usar as funcionalidades do aplicativo. Responda diretamente à pergunta, com passos práticos quando útil, e faça perguntas de esclarecimento quando faltarem informações. Não invente funcionalidades, dados pessoais, preços, horários ou serviços específicos do aplicativo. Para questões médicas, sintomas, lesões, transtornos alimentares, dietas clínicas ou medicamentos/suplementos, dê apenas informação geral, não diagnostique nem prescreva, e recomende um profissional habilitado; diante de dor forte ou emergência, oriente procurar atendimento médico. Adapte sugestões de treino ao nível informado e priorize técnica correta, progressão gradual e segurança. Se não souber ou não puder confirmar algo, diga isso claramente e ofereça uma alternativa segura. Nunca afirme que é humano." }
+          { role: "system", content: buildFitnessSystemContext(fitnessProfile, safeMessages) }
           ...safeMessages,
         ],
       }),
