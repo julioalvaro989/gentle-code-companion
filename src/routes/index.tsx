@@ -145,7 +145,7 @@ function GymApp() {
           setProfileName(name);
           // Resolve backend authorization first. Admin sessions must be registered
           // before RLS-protected profile/progress reads are attempted.
-          let access;
+          let access: Awaited<ReturnType<typeof getVibraAccess>>;
           try {
             access = await getVibraAccess(current);
             setAccessError("");
@@ -231,6 +231,11 @@ function GymApp() {
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
       const access = await getVibraAccess(next);
+      if (access.adminSessionLimit) {
+        setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+        setAccessReady(true);
+        return;
+      }
       if (access.status === "active") {
         window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
       } else {
@@ -270,6 +275,11 @@ function GymApp() {
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
         const access = await getVibraAccess(next);
+        if (access.adminSessionLimit) {
+          setAccessError("As três sessões administrativas permitidas já estão em uso. Encerre uma sessão anterior e tente novamente.");
+          setAccessReady(true);
+          return;
+        }
         if (access.status === "active") window.location.assign(access.profileCompleted ? "/" : "/fitness-profile");
         else {
           const nextPlan = access.planId || selectedPlan;
