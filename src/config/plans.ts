@@ -40,7 +40,7 @@ function parsePlan(value: unknown): PublicPlan | null {
   if (typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) return null;
   if (interval !== null && interval !== "month" && interval !== "year" && interval !== "one_time") return null;
   if (!Array.isArray(benefits) || !benefits.every((item) => typeof item === "string")) return null;
-  if (!isRecord(aiLimits) || typeof aiLimits.summary !== "string" || (aiLimits.status !== "to_define" && aiLimits.status !== "configured")) return null;
+   if (!isRecord(aiLimits) || typeof aiLimits['summary'] !== "string" || (aiLimits['status'] !== "to_define" && aiLimits['status'] !== "configured")) return null;
   if (advancedPersonalization !== "available" && advancedPersonalization !== "not_included" && advancedPersonalization !== "under_review") return null;
   if (status !== "draft" && status !== "published") return null;
 
@@ -56,7 +56,7 @@ function parsePlan(value: unknown): PublicPlan | null {
     currency,
     interval: interval as PlanInterval | null,
     benefits: benefits as string[],
-    aiLimits: { summary: aiLimits.summary, status: aiLimits.status },
+    aiLimits: { summary: aiLimits['summary'], status: aiLimits['status'] },
     advancedPersonalization,
     status,
   };
@@ -69,10 +69,10 @@ export async function loadPublicPlansConfig(): Promise<PublicPlansConfig> {
   });
   if (!response.ok) throw new Error(`Não foi possível carregar a configuração de planos (HTTP ${response.status}).`);
   const raw: unknown = await response.json();
-  if (!isRecord(raw) || raw.version !== 1 || !Array.isArray(raw.plans)) {
+  if (!isRecord(raw) || raw['version'] !== 1 || !Array.isArray(raw['plans'])) {
     throw new Error("A configuração de planos está em formato inválido.");
   }
-  const plans = raw.plans.map(parsePlan);
+  const plans = raw['plans'].map(parsePlan);
   if (plans.some((plan) => plan === null)) throw new Error("A configuração contém um plano inválido.");
   const validPlans = plans as PublicPlan[];
   if (new Set(validPlans.map((plan) => plan.id)).size !== validPlans.length) {
