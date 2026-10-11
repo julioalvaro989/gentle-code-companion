@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Dumbbell, Filter, PlayCircle, Search, SlidersHorizontal, Video, X } from "lucide-react";
 import { exerciseCatalog, type ExerciseRecord } from "./exerciseCatalog";
+import { ExerciseMovementGraphic } from "./ExerciseMovementGraphic";
 import "./ExerciseLibrary.css";
 
 type Props = { onOpenExercise?: (id: string) => void; selectedExerciseId?: string | null; onClearSelected?: () => void };
