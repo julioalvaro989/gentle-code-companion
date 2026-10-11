@@ -46,7 +46,7 @@ function PersonalizedPreview() {
           <article className="onboarding-preview-tile"><Leaf/><small>PREFERÊNCIAS ALIMENTARES</small><strong>{a.preferredFoods.length ? a.preferredFoods.slice(0,3).join(", ") : "Preferências não informadas"}</strong><p>{a.foodBudget ? "Orçamento estimado: R$ "+a.foodBudget+(a.foodBudgetPeriod==="weekly"?" por semana":" por mês") : "Nenhum orçamento informado."}</p></article>
         </div>
         <div className="onboarding-preview-explainer"><ShieldCheck/><div><strong>Como isso ajuda a personalizar sua experiência</strong><p>Essas informações podem orientar a organização de metas, preferências e rotina. Esta é uma prévia das respostas fornecidas, não um plano de treino ou alimentação completo e não substitui avaliação de profissionais de saúde.</p></div></div>
-        <div className="onboarding-preview-actions"><button className="onboarding-back" onClick={()=>window.location.assign("/onboarding")}><ArrowLeft size={17}/> Editar meu perfil</button><button className="onboarding-next" onClick={()=>window.location.assign("/plans")}>Ver planos e continuar <ArrowRight size={17}/></button></div>
+        <div className="onboarding-preview-actions"><button className="onboarding-back" onClick={()=>window.location.assign("/onboarding?edit=1")}><ArrowLeft size={17}/> Editar meu perfil</button><button className="onboarding-next" onClick={()=>window.location.assign("/plans")}>Ver planos e continuar <ArrowRight size={17}/></button></div>
       </section>
       <p className="onboarding-footer-note">Você continua no controle das suas escolhas.</p>
     </div>
