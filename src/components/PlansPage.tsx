@@ -34,13 +34,13 @@ export function PlansPage() {
         <button className="vibra-plans-back" type="button" onClick={async () => {
           try { await signOut(); } finally { window.location.replace("/"); }
         }}>
-          <ArrowLeft size={16} /> Sair e voltar para a Vibra
+          <ArrowLeft size={16} /> Sair e voltar para a Avirafit
         </button>
-        <div className="vibra-plans-brand"><span>V</span> vibra<span>.</span></div>
+        <div className="vibra-plans-brand"><span>A</span> avirafit<span>.</span></div>
         <p className="vibra-plans-eyebrow"><ShieldCheck size={15} /> ACESSO E PLANOS</p>
         <h1>Seu próximo passo,<br /><span>no seu ritmo.</span></h1>
         <p className="vibra-plans-intro">
-          Compare as opções da Vibra. Os preços e os limites do Vibra AI ainda estão em definição.
+          Compare as opções da Avirafit. Os preços e os limites do Avirafit AI ainda estão em definição.
           Nenhuma contratação ou ativação de assinatura acontece nesta página.
         </p>
 
