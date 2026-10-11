@@ -255,9 +255,11 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
   const validPeriod = !subscription?.current_period_end || new Date(subscription.current_period_end).getTime() > Date.now();
   const status: VibraAccess["status"] = subscription?.status === "active" && validPeriod
     ? "active"
-    : subscription && ["pending", "past_due", "canceled", "refunded", "failed"].includes(subscription.status)
-      ? subscription.status
-      : "none";
+    : subscription?.status === "active" && !validPeriod
+      ? "past_due"
+      : subscription && ["pending", "past_due", "canceled", "refunded", "failed"].includes(subscription.status)
+        ? subscription.status
+        : "none";
   const profile = status === "active" ? await getFitnessProfile(session) : null;
   return {
     status,
