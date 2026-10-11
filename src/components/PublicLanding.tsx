@@ -166,7 +166,7 @@ export function PublicLanding({ onAuth }: Props) {
             <div className="vp-hero-content">
               <p className="vp-eyebrow"><Zap size={14} aria-hidden="true" /> FITNESS, COM INTELIGÊNCIA</p>
               <h1 id="vp-title">Seu próximo nível começa com <span>inteligência.</span></h1>
-              <p className="vp-hero-description">Treinos personalizados, orientação para sua rotina e acompanhamento da evolução com a inteligência artificial do Vibra — no seu ritmo e com os recursos disponíveis na sua conta.</p>
+              <p className="vp-hero-description">Treinos, orientação para sua rotina e acompanhamento da evolução com a inteligência artificial do Vibra — no seu ritmo e com os recursos disponíveis na sua conta.</p>
               <div className="vp-hero-actions">
                 <Button className="vp-button" size="lg" onClick={() => onAuth("signup")}>Começar agora <ArrowRight aria-hidden="true" /></Button>
                 <Button variant="ghost" className="vp-discover" onClick={() => onAuth("login")}>Já tenho conta <ArrowDown aria-hidden="true" /></Button>
