@@ -24,9 +24,9 @@ function readPosition(): Position | null {
     const stored: unknown = JSON.parse(localStorage.getItem(positionStorageKey) ?? "null");
     if (typeof stored !== "object" || stored === null) return null;
     const value = stored as Record<string, unknown>;
-    if (value.version !== 1 || typeof value.x !== "number" || typeof value.y !== "number" ||
-        !Number.isFinite(value.x) || !Number.isFinite(value.y)) return null;
-    return { x: value.x, y: value.y };
+    if (value["version"] !== 1 || typeof value["x"] !== "number" || typeof value["y"] !== "number" ||
+        !Number.isFinite(value["x"]) || !Number.isFinite(value["y"])) return null;
+    return { x: value["x"], y: value["y"] };
   } catch { return null; }
 }
 
