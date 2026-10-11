@@ -62,16 +62,22 @@ revoke insert, update, delete, truncate on table public.vibra_subscriptions from
 
 -- These column grants complement existing self-row RLS policies. They do not
 -- grant access to another user's row and do not let clients edit subscription state.
+grant select on table public.fitness_profiles, public.fitness_progress to authenticated;
 grant insert (
-  birth_date, weight_kg, height_cm, primary_goal, experience_level,
-  weekly_frequency, training_location, preferences, physical_limitations,
-  profile_completed
-) on table public.fitness_profiles to authenticated;
-grant update (
-  username, email, goal, updated_at, birth_date, weight_kg, height_cm,
+  id, username, email, goal, updated_at, birth_date, weight_kg, height_cm,
   primary_goal, experience_level, weekly_frequency, training_location,
   preferences, physical_limitations, profile_completed
 ) on table public.fitness_profiles to authenticated;
+grant update (
+  id, username, email, goal, updated_at, birth_date, weight_kg, height_cm,
+  primary_goal, experience_level, weekly_frequency, training_location,
+  preferences, physical_limitations, profile_completed
+) on table public.fitness_profiles to authenticated;
+
+grant insert (user_id, completed_exercises, water_glasses, goal, updated_at)
+  on table public.fitness_progress to authenticated;
+grant update (user_id, completed_exercises, water_glasses, goal, updated_at)
+  on table public.fitness_progress to authenticated;
 
 
 -- A restrictive policy is ANDed with existing self/admin policies, so it can
