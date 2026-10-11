@@ -7,7 +7,7 @@ import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Target, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({ head: () => ({ meta: [
   { title: "Vibra — Seu próximo nível" },
