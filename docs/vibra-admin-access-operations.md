@@ -8,6 +8,7 @@
    - `SUPABASE_URL`
    - `SUPABASE_PUBLISHABLE_KEY` ou `SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
+   - `VIBRA_ADMIN_EMAIL` com o e-mail exato da conta proprietária, em configuração privada do Supabase Edge Functions (comparação sem diferenciar maiúsculas/minúsculas). Sem esse secret, o acesso administrativo falha de forma fechada.
    - `ALLOWED_ORIGINS` com as origens exatas do app, separadas por vírgula.
 4. Valide em ambiente de staging que os JWTs incluem `session_id` e que a versão do Supabase aceita as funções/roles usadas nesta migration.
 5. Não considere o mecanismo ativo antes de migration, deploy e testes de RLS passarem.
