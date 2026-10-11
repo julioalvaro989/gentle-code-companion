@@ -142,6 +142,9 @@ function GymApp() {
           setSession(current);
           const name = current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Vibra";
           setProfileName(name);
+          // Resolve backend authorization first. Admin sessions must be registered
+          // before RLS-protected profile/progress reads are attempted.
+          const access = await getVibraAccess(current).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
           const profile = await getFitnessProfile(current).catch(() => null);
           if (profile?.username) setProfileName(profile.username);
           const saved = await getFitnessProgress(current).catch(() => null);
@@ -155,7 +158,6 @@ function GymApp() {
           let fromStorage: string | null = null;
           try { fromStorage = window.localStorage.getItem(VIBRA_SELECTED_PLAN_KEY); } catch { /* Ignore unavailable storage. */ }
           const chosenPlan = isVibraPlanId(fromUrl) ? fromUrl : isVibraPlanId(fromStorage) ? fromStorage : null;
-          const access = await getVibraAccess(current).catch(() => ({ status: "none" as const, planId: null, profileCompleted: false }));
           if (access.status !== "active") {
             const nextPlan = access.planId || chosenPlan;
             window.location.replace(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
