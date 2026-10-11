@@ -42,18 +42,50 @@ function headers(token?: string) {
   return { apikey: key, Authorization: `Bearer ${token ?? key}`, "Content-Type": "application/json" };
 }
 
+export class SupabaseRequestError extends Error {
+  readonly status?: number;
+  readonly code?: string;
+  readonly details?: string;
+  readonly hint?: string;
+
+  constructor(message: string, metadata: { status?: number; code?: string; details?: string; hint?: string } = {}) {
+    super(message);
+    this.name = "SupabaseRequestError";
+    this.status = metadata.status;
+    this.code = metadata.code;
+    this.details = metadata.details;
+    this.hint = metadata.hint;
+  }
+}
+
 async function request(path: string, options: RequestInit = {}, token?: string) {
   let currentToken = token;
   if (token) {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    if (!data.session) throw new Error("Sua sessão expirou. Entre novamente.");
+    if (error) throw new SupabaseRequestError(error.message, { status: error.status });
+    if (!data.session) throw new SupabaseRequestError("Sua sessão expirou. Entre novamente.", { status: 401, code: "SESSION_MISSING" });
     currentToken = data.session.access_token;
   }
-  const response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(currentToken), ...(options.headers ?? {}) } });
+
+  let response: Response;
+  try {
+    response = await fetch(`${url}/${path}`, { ...options, headers: { ...headers(currentToken), ...(options.headers ?? {}) } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Falha de rede";
+    throw new SupabaseRequestError(message, { code: "NETWORK_ERROR" });
+  }
+
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body?.msg || body?.message || body?.error_description || "Não foi possível concluir a operação.");
+  if (!response.ok) {
+    const message = body?.message || body?.msg || body?.error_description || body?.error || "Não foi possível concluir a operação.";
+    throw new SupabaseRequestError(message, {
+      status: response.status,
+      code: typeof body?.code === "string" ? body.code : undefined,
+      details: typeof body?.details === "string" ? body.details : undefined,
+      hint: typeof body?.hint === "string" ? body.hint : undefined,
+    });
+  }
   return body;
 }
 
@@ -274,13 +306,20 @@ export async function saveFitnessOnboarding(
   answers: FitnessOnboardingAnswers,
   status: "pending" | "completed" = "pending",
 ): Promise<void> {
+  if (!session.user.id) {
+    throw new SupabaseRequestError("Não há usuário autenticado para salvar o perfil.", { status: 401, code: "USER_ID_MISSING" });
+  }
+  if (!answers.primaryGoal.trim()) {
+    throw new SupabaseRequestError("Selecione um objetivo principal antes de salvar.", { status: 400, code: "PRIMARY_GOAL_REQUIRED" });
+  }
+
   const now = new Date().toISOString();
   await request("rest/v1/fitness_onboarding_profiles?on_conflict=user_id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify({
       user_id: session.user.id,
-      answers,
+      answers: { ...answers, secondaryGoals: Array.isArray(answers.secondaryGoals) ? answers.secondaryGoals : [] },
       status,
       updated_at: now,
       completed_at: status === "completed" ? now : null,
