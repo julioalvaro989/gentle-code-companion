@@ -11,6 +11,7 @@ type Place = NonNullable<FitnessProfileInput["training_location"]>;
 export function FitnessProfilePage() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -35,9 +36,9 @@ export function FitnessProfilePage() {
     (async () => {
       try {
         const current = await adoptSupabaseSession();
-        if (!current) { window.location.replace("/?auth=login"); return; }
+        if (!current) { setRedirecting(true); window.location.replace("/?auth=login"); return; }
         const access = await getVibraAccess(current);
-        if (access.status !== "active") { window.location.replace("/checkout"); return; }
+        if (access.status !== "active") { setRedirecting(true); window.location.replace("/checkout"); return; }
         if (!active) return;
         setSession(current);
         const saved = await getFitnessProfile(current);
@@ -74,7 +75,7 @@ export function FitnessProfilePage() {
       const profile: FitnessProfileInput = {
         username: name.trim(),
         email: session.user.email || "",
-        goal: goal,
+        goal: goal === "emagrecimento" ? "Perder gordura" : goal === "hipertrofia" ? "Ganhar massa muscular" : goal === "condicionamento" ? "Melhorar condicionamento" : "Ter mais saúde e energia",
         birth_date: birthDate || null,
         weight_kg: kg,
         height_cm: cm,
@@ -94,7 +95,7 @@ export function FitnessProfilePage() {
     } finally { setSaving(false); }
   }
 
-  if (loading) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#080810", color: "white" }}>Validando pagamento e carregando perfil…</main>;
+  if (loading || redirecting) return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#080810", color: "white" }}>Validando pagamento e carregando perfil…</main>;
 
   return <main style={{ minHeight: "100vh", padding: "28px 16px 56px", background: "radial-gradient(circle at 10% 0%, #21163d 0, transparent 34%), #080810", color: "#f8f7ff" }}>
     <div style={{ maxWidth: 850, margin: "0 auto" }}>
