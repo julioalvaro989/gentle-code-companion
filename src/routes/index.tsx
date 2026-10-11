@@ -204,7 +204,10 @@ function GymApp() {
         await saveFitnessProfile(next, { username: name, email: next.user.email || "", goal }).catch(() => {});
         const access = await resolveVibraAccess(async () => next, checkTestAdmin);
         if (access.testAdmin && access.session) await activateInternalSession(access.session);
-        else window.location.assign("/plans");
+        else {
+          const onboarding = await getFitnessOnboarding(next).catch(() => null);
+          window.location.assign(onboarding?.status === "completed" ? "/plans" : "/onboarding");
+        }
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
