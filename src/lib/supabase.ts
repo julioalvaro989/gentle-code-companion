@@ -254,7 +254,19 @@ async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boo
     const { data, error } = await supabase.functions.invoke("vibra-admin-session", {
       body: { action: "claim" },
     });
-    if (error) throw new Error("Não foi possível validar as permissões de acesso.");
+    if (error) {
+      // Preserve actionable diagnostics in browser logs while never logging tokens or headers.
+      const context = (error as { context?: { status?: number; statusText?: string } }).context;
+      console.error("[Vibra admin authorization] Edge Function invocation failed", {
+        function: "vibra-admin-session",
+        status: context?.status ?? null,
+        statusText: context?.statusText ?? null,
+        errorName: error instanceof Error ? error.name : "FunctionsFetchError",
+        message: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
+      });
+      throw new Error(context?.status === 401 ? "Sua sessão expirou. Entre novamente." : context?.status === 403 ? "A origem deste ambiente não está autorizada no serviço de acesso." : context?.status === 503 ? "O serviço de autorização está sem configuração ou temporariamente indisponível." : "Não foi possível validar as permissões de acesso.");
+    }
     if (!data || typeof data.admin !== "boolean" || typeof data.allowed !== "boolean") {
       throw new Error("O serviço de autorização retornou uma resposta inválida.");
     }
