@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Activity, ArrowLeft, LogOut, Users, ShieldCheck, RefreshCw } from "lucide-react";
-import { getProfile, getStoredSession, listFitnessProfiles, signIn, signOut, type AuthSession, type FitnessProfile } from "../lib/supabase";
+import { adoptSupabaseSession, getProfile, listFitnessProfiles, signIn, signOut, type AuthSession, type FitnessProfile } from "../lib/supabase";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -16,10 +16,10 @@ function AdminPage() {
 
   useEffect(() => {
     let alive = true;
-    const current = getStoredSession();
-    if (!current) { setReady(true); return; }
     (async () => {
       try {
+        const current = await adoptSupabaseSession();
+        if (!current) return;
         const profile = await getProfile(current);
         if (!alive) return;
         if (!profile?.is_admin) { await signOut(); setError("Esta conta não possui permissão de administrador."); }
@@ -49,7 +49,7 @@ function AdminPage() {
     finally { setLoading(false); setReady(true); }
   }
 
-  async function logout() { await signOut(); setSession(null); setUsers([]); }
+  async function logout() { try { await signOut(); } catch { setError("A sessão local foi encerrada, mas o provedor não confirmou o logout remoto."); } finally { setSession(null); setUsers([]); } }
 
   if (!ready) return <div className="admin-page"><div className="admin-card"><h1>Validando acesso...</h1></div></div>;
 
