@@ -82,7 +82,8 @@ language sql
 stable
 security definer
 set search_path = public, pg_temp
-as $vibra$1  select exists (
+as $vibra$
+  select exists (
     select 1
     from public.vibra_subscriptions s
     where s.user_id = auth.uid()
