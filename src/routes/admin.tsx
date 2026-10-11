@@ -49,7 +49,7 @@ function AdminPage() {
     finally { setLoading(false); setReady(true); }
   }
 
-  async function logout() { try { await signOut(); } catch { setError("A sessão local foi encerrada, mas o provedor não confirmou o logout remoto."); } finally { setSession(null); setUsers([]); } }
+  async function logout() { try { await signOut(); } catch { setError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setUsers([]); } }
 
   if (!ready) return <div className="admin-page"><div className="admin-card"><h1>Validando acesso...</h1></div></div>;
 

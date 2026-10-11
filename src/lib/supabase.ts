@@ -110,7 +110,13 @@ export async function signOut() {
   const { supabase } = await import("@/integrations/supabase/client");
   try { localStorage.removeItem("investe_session"); } catch { /* Storage can be unavailable. */ }
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (!error) return;
+
+  // A remote logout can fail while the local refresh token remains stored.
+  // Always attempt local cleanup before propagating the remote error.
+  const { error: localError } = await supabase.auth.signOut({ scope: "local" });
+  if (localError) throw new Error("Não foi possível encerrar a sessão local.");
+  throw error;
 }
 
 export async function signInWithGoogle() {

@@ -75,9 +75,42 @@ Deno.serve(async (req: Request) => {
 
   const contentLength = Number(req.headers.get("Content-Length") ?? "0");
   if (contentLength > MAX_BODY_BYTES) return jsonError("A mensagem excede o tamanho permitido.", 413, origin);
+
+  // Enforce the byte limit while reading, not after buffering an unbounded body.
   let rawBody: string;
-  try { rawBody = await req.text(); } catch { return jsonError("Não foi possível ler a solicitação.", 400, origin); }
-  if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) return jsonError("A mensagem excede o tamanho permitido.", 413, origin);
+  const reader = req.body?.getReader();
+  if (!reader) {
+    rawBody = "";
+  } else {
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    let tooLarge = false;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (totalBytes > MAX_BODY_BYTES) {
+          tooLarge = true;
+          await reader.cancel().catch(() => {});
+          break;
+        }
+        chunks.push(value);
+      }
+    } catch {
+      return jsonError("Não foi possível ler a solicitação.", 400, origin);
+    } finally {
+      try { reader.releaseLock(); } catch { /* The stream may already be closed. */ }
+    }
+    if (tooLarge) return jsonError("A mensagem excede o tamanho permitido.", 413, origin);
+    const bytes = new Uint8Array(totalBytes);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    rawBody = new TextDecoder().decode(bytes);
+  }
 
   let body: { messages?: unknown };
   try { body = JSON.parse(rawBody); } catch { return jsonError("Solicitação inválida.", 400, origin); }
