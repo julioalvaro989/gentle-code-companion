@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as PlansRouteImport } from './routes/plans'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PreviewRouteImport } from './routes/preview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,12 +36,24 @@ const PlansRoute = PlansRouteImport.update({
   path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewRoute = PreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/plans': typeof PlansRoute
+  '/onboarding': typeof OnboardingRoute
+  '/preview': typeof PreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -56,10 +70,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/dashboard' | '/plans'
+  fullPaths: '/' | '/admin' | '/dashboard' | '/plans' | '/onboarding' | '/preview'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/dashboard' | '/plans'
-  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans'
+  to: '/' | '/admin' | '/dashboard' | '/plans' | '/onboarding' | '/preview'
+  id: '__root__' | '/' | '/admin' | '/dashboard' | '/plans' | '/onboarding' | '/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +81,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
   PlansRoute: typeof PlansRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PreviewRoute: typeof PreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +115,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview': {
+      id: '/preview'
+      path: '/preview'
+      fullPath: '/preview'
+      preLoaderRoute: typeof PreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +137,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
   PlansRoute: PlansRoute,
+  OnboardingRoute: OnboardingRoute,
+  PreviewRoute: PreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
