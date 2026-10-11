@@ -8,10 +8,10 @@ import { accessDestination, resolveVibraAccess } from "../lib/vibra-access";
 
 export const Route = createFileRoute("/plans")({
   head: () => ({ meta: [
-    { title: "Planos — Vibra" },
-    { name: "description", content: "Conheça as opções de acesso da Vibra." },
-    { property: "og:title", content: "Planos — Vibra" },
-    { property: "og:description", content: "Conheça as opções de acesso e recursos da Vibra." },
+    { title: "Planos — Avirafit" },
+    { name: "description", content: "Conheça as opções de acesso da Avirafit." },
+    { property: "og:title", content: "Planos — Avirafit" },
+    { property: "og:description", content: "Conheça as opções de acesso e recursos da Avirafit." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
