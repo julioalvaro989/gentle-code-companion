@@ -82,15 +82,14 @@ language sql
 stable
 security definer
 set search_path = public, pg_temp
-as $
-  select exists (
+as $vibra$1  select exists (
     select 1
     from public.vibra_subscriptions s
     where s.user_id = auth.uid()
       and s.status = 'active'
       and (s.current_period_end is null or s.current_period_end > now())
   );
-$;
+$vibra$;
 
 revoke all on function public.vibra_has_active_subscription() from public, anon;
 grant execute on function public.vibra_has_active_subscription() to authenticated;
