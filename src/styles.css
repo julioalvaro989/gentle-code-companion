@@ -216,3 +216,75 @@ html, body, #root, .gym-app, .fit-app { background-color:var(--vibra-bg); color:
 .exercise-search, .fit-search, input, textarea, select { color:var(--vibra-text); }
 input::placeholder, textarea::placeholder { color:var(--vibra-muted); opacity:.8; }
 :focus-visible { outline-color:var(--vibra-purple-light); }
+
+
+/* Refinamento visual da área interna Vibra — restrito à aplicação autenticada */
+.fit-app {
+  --vibra-dashboard-radius: 18px;
+  --vibra-dashboard-shadow: 0 12px 32px #0003;
+}
+.fit-app .page-wrap { max-width: 1480px; margin-inline: auto; }
+.fit-app .welcome-row { gap: 22px; margin-bottom: 24px; }
+.fit-app .welcome-row h1 { letter-spacing: -1.15px; line-height: 1.12; }
+.fit-app .welcome-row p { line-height: 1.65; }
+.fit-app .section-kicker { letter-spacing: 1.25px; }
+.fit-app .fit-hero,
+.fit-app .panel,
+.fit-app .stat-card,
+.fit-app .fit-specialist-strip,
+.fit-app .fit-workout-banner,
+.fit-app .fit-expert-card {
+  border-radius: var(--vibra-dashboard-radius);
+}
+.fit-app .fit-hero { isolation: isolate; box-shadow: var(--vibra-dashboard-shadow); }
+.fit-app .fit-hero-shade { pointer-events: none; }
+.fit-app .fit-hero-copy { max-width: 620px; }
+.fit-app .fit-hero-copy h2 { letter-spacing: -1.25px; line-height: 1.02; }
+.fit-app .stats-grid { gap: 14px; margin-block: 22px; }
+.fit-app .stat-card {
+  padding: 20px;
+  box-shadow: 0 8px 24px #0002;
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.fit-app .stat-card:hover {
+  transform: translateY(-2px);
+  border-color: #A855F74d;
+  box-shadow: 0 12px 28px #0003;
+}
+.fit-app .stat-value { letter-spacing: -.65px; }
+.fit-app .lower-grid { gap: 18px; align-items: stretch; }
+.fit-app .panel { padding: clamp(17px, 2vw, 25px); box-shadow: 0 8px 28px #0002; }
+.fit-app .panel-heading { gap: 14px; }
+.fit-app .panel-heading h3, .fit-app .panel-heading h2 { letter-spacing: -.35px; }
+.fit-app .exercise-row { gap: 12px; padding-block: 14px; border-radius: 10px; transition: background-color .16s ease; }
+.fit-app .green-button, .fit-app .outline-button, .fit-app .start-bottom {
+  min-height: 42px;
+  border-radius: 11px;
+  font-weight: 700;
+  transition: transform .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.fit-app .green-button:active, .fit-app .outline-button:active, .fit-app .start-bottom:active { transform: translateY(1px); }
+.fit-app .fit-specialist-strip { gap: 20px; margin-top: 22px; padding: clamp(18px, 2.5vw, 26px); }
+.fit-app .fit-page-section > h1 { letter-spacing: -.8px; line-height: 1.15; }
+.fit-app .fit-page-intro { max-width: 760px; line-height: 1.7; }
+.fit-app .fit-workout-banner { gap: 22px; padding: clamp(20px, 3vw, 30px); }
+.fit-app .fit-exercises-panel { margin-top: 18px; }
+.fit-app .fit-note { border-radius: 14px; line-height: 1.7; }
+.fit-app .app-footer { gap: 12px; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .fit-app .welcome-row { margin-bottom: 18px; }
+  .fit-app .stats-grid { gap: 10px; }
+  .fit-app .lower-grid { gap: 14px; }
+  .fit-app .stat-card:hover { transform: none; }
+}
+@media (max-width: 620px) {
+  .fit-app .welcome-row h1 { letter-spacing: -.75px; }
+  .fit-app .stats-grid { margin-block: 16px; }
+  .fit-app .stat-card { border-radius: 14px; }
+  .fit-app .fit-specialist-strip { margin-top: 16px; }
+  .fit-app .fit-page-section > h1 { letter-spacing: -.55px; }
+  .fit-app .panel { border-radius: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fit-app .stat-card, .fit-app .green-button, .fit-app .outline-button, .fit-app .start-bottom { transition: none !important; }
+}
