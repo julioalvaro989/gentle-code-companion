@@ -104,24 +104,9 @@ function GymApp() {
         const current = await adoptSupabaseSession();
         if (!active) return;
         if (current) {
-          // The app has no trusted subscription-entitlement source yet. Never assume premium access.
+          // Do not expose the dashboard until a trusted subscription check is available.
           window.location.replace("/plans");
           return;
-          setSession(current);
-          const metaName = current.user.user_metadata?.full_name || current.user.user_metadata?.username || "";
-          setProfileName(metaName || current.user.email?.split("@")[0] || "Aluno Vibra");
-          try {
-            const p = await getFitnessProfile(current);
-            if (p?.username) setProfileName(p.username);
-            else await saveFitnessProfile(current, { username: metaName || current.user.email?.split("@")[0] || "Aluno Vibra", email: current.user.email || "", goal });
-            const saved = await getFitnessProgress(current);
-            if (saved) {
-              setDone(saved.completed_exercises || []);
-              setWater(saved.water_glasses || 0);
-              setGoal(saved.goal || "Ganhar massa muscular");
-            }
-          } catch (e) { console.error("Falha ao carregar dados fitness", e); }
-          setProgressHydrated(true);
         } else {
           setProgressHydrated(false);
         }
