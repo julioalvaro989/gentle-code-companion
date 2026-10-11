@@ -73,4 +73,38 @@ grant update (
   preferences, physical_limitations, profile_completed
 ) on table public.fitness_profiles to authenticated;
 
+
+-- A restrictive policy is ANDed with existing self/admin policies, so it can
+-- enforce payment without replacing the project's existing row-ownership rules.
+create or replace function public.vibra_has_active_subscription()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $
+  select exists (
+    select 1
+    from public.vibra_subscriptions s
+    where s.user_id = auth.uid()
+      and s.status = 'active'
+      and (s.current_period_end is null or s.current_period_end > now())
+  );
+$;
+
+revoke all on function public.vibra_has_active_subscription() from public, anon;
+grant execute on function public.vibra_has_active_subscription() to authenticated;
+
+drop policy if exists fitness_profiles_requires_active_subscription on public.fitness_profiles;
+create policy fitness_profiles_requires_active_subscription
+  on public.fitness_profiles as restrictive for all to authenticated
+  using (public.vibra_has_active_subscription())
+  with check (public.vibra_has_active_subscription());
+
+drop policy if exists fitness_progress_requires_active_subscription on public.fitness_progress;
+create policy fitness_progress_requires_active_subscription
+  on public.fitness_progress as restrictive for all to authenticated
+  using (public.vibra_has_active_subscription())
+  with check (public.vibra_has_active_subscription());
+
 commit;
