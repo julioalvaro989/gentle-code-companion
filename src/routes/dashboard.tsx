@@ -22,7 +22,7 @@ function DashboardGate() {
   useEffect(() => {
     let active = true;
     resolveVibraAccess(adoptSupabaseSession, checkTestAdmin)
-      .then(({ session, testAdmin }) => {
+      .then(async ({ session, testAdmin }) => {
         if (!active) return;
         if (session && !testAdmin) {
           const onboarding = await getFitnessOnboarding(session);
