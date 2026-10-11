@@ -104,9 +104,18 @@ function GymApp() {
         const current = await adoptSupabaseSession();
         if (!active) return;
         if (current) {
-          // Do not expose the dashboard until a trusted subscription check is available.
-          window.location.replace("/plans");
-          return;
+          setSession(current);
+          const name = current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Vibra";
+          setProfileName(name);
+          const profile = await getFitnessProfile(current).catch(() => null);
+          if (profile?.username) setProfileName(profile.username);
+          const saved = await getFitnessProgress(current).catch(() => null);
+          if (saved) {
+            setDone(saved.completed_exercises || []);
+            setWater(saved.water_glasses ?? 0);
+            setGoal(saved.goal || "Ganhar massa muscular");
+          }
+          setProgressHydrated(true);
         } else {
           setProgressHydrated(false);
         }
