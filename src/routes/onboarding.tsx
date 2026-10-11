@@ -49,7 +49,7 @@ function OnboardingPage() {
         if (!active) return;
         setSession(current);
         if (saved?.answers) setAnswers({ ...emptyAnswers, ...saved.answers });
-        if (saved?.status === "completed") {
+        if (saved?.status === "completed" && new URLSearchParams(window.location.search).get("edit") !== "1") {
           window.location.replace("/preview");
           return;
         }
