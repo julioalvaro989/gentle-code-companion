@@ -170,7 +170,7 @@ function GymApp() {
       const saved = await getFitnessProgress(next).catch(() => null);
       if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
       setProgressHydrated(true);
-      window.location.assign("/plans");
+      window.location.assign(authMode === "signup" ? "/plans" : "/");
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
     finally { setAuthBusy(false); }
   }
@@ -204,7 +204,7 @@ function GymApp() {
         const saved = await getFitnessProgress(next).catch(() => null);
         if (saved) { setDone(saved.completed_exercises || []); setWater(saved.water_glasses || 0); setGoal(saved.goal || "Ganhar massa muscular"); }
         setProgressHydrated(true);
-        window.location.assign("/plans");
+        window.location.assign("/");
       }
     } catch (e) { setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
     finally { setAuthBusy(false); }
