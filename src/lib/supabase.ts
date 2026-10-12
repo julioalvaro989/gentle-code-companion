@@ -272,14 +272,16 @@ export async function saveFitnessOnboardingAnswers(session: AuthSession, answers
   // Optimistic concurrency: the database RPC atomically merges only the allowed keys
   // if updated_at still matches this read. The server revalidates every value.
   const current = await getFitnessOnboardingAnswers(session);
-  if (!current) throw new Error("Ainda não existe um registro de onboarding para atualizar. Complete o onboarding primeiro.");
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.rpc("update_own_fitness_onboarding_answers", {
     p_patch: patch as import("../integrations/supabase/types").Json,
-    p_expected_updated_at: current.updated_at,
+    // NULL is a create-only precondition; the RPC rejects it if a row already exists.
+    p_expected_updated_at: current?.updated_at ?? null,
   });
   if (error) {
-    if (error.code === "40001") throw new Error("Seu perfil foi atualizado em outro dispositivo. Recarregue os dados e tente novamente.");
+    if (error.code === "40001") throw new Error("Seu perfil foi alterado em outro dispositivo. Recarregue os dados e tente novamente.");
+    if (error.code === "P0002") throw new Error("O perfil de onboarding não existe mais. Recarregue a página e tente novamente.");
+    if (error.code === "42501") throw new Error("Sua sessão expirou ou você não tem autorização para salvar. Entre novamente.");
     throw new Error("Não foi possível salvar suas preferências com segurança. Tente novamente.");
   }
   if (data === null || data === undefined) throw new Error("A atualização não foi confirmada. Recarregue o perfil antes de continuar.");
