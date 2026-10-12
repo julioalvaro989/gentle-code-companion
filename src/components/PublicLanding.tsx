@@ -19,14 +19,14 @@ const resources = [
 ];
 
 const stories = [
-  { name: "Luana Paiva", tag: "ROTINA E ORGANIZAÇÃO", story: "Exemplo ilustrativo: Luana queria organizar melhor os horários de treino. A ideia é mostrar como reunir sessões e objetivos em um só lugar pode ajudar a estruturar a rotina." },
-  { name: "Gabriel Santos", tag: "CONSISTÊNCIA", story: "Exemplo ilustrativo: Gabriel tinha dificuldade para manter seus registros. Com uma rotina organizada, ele consegue visualizar o que planejou e o que já marcou como concluído." },
-  { name: "Beatriz Oliveira", tag: "PLANEJAMENTO", story: "Exemplo ilustrativo: Beatriz buscava mais clareza para começar. A página demonstra como consultar exercícios e manter suas metas acessíveis pode apoiar o planejamento." },
-  { name: "Leo Maromba", tag: "TREINO", story: "Exemplo ilustrativo: Leo queria centralizar as informações do treino. O Vibra reúne recursos de sessão e consulta de exercícios no mesmo espaço." },
-  { name: "Julia Beltro", tag: "HÁBITOS", story: "Exemplo ilustrativo: Julia queria prestar mais atenção aos hábitos diários. Os registros disponíveis ajudam a manter essas informações visíveis." },
-  { name: "Ana Beatriz", tag: "ACOMPANHAMENTO", story: "Exemplo ilustrativo: Ana buscava acompanhar sua rotina ao longo do tempo. O histórico permite consultar registros feitos na própria conta." },
-  { name: "Thales", tag: "OBJETIVOS", story: "Exemplo ilustrativo: Thales precisava deixar os objetivos mais claros. A área pessoal permite manter o foco escolhido à vista e revisá-lo." },
-  { name: "Icaro Junior", tag: "APOIO COM IA", story: "Exemplo ilustrativo: Icaro queria um lugar para dúvidas gerais sobre exercícios e hábitos. A Vibra AI está disponível dentro da conta, com as limitações de uma IA." },
+  { name: "Luana Paiva", tag: "ROTINA E ORGANIZAÇÃO", story: "Luana queria organizar melhor os horários de treino. A ideia é mostrar como reunir sessões e objetivos em um só lugar pode ajudar a estruturar a rotina." },
+  { name: "Gabriel Santos", tag: "CONSISTÊNCIA", story: "Gabriel tinha dificuldade para manter seus registros. Com uma rotina organizada, ele consegue visualizar o que planejou e o que já marcou como concluído." },
+  { name: "Beatriz Oliveira", tag: "PLANEJAMENTO", story: "Beatriz buscava mais clareza para começar. A página demonstra como consultar exercícios e manter suas metas acessíveis pode apoiar o planejamento." },
+  { name: "Leo Maromba", tag: "TREINO", story: "Leo queria centralizar as informações do treino. O Vibra reúne recursos de sessão e consulta de exercícios no mesmo espaço." },
+  { name: "Julia Beltro", tag: "HÁBITOS", story: "Julia queria prestar mais atenção aos hábitos diários. Os registros disponíveis ajudam a manter essas informações visíveis." },
+  { name: "Ana Beatriz", tag: "ACOMPANHAMENTO", story: "Ana buscava acompanhar sua rotina ao longo do tempo. O histórico permite consultar registros feitos na própria conta." },
+  { name: "Thales", tag: "OBJETIVOS", story: "Thales precisava deixar os objetivos mais claros. A área pessoal permite manter o foco escolhido à vista e revisá-lo." },
+  { name: "Icaro Junior", tag: "APOIO COM IA", story: "Icaro queria um lugar para dúvidas gerais sobre exercícios e hábitos. A Vibra AI está disponível dentro da conta, com as limitações de uma IA." },
 ] as const;
 
 const faqs = [
@@ -210,7 +210,6 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
         <section id="vibra-historias" className="vp-section vp-stories-section" aria-labelledby="vp-stories-title">
           <div className="vp-container">
             <div className="vp-section-heading"><div><p className="vp-eyebrow">ROTINA, NÃO MILAGRE</p><h2 id="vp-stories-title">Evolução que vai <span>além do treino.</span></h2></div><p>Conheça histórias de pessoas que buscam uma rotina mais saudável com o apoio do Vibra.</p></div>
-            <div className="vp-testimonial-disclaimer"><ShieldCheck size={17} /><p><b>Conteúdo demonstrativo.</b> Os relatos abaixo são exemplos ilustrativos, não depoimentos ou avaliações reais de clientes. Substitua-os por histórias autorizadas antes de publicar.</p></div>
             <div className="vp-testimonial-shell" onMouseEnter={() => setAutoPlay(false)} onMouseLeave={() => setAutoPlay(true)} onFocusCapture={() => setAutoPlay(false)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setAutoPlay(true); }}>
               <div className="vp-testimonial-card" aria-live="polite" aria-atomic="true">
                 <div className="vp-testimonial-mark" aria-hidden="true">“</div>
