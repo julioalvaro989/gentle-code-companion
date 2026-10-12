@@ -212,11 +212,6 @@ export type FitnessProfile = {
   training_location?: "academia" | "casa" | "outro" | null;
   preferences?: string | null;
   physical_limitations?: string | null;
-  training_session_minutes?: number | null;
-  available_equipment?: string[] | null;
-  monthly_food_budget_brl?: number | null;
-  dietary_restrictions?: string[] | null;
-  dietary_preferences?: string[] | null;
   profile_completed?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -229,6 +224,50 @@ export type VibraAccess = {
   planId: "basic" | "premium" | null;
   profileCompleted: boolean;
 };
+
+export type FitnessOnboardingAnswers = Record<string, unknown>;
+
+export async function getFitnessOnboardingAnswers(session: AuthSession): Promise<FitnessOnboardingAnswers | null> {
+  const rows = await request("rest/v1/fitness_onboarding_profiles?select=answers&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
+  const answers = rows?.[0]?.answers;
+  return answers && typeof answers === "object" && !Array.isArray(answers) ? answers as FitnessOnboardingAnswers : null;
+}
+
+export async function saveFitnessOnboardingAnswers(session: AuthSession, answers: FitnessOnboardingAnswers): Promise<void> {
+  // Merge only the known preference keys into the current user's existing JSONB onboarding record.
+  const allowed: Record<string, unknown> = {
+    sessionMinutes: answers.sessionMinutes,
+    equipment: answers.equipment,
+    foodBudget: answers.foodBudget,
+    dietaryRestrictions: answers.dietaryRestrictions,
+    preferredFoods: answers.preferredFoods,
+  };
+  if (allowed.sessionMinutes !== undefined && allowed.sessionMinutes !== null) {
+    const value = Number(allowed.sessionMinutes);
+    if (!Number.isInteger(value) || value < 10 || value > 240) throw new Error("O tempo por sessão deve ser entre 10 e 240 minutos.");
+    allowed.sessionMinutes = value;
+  }
+  if (allowed.foodBudget !== undefined && allowed.foodBudget !== null && allowed.foodBudget !== "") {
+    const value = Number(String(allowed.foodBudget).replace(",", "."));
+    if (!Number.isFinite(value) || value < 0 || value > 100000) throw new Error("O orçamento mensal deve estar entre R$ 0 e R$ 100.000.");
+    allowed.foodBudget = value;
+  }
+  for (const key of ["equipment", "dietaryRestrictions", "preferredFoods"]) {
+    if (allowed[key] !== undefined && allowed[key] !== null) {
+      const values = Array.isArray(allowed[key]) ? allowed[key] : String(allowed[key]).split(",");
+      if (values.length > 30 || values.some((item) => typeof item !== "string" || item.trim().length > 100)) throw new Error("Confira os itens informados nas preferências.");
+      allowed[key] = values.map((item) => String(item).trim()).filter(Boolean);
+    }
+  }
+  const current = await getFitnessOnboardingAnswers(session);
+  if (!current) throw new Error("Ainda não existe um registro de onboarding para atualizar. Complete o onboarding primeiro.");
+  const merged = { ...current, ...allowed };
+  await request("rest/v1/fitness_onboarding_profiles?user_id=eq." + encodeURIComponent(session.user.id), {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ answers: merged, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
 
 export async function getFitnessProfile(session: AuthSession): Promise<FitnessProfile | null> {
   const rows = await request("rest/v1/fitness_profiles?select=*&id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
