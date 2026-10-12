@@ -75,10 +75,10 @@ function buildFitnessSystemContext(profile: Record<string, unknown> | null, onbo
     nome_preferido: textValue(profile.username, 80),
     objetivo: textValue(profile.primary_goal, 80) ?? textValue(profile.goal, 120),
     idade: age !== null && age >= 13 && age <= 110 ? age : null,
-    peso_kg: numeric(profile.weight_kg),
-    altura_cm: numeric(profile.height_cm),
-    experiencia: textValue(profile.experience_level, 40),
-    frequencia_semanal: numeric(profile.weekly_frequency),
+    peso_kg: onboardingNumber(profile.weight_kg, 20, 500),
+    altura_cm: onboardingNumber(profile.height_cm, 80, 250),
+    experiencia: ["iniciante", "intermediario", "avancado"].includes(String(profile.experience_level)) ? textValue(profile.experience_level, 40) : null,
+    frequencia_semanal: onboardingNumber(profile.weekly_frequency, 1, 7),
     local_treino: textValue(profile.training_location, 80),
     preferencias_restricoes_informadas: textValue(profile.preferences, 1500),
     limitacoes_fisicas_informadas: textValue(profile.physical_limitations, 1000),
@@ -87,6 +87,8 @@ function buildFitnessSystemContext(profile: Record<string, unknown> | null, onbo
     orcamento_mensal_alimentacao_brl: onboardingNumber(onboarding?.foodBudget, 0, 100000),
     restricoes_alimentares: listValue(onboarding?.dietaryRestrictions),
     preferencias_alimentares: listValue(onboarding?.preferredFoods),
+    alergias_informadas: listValue(onboarding?.allergies),
+    alimentos_nao_desejados: listValue(onboarding?.dislikedFoods),
     nota: "Campos null não foram encontrados no perfil estruturado disponível; não presumir valores. O texto de preferências só deve ser interpretado como informação se o usuário realmente o tiver informado."
   };
   const latest = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
