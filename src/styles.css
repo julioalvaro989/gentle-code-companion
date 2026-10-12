@@ -288,3 +288,6 @@ input::placeholder, textarea::placeholder { color:var(--vibra-muted); opacity:.8
 @media (prefers-reduced-motion: reduce) {
   .fit-app .stat-card, .fit-app .green-button, .fit-app .outline-button, .fit-app .start-bottom { transition: none !important; }
 }
+
+.gym-logo-img{height:46px;width:auto;display:block;border-radius:11px}
+.mobile-brand-logo{height:32px;width:auto;display:block;border-radius:8px}

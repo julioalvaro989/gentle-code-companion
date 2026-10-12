@@ -8,6 +8,9 @@ import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
+import vibraLogoAsset from "../assets/vibra-logo.png.asset.json";
+
+const vibraLogoUrl = vibraLogoAsset.url;
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
@@ -337,7 +340,7 @@ function GymApp() {
         <button type="button" className="va-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}>
           <ArrowLeft size={16} /> Voltar ao início
         </button>
-        <div className="va-brand"><span className="va-brand-mark"><Activity size={23} strokeWidth={2.6} /></span><span>vibra<span>.</span></span></div>
+        <div className="va-brand"><img className="va-brand-logo va-brand-logo-lg" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></div>
         <div className="va-story-copy">
           <div className="va-eyebrow"><Sparkles size={14} /> SEU ESPAÇO DE EVOLUÇÃO</div>
           <h1>Seu ritmo.<br />Sua jornada.<br /><span>Seu próximo nível.</span></h1>
@@ -346,7 +349,7 @@ function GymApp() {
         <div className="va-story-footer"><span><Dumbbell size={16}/> TREINO</span><i /><span><Target size={16}/> FOCO</span><i /><span><TrendingUp size={16}/> EVOLUÇÃO</span></div>
       </section>
       <section className="va-auth-panel" aria-labelledby="va-title">
-        <div className="va-panel-top"><span className="va-mobile-brand"><span className="va-brand-mark"><Activity size={20}/></span> vibra<span>.</span></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
+        <div className="va-panel-top"><span className="va-mobile-brand"><img className="va-brand-logo" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
         <div className="va-form-heading">
           <div className="va-form-eyebrow">{authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
           <h2 id="va-title">{authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
@@ -375,13 +378,13 @@ function GymApp() {
   return <div className="gym-app fit-app">
     <VibraChat />
     <>{mobileMenu && <button type="button" className="sidebar-scrim" aria-label="Fechar menu" onClick={() => setMobileMenu(false)} />}<aside className={"sidebar " + (mobileMenu ? "sidebar-open" : "")}>
-      <a className="gym-logo" href="#inicio" onClick={() => changePage("Visão geral")}><span className="logo-mark"><Dumbbell size={23} strokeWidth={2.5}/></span><span>FITPRO<span className="logo-dot">.</span><small>PERFORMANCE CLUB</small></span></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
+      <a className="gym-logo" href="#inicio" aria-label="Vibra, início" onClick={() => changePage("Visão geral")}><img className="gym-logo-img" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
       <div className="side-label">SEU ESPAÇO</div>
       <nav className="side-nav">{navItems.map(({name,icon:Icon})=><button key={name} className={"nav-item "+(activeNav===name?"active":"")} onClick={()=>changePage(name)}><Icon size={18}/>{name}{name==="Treinos"&&<span className="nav-count">4</span>}</button>)}</nav>
       <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
     </aside></>
     <main className="main-content" id="inicio">
-      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><Dumbbell size={20}/> FITPRO<span>.</span></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
+      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
         {activeNav==="Visão geral" && <>

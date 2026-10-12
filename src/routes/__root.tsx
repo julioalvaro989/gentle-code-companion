@@ -24,7 +24,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     { name: "description", content: "Organize treinos, nutrição, progresso e acompanhamento fitness com o FitPro." },
     { property: "og:title", content: "FitPro" },
     { property: "og:description", content: "Seu treino, sua nutrição, sua evolução." }
-  ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.ico", type: "image/x-icon" }] }),
+  ], links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: "/favicon.png", type: "image/png" }] }),
   shellComponent: ({ children }: { children: ReactNode }) => <html lang="pt-BR"><head><HeadContent /></head><body>{children}<Scripts /></body></html>,
   component: function RootContent() {
     const { queryClient } = Route.useRouteContext();

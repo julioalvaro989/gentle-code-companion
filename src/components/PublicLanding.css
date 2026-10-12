@@ -870,3 +870,7 @@
   .vp-premium *, .vp-premium *::before, .vp-premium *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .vp-scene-object { transform: none; }
 }
+
+.vp-brand-logo { height: 44px; width: auto; display: block; border-radius: 10px; }
+.vp-footer .vp-brand-logo { height: 52px; }
+@media (max-width: 640px) { .vp-brand-logo { height: 38px; } }
