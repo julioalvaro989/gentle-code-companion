@@ -376,6 +376,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      update_own_fitness_onboarding_answers: {
+        Args: { p_patch: Json; p_expected_updated_at: string }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
       is_fitness_admin: { Args: never; Returns: boolean }
       vibra_claim_admin_session: {
