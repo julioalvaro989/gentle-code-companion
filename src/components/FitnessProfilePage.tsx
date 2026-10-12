@@ -30,6 +30,8 @@ export function FitnessProfilePage() {
   const [foodBudget, setFoodBudget] = useState("");
   const [dietaryRestrictions, setDietaryRestrictions] = useState("");
   const [dietaryPreferences, setDietaryPreferences] = useState("");
+  const [allergies, setAllergies] = useState("");
+  const [dislikedFoods, setDislikedFoods] = useState("");
 
   const progress = useMemo(() => {
     const checks = [name.trim().length >= 2, Number(weight) >= 20 && Number(weight) <= 500, Number(height) >= 80 && Number(height) <= 250, Boolean(goal), Boolean(level), Number(frequency) >= 1 && Number(frequency) <= 7, Boolean(place)];
@@ -60,11 +62,14 @@ export function FitnessProfilePage() {
         setLimitations(saved?.physical_limitations || "");
         const onboarding = await getFitnessOnboardingAnswers(current);
         if (!active) return;
-        setSessionMinutes(onboarding?.sessionMinutes == null ? "" : String(onboarding.sessionMinutes));
-        setEquipment(Array.isArray(onboarding?.equipment) ? onboarding.equipment.join(", ") : typeof onboarding?.equipment === "string" ? onboarding.equipment : "");
-        setFoodBudget(onboarding?.foodBudget == null ? "" : String(onboarding.foodBudget));
-        setDietaryRestrictions(Array.isArray(onboarding?.dietaryRestrictions) ? onboarding.dietaryRestrictions.join(", ") : typeof onboarding?.dietaryRestrictions === "string" ? onboarding.dietaryRestrictions : "");
-        setDietaryPreferences(Array.isArray(onboarding?.preferredFoods) ? onboarding.preferredFoods.join(", ") : typeof onboarding?.preferredFoods === "string" ? onboarding.preferredFoods : "");
+        const answers = onboarding?.answers;
+        setSessionMinutes(answers?.sessionMinutes == null ? "" : String(answers.sessionMinutes));
+        setEquipment(Array.isArray(answers?.equipment) ? answers.equipment.join(", ") : typeof answers?.equipment === "string" ? answers.equipment : "");
+        setFoodBudget(answers?.foodBudget == null ? "" : String(answers.foodBudget));
+        setDietaryRestrictions(Array.isArray(answers?.dietaryRestrictions) ? answers.dietaryRestrictions.join(", ") : typeof answers?.dietaryRestrictions === "string" ? answers.dietaryRestrictions : "");
+        setDietaryPreferences(Array.isArray(answers?.preferredFoods) ? answers.preferredFoods.join(", ") : typeof answers?.preferredFoods === "string" ? answers.preferredFoods : "");
+        setAllergies(Array.isArray(answers?.allergies) ? answers.allergies.join(", ") : typeof answers?.allergies === "string" ? answers.allergies : "");
+        setDislikedFoods(Array.isArray(answers?.dislikedFoods) ? answers.dislikedFoods.join(", ") : typeof answers?.dislikedFoods === "string" ? answers.dislikedFoods : "");
       } catch {
         if (active) setError("Não foi possível validar seu acesso ou recuperar o perfil. O acesso permanece bloqueado; tente novamente.");
       } finally { if (active) setLoading(false); }
@@ -106,6 +111,8 @@ export function FitnessProfilePage() {
         foodBudget: foodBudget.trim() ? Number(foodBudget.replace(",", ".")) : null,
         dietaryRestrictions: dietaryRestrictions.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
         preferredFoods: dietaryPreferences.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
+        allergies: allergies.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
+        dislikedFoods: dislikedFoods.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
       });
       setNotice("Perfil salvo com sucesso. Abrindo seu espaço Vibra…");
       window.location.assign("/");
@@ -146,6 +153,10 @@ export function FitnessProfilePage() {
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
           <label style={labelStyle}>Restrições alimentares <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={dietaryRestrictions} onChange={e=>setDietaryRestrictions(e.target.value)} maxLength={1200} placeholder="Ex.: vegetariana, intolerância à lactose (somente se aplicável)" /></label>
           <label style={labelStyle}>Preferências alimentares <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={dietaryPreferences} onChange={e=>setDietaryPreferences(e.target.value)} maxLength={1200} placeholder="Ex.: arroz, feijão, refeições práticas" /></label>
+        </section>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
+          <label style={labelStyle}>Alergias alimentares <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={allergies} onChange={e=>setAllergies(e.target.value)} maxLength={1200} placeholder="Informe somente alergias confirmadas." /></label>
+          <label style={labelStyle}>Alimentos que prefere evitar <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={dislikedFoods} onChange={e=>setDislikedFoods(e.target.value)} maxLength={1200} placeholder="Ex.: alimentos que não gosta." /></label>
         </section>
         <label style={labelStyle}>Lesões ou limitações físicas que deseja informar <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><textarea style={{ ...inputStyle, minHeight: 92, resize: "vertical" }} value={limitations} onChange={e=>setLimitations(e.target.value)} maxLength={1000} placeholder="Compartilhe somente o que considerar necessário." /><small style={{ color: "#9691a9", fontWeight: 400, lineHeight: 1.5 }}>Esse dado é sensível. Será usado apenas para contextualizar orientações relevantes; não substitui avaliação profissional.</small></label>
         {error && <p role="alert" style={{ color: "#ff9eaa", background: "#351c2a", padding: 12, borderRadius: 10 }}>{error}</p>}
