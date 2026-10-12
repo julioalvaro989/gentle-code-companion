@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      fitness_onboarding_profiles: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fitness_profiles: {
         Row: {
           birth_date: string | null
@@ -30,8 +57,8 @@ export type Database = {
           training_location: string | null
           updated_at: string
           username: string
-          weight_kg: number | null
           weekly_frequency: number | null
+          weight_kg: number | null
         }
         Insert: {
           birth_date?: string | null
@@ -48,8 +75,8 @@ export type Database = {
           training_location?: string | null
           updated_at?: string
           username: string
-          weight_kg?: number | null
           weekly_frequency?: number | null
+          weight_kg?: number | null
         }
         Update: {
           birth_date?: string | null
@@ -66,50 +93,8 @@ export type Database = {
           training_location?: string | null
           updated_at?: string
           username?: string
-          weight_kg?: number | null
           weekly_frequency?: number | null
-        }
-        Relationships: []
-      }
-      vibra_subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          id: string
-          paid_at: string | null
-          plan_id: string
-          provider: string | null
-          provider_customer_id: string | null
-          provider_subscription_id: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          paid_at?: string | null
-          plan_id: string
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          paid_at?: string | null
-          plan_id?: string
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
+          weight_kg?: number | null
         }
         Relationships: []
       }
@@ -263,6 +248,129 @@ export type Database = {
         }
         Relationships: []
       }
+      vibra_admin_audit: {
+        Row: {
+          created_at: string
+          detail: Json
+          event: string
+          id: number
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event: string
+          id?: never
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event?: string
+          id?: never
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      vibra_admin_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          last_seen_at: string
+          revoked_at: string | null
+          session_id: string
+          user_agent_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          session_id: string
+          user_agent_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          session_id?: string
+          user_agent_hash?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vibra_admins: {
+        Row: {
+          granted_at: string
+          granted_by: string
+          revoked_at: string | null
+          revoked_by: string | null
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vibra_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          paid_at: string | null
+          plan_id: string
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          paid_at?: string | null
+          plan_id: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          paid_at?: string | null
+          plan_id?: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -270,6 +378,21 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_fitness_admin: { Args: never; Returns: boolean }
+      vibra_claim_admin_session: {
+        Args: {
+          p_expires_at: string
+          p_session_id: string
+          p_user_agent_hash?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      vibra_has_active_subscription: { Args: never; Returns: boolean }
+      vibra_is_current_admin: { Args: never; Returns: boolean }
+      vibra_release_admin_session: {
+        Args: { p_session_id: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

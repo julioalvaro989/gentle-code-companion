@@ -25,7 +25,7 @@ const stories = [
   { name: "Ana Beatriz", tag: "ACOMPANHAMENTO", story: "Exemplo ilustrativo: Ana buscava acompanhar sua rotina ao longo do tempo. O histórico permite consultar registros feitos na própria conta." },
   { name: "Thales", tag: "OBJETIVOS", story: "Exemplo ilustrativo: Thales precisava deixar os objetivos mais claros. A área pessoal permite manter o foco escolhido à vista e revisá-lo." },
   { name: "Icaro Junior", tag: "APOIO COM IA", story: "Exemplo ilustrativo: Icaro queria um lugar para dúvidas gerais sobre exercícios e hábitos. A Vibra AI está disponível dentro da conta, com as limitações de uma IA." },
-];
+] as const;
 
 const faqs = [
   { q: "O que é o Vibra?", a: "O Vibra é uma plataforma digital para reunir recursos de treino, exercícios, hábitos, registros de progresso e uma conversa com IA dentro da conta." },
@@ -131,7 +131,7 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
     { id: "vibra-faq", label: "FAQ" },
   ];
 
-  const currentStory = stories[storyIndex];
+  const currentStory = stories[storyIndex] ?? stories[0];
 
   return (
     <div className="vibra-public vp-premium">

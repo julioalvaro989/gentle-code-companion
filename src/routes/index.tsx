@@ -10,7 +10,7 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAc
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
-const publicSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, "");
+const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -111,6 +111,7 @@ function GymApp() {
   const progress = Math.round(done.length / exercises.length * 100);
 
   useEffect(() => {
+    let forceLoginForm = false;
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       // A return-to-public-landing navigation must not be redirected back to
@@ -121,7 +122,7 @@ function GymApp() {
         return;
       }
       const requestedAuth = params.get("auth");
-      const forceLoginForm = requestedAuth === "login";
+      forceLoginForm = requestedAuth === "login";
       if (requestedAuth === "login" || requestedAuth === "signup") {
         setAuthMode(requestedAuth);
         setShowAuth(true);
