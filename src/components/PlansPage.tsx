@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Clock3, LockKeyhole, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, LockKeyhole, MessageCircle, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "./ui/button";
 import "./PlansPage.css";
 import { VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
