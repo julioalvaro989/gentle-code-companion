@@ -129,7 +129,6 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
     { id: "vibra-como-funciona", label: "Como funciona" },
     { id: "vibra-recursos", label: "Recursos" },
     { id: "vibra-historias", label: "Histórias" },
-    { id: "vibra-planos", label: "Planos" },
     { id: "vibra-faq", label: "FAQ" },
   ];
 
@@ -223,18 +222,6 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
               </div>
               <p className="vp-carousel-status" aria-live="polite">História ilustrativa {storyIndex + 1} de {stories.length}</p>
             </div>
-          </div>
-        </section>
-
-        <section id="vibra-planos" className="vp-section vp-plans-premium" aria-labelledby="vp-plans-title">
-          <div className="vp-container">
-            <div className="vp-section-heading"><div><p className="vp-eyebrow">PLANOS VIBRA</p><h2 id="vp-plans-title">Escolha o ritmo.<br /><span>Construa sua rotina.</span></h2></div><p>Preços e limites propostos para planejamento comercial. A contratação só deve ser liberada depois da validação oficial.</p></div>
-            <div className="vp-pricing-notice"><Clock3 size={18} /><p><b>Valores em validação — não disponíveis para contratação.</b><br />Os preços, limites de mensagens e condições precisam ser confirmados na Cakto e no backend. Nenhum pagamento é iniciado nesta página.</p></div>
-            <div className="vp-pricing-grid">
-              <article className="vp-price-card"><span className="vp-price-kicker">PLANO INICIAL</span><h3>Vibra Basic</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-price-cta vp-price-cta-outline" onClick={() => onPlans()}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
-              <article className="vp-price-card vp-price-featured"><span className="vp-price-recommended">PLANO EM PREPARAÇÃO</span><span className="vp-price-kicker">OPÇÃO AVANÇADA</span><h3>Vibra Premium</h3><p className="vp-price-description">Plano em preparação. Os benefícios e limites oficiais serão apresentados após validação.</p><div className="vp-price"><strong>A confirmar</strong><span>condições comerciais</span></div><ul><li><Check size={16} /> Detalhes em validação</li><li><Check size={16} /> Recursos sujeitos à configuração oficial</li><li><ShieldCheck size={16} /> Sem contratação nesta página</li></ul><Button className="vp-button vp-price-cta" onClick={() => onPlans()}>Criar conta <ArrowRight size={16} /></Button><small className="vp-price-footnote">Nenhum preço ou limite foi confirmado.</small></article>
-            </div>
-            <p className="vp-pricing-terms">Cobrança mensal planejada. Valores, recursos, limites, renovação e cancelamento precisam ser confirmados nos termos oficiais antes da oferta ao público.</p>
           </div>
         </section>
 
