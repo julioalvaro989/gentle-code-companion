@@ -69,6 +69,5 @@
 .vibra-plans-offers{position:relative;z-index:1;width:min(100%,940px);margin:0 auto}
 .vibra-plans-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,28px)}
 .vibra-plans-card{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.vibra-plans-period,
 @media(max-width:720px){.vibra-plans-content{padding-bottom:10px}.vibra-plans-athlete-backdrop{inset:auto -16px 0;height:240px;opacity:.38}.vibra-plans-athlete-backdrop:before,.vibra-plans-athlete-backdrop:after{width:65%;background-position:center 30%}.vibra-plans-offers{width:100%}.vibra-plans-card{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}}
 @media(max-width:480px){.vibra-plans-athlete-backdrop{height:190px;opacity:.3}.vibra-plans-athlete-backdrop:before,.vibra-plans-athlete-backdrop:after{width:75%}}
