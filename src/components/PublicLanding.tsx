@@ -250,7 +250,7 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
           <p className="vp-eyebrow">O COMEÇO É SEU</p><h2>Transforme intenção<br />em <span>movimento.</span></h2><p>Organize sua rotina com o Vibra, no seu ritmo.</p><Button className="vp-button" size="lg" onClick={() => onPlans()}>Começar agora <ArrowRight /></Button>
         </section>
       </main>
-      <footer className="vp-footer vp-footer-premium"><div className="vp-container"><div className="vp-footer-top"><a className="vp-brand" href="#inicio" onClick={(event) => { event.preventDefault(); goTo("inicio"); }}><span aria-hidden="true">V</span>vibra<span className="vp-brand-dot">.</span></a><p>Seu treino. Seu ritmo. Sua evolução.</p><Button variant="ghost" onClick={() => onAuth("login")}>Entrar na minha conta <ArrowRight /></Button></div><div className="vp-footer-bottom"><span>© 2026 Vibra</span><span>Conteúdo informativo. A Vibra AI não substitui orientação profissional.</span></div></div></footer>
+      <footer className="vp-footer vp-footer-premium"><div className="vp-container"><div className="vp-footer-top"><a className="vp-brand" href="#inicio" aria-label="Vibra, início" onClick={(event) => { event.preventDefault(); goTo("inicio"); }}><img className="vp-brand-logo" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></a><p>Seu treino. Seu ritmo. Sua evolução.</p><Button variant="ghost" onClick={() => onAuth("login")}>Entrar na minha conta <ArrowRight /></Button></div><div className="vp-footer-bottom"><span>© 2026 Vibra</span><span>Conteúdo informativo. A Vibra AI não substitui orientação profissional.</span></div></div></footer>
     </div>
   );
 }
