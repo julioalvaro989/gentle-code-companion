@@ -340,7 +340,7 @@ function GymApp() {
         <button type="button" className="va-back" onClick={() => { setShowAuth(false); setAuthError(""); setAuthMessage(""); }}>
           <ArrowLeft size={16} /> Voltar ao início
         </button>
-        <div className="va-brand"><span className="va-brand-mark"><Activity size={23} strokeWidth={2.6} /></span><span>vibra<span>.</span></span></div>
+        <div className="va-brand"><img className="va-brand-logo va-brand-logo-lg" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></div>
         <div className="va-story-copy">
           <div className="va-eyebrow"><Sparkles size={14} /> SEU ESPAÇO DE EVOLUÇÃO</div>
           <h1>Seu ritmo.<br />Sua jornada.<br /><span>Seu próximo nível.</span></h1>
