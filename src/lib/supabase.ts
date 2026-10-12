@@ -212,6 +212,11 @@ export type FitnessProfile = {
   training_location?: "academia" | "casa" | "outro" | null;
   preferences?: string | null;
   physical_limitations?: string | null;
+  training_session_minutes?: number | null;
+  available_equipment?: string[] | null;
+  monthly_food_budget_brl?: number | null;
+  dietary_restrictions?: string[] | null;
+  dietary_preferences?: string[] | null;
   profile_completed?: boolean;
   created_at?: string;
   updated_at?: string;
