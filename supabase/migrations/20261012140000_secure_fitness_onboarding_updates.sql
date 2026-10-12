@@ -35,30 +35,41 @@ begin
     end if;
     v_value := p_patch -> v_key;
 
-    if v_key = 'sessionMinutes' and v_value <> 'null'::jsonb then
-      if jsonb_typeof(v_value) <> 'number'
-         or (v_value #>> '{}') !~ '^[0-9]+$'
-         or (v_value #>> '{}')::numeric < 10
-         or (v_value #>> '{}')::numeric > 240 then
+    if v_value = 'null'::jsonb then
+      continue;
+    end if;
+
+    if v_key = 'sessionMinutes' then
+      if jsonb_typeof(v_value) <> 'number' then
         raise exception 'sessionMinutes must be an integer between 10 and 240' using errcode = '22023';
       end if;
-    elsif v_key = 'foodBudget' and v_value <> 'null'::jsonb then
-      if jsonb_typeof(v_value) <> 'number'
-         or (v_value #>> '{}')::numeric < 0
-         or (v_value #>> '{}')::numeric > 100000 then
+      if (v_value #>> '{}') !~ '^[0-9]+$' then
+        raise exception 'sessionMinutes must be an integer between 10 and 240' using errcode = '22023';
+      end if;
+      if (v_value #>> '{}')::numeric < 10 or (v_value #>> '{}')::numeric > 240 then
+        raise exception 'sessionMinutes must be an integer between 10 and 240' using errcode = '22023';
+      end if;
+    elsif v_key = 'foodBudget' then
+      if jsonb_typeof(v_value) <> 'number' then
         raise exception 'foodBudget must be between 0 and 100000' using errcode = '22023';
       end if;
-    elsif v_key in ('equipment', 'dietaryRestrictions', 'preferredFoods', 'allergies', 'dislikedFoods')
-          and v_value <> 'null'::jsonb then
-      if jsonb_typeof(v_value) <> 'array'
-         or jsonb_array_length(v_value) > 30
-         or exists (
-           select 1
-           from jsonb_array_elements(v_value) item
-           where jsonb_typeof(item) <> 'string'
-              or length(btrim(item #>> '{}')) < 1
-              or length(btrim(item #>> '{}')) > 100
-         ) then
+      if (v_value #>> '{}')::numeric < 0 or (v_value #>> '{}')::numeric > 100000 then
+        raise exception 'foodBudget must be between 0 and 100000' using errcode = '22023';
+      end if;
+    elsif v_key in ('equipment', 'dietaryRestrictions', 'preferredFoods', 'allergies', 'dislikedFoods') then
+      if jsonb_typeof(v_value) <> 'array' then
+        raise exception '% must be an array of up to 30 strings, each 1 to 100 characters', v_key using errcode = '22023';
+      end if;
+      if jsonb_array_length(v_value) > 30 then
+        raise exception '% must be an array of up to 30 strings, each 1 to 100 characters', v_key using errcode = '22023';
+      end if;
+      if exists (
+        select 1
+        from jsonb_array_elements(v_value) as elements(item)
+        where jsonb_typeof(item) <> 'string'
+           or length(btrim(item #>> '{}')) < 1
+           or length(btrim(item #>> '{}')) > 100
+      ) then
         raise exception '% must be an array of up to 30 strings, each 1 to 100 characters', v_key using errcode = '22023';
       end if;
     end if;
