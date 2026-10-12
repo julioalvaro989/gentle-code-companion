@@ -212,17 +212,13 @@ function GymApp() {
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setAuthError(""); setAuthMessage("");
-    if (authMode === "signup" && !selectedPlan) {
-      window.location.assign("/plans");
-      return;
-    }
     setAuthBusy(true);
     try {
       let next: AuthSession | null;
       if (authMode === "signup") {
         next = await signUp(authUsername.trim(), authEmail.trim(), authPassword);
         if (!next) {
-          setAuthMessage("Cadastro recebido! Enviamos um e-mail de confirmação para o endereço informado. Abra a mensagem e clique no link para confirmar sua conta; depois, volte aqui para entrar.");
+          setAuthMessage("A conta foi recebida, mas o provedor de autenticação não retornou uma sessão. Para entrar sem confirmação por e-mail, desative “Confirm email” nas configurações de autenticação do projeto e tente novamente.");
           return;
         }
         setProfileName(authUsername.trim());
