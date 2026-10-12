@@ -150,7 +150,7 @@ begin
   end if;
 
   update public.fitness_onboarding_profiles as p
-     set answers = pg_catalog.coalesce(p.answers, '{}'::jsonb) || p_patch,
+     set answers = coalesce(p.answers, '{}'::jsonb) || p_patch,
          updated_at = v_new_updated_at
    where p.user_id = v_user_id;
 
