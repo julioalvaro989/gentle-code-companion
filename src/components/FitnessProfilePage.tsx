@@ -25,6 +25,11 @@ export function FitnessProfilePage() {
   const [place, setPlace] = useState<Place>("academia");
   const [preferences, setPreferences] = useState("");
   const [limitations, setLimitations] = useState("");
+  const [sessionMinutes, setSessionMinutes] = useState("");
+  const [equipment, setEquipment] = useState("");
+  const [foodBudget, setFoodBudget] = useState("");
+  const [dietaryRestrictions, setDietaryRestrictions] = useState("");
+  const [dietaryPreferences, setDietaryPreferences] = useState("");
 
   const progress = useMemo(() => {
     const checks = [name.trim().length >= 2, Number(weight) >= 20 && Number(weight) <= 500, Number(height) >= 80 && Number(height) <= 250, Boolean(goal), Boolean(level), Number(frequency) >= 1 && Number(frequency) <= 7, Boolean(place)];
@@ -53,6 +58,11 @@ export function FitnessProfilePage() {
         setPlace(saved?.training_location || "academia");
         setPreferences(saved?.preferences || "");
         setLimitations(saved?.physical_limitations || "");
+        setSessionMinutes(saved?.training_session_minutes == null ? "" : String(saved.training_session_minutes));
+        setEquipment((saved?.available_equipment || []).join(", "));
+        setFoodBudget(saved?.monthly_food_budget_brl == null ? "" : String(saved.monthly_food_budget_brl));
+        setDietaryRestrictions((saved?.dietary_restrictions || []).join(", "));
+        setDietaryPreferences((saved?.dietary_preferences || []).join(", "));
       } catch {
         if (active) setError("Não foi possível validar seu acesso ou recuperar o perfil. O acesso permanece bloqueado; tente novamente.");
       } finally { if (active) setLoading(false); }
@@ -70,6 +80,14 @@ export function FitnessProfilePage() {
     if (!Number.isFinite(cm) || cm < 80 || cm > 250) { setError("Informe uma altura entre 80 e 250 cm."); return; }
     if (!Number.isInteger(weekly) || weekly < 1 || weekly > 7) { setError("Escolha uma frequência entre 1 e 7 dias por semana."); return; }
     if (birthDate && (new Date(birthDate).getTime() > Date.now() || new Date(birthDate).getFullYear() < 1900)) { setError("Confira a data de nascimento informada."); return; }
+    const minutes = sessionMinutes.trim() ? Number(sessionMinutes) : null;
+    const budget = foodBudget.trim() ? Number(foodBudget.replace(",", ".")) : null;
+    if (minutes !== null && (!Number.isInteger(minutes) || minutes < 10 || minutes > 240)) { setError("O tempo por sessão deve ser entre 10 e 240 minutos."); return; }
+    if (budget !== null && (!Number.isFinite(budget) || budget < 0 || budget > 100000)) { setError("Informe um orçamento mensal entre R$ 0 e R$ 100.000."); return; }
+    const splitList = (value: string, maxItems: number, maxLength: number) => value.split(",").map(item => item.trim().slice(0, maxLength)).filter(Boolean).slice(0, maxItems);
+    const equipmentList = splitList(equipment, 30, 80);
+    const restrictionList = splitList(dietaryRestrictions, 30, 100);
+    const dietaryPreferenceList = splitList(dietaryPreferences, 30, 100);
     setSaving(true);
     try {
       const profile: FitnessProfileInput = {
@@ -85,6 +103,11 @@ export function FitnessProfilePage() {
         training_location: place,
         preferences: preferences.trim() || null,
         physical_limitations: limitations.trim() || null,
+        training_session_minutes: minutes,
+        available_equipment: equipmentList.length ? equipmentList : null,
+        monthly_food_budget_brl: budget,
+        dietary_restrictions: restrictionList.length ? restrictionList : null,
+        dietary_preferences: dietaryPreferenceList.length ? dietaryPreferenceList : null,
         profile_completed: true,
       };
       await saveFullFitnessProfile(session, profile);
@@ -119,6 +142,15 @@ export function FitnessProfilePage() {
           <label style={labelStyle}>Onde costuma treinar?<select style={inputStyle} value={place} onChange={e=>setPlace(e.target.value as Place)}><option value="academia">Academia</option><option value="casa">Em casa</option><option value="outro">Outro local</option></select></label>
         </section>
         <label style={labelStyle}>Preferências ou restrições relevantes <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><textarea style={{ ...inputStyle, minHeight: 92, resize: "vertical" }} value={preferences} onChange={e=>setPreferences(e.target.value)} maxLength={1500} placeholder="Ex.: equipamentos disponíveis, preferências de treino ou alimentação." /></label>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
+          <label style={labelStyle}>Tempo disponível por sessão (minutos) <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><input style={inputStyle} type="number" min="10" max="240" step="5" value={sessionMinutes} onChange={e=>setSessionMinutes(e.target.value)} placeholder="Ex.: 45" /></label>
+          <label style={labelStyle}>Orçamento mensal para alimentação (R$) <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><input style={inputStyle} type="number" min="0" max="100000" step="0.01" value={foodBudget} onChange={e=>setFoodBudget(e.target.value)} placeholder="Ex.: 400,00" /></label>
+        </section>
+        <label style={labelStyle}>Equipamentos disponíveis <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><input style={inputStyle} value={equipment} onChange={e=>setEquipment(e.target.value)} maxLength={1200} placeholder="Ex.: halteres, elásticos, esteira" /></label>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
+          <label style={labelStyle}>Restrições alimentares <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={dietaryRestrictions} onChange={e=>setDietaryRestrictions(e.target.value)} maxLength={1200} placeholder="Ex.: vegetariana, intolerância à lactose (somente se aplicável)" /></label>
+          <label style={labelStyle}>Preferências alimentares <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional, separe por vírgulas)</span><textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={dietaryPreferences} onChange={e=>setDietaryPreferences(e.target.value)} maxLength={1200} placeholder="Ex.: arroz, feijão, refeições práticas" /></label>
+        </section>
         <label style={labelStyle}>Lesões ou limitações físicas que deseja informar <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><textarea style={{ ...inputStyle, minHeight: 92, resize: "vertical" }} value={limitations} onChange={e=>setLimitations(e.target.value)} maxLength={1000} placeholder="Compartilhe somente o que considerar necessário." /><small style={{ color: "#9691a9", fontWeight: 400, lineHeight: 1.5 }}>Esse dado é sensível. Será usado apenas para contextualizar orientações relevantes; não substitui avaliação profissional.</small></label>
         {error && <p role="alert" style={{ color: "#ff9eaa", background: "#351c2a", padding: 12, borderRadius: 10 }}>{error}</p>}
         {notice && <p role="status" style={{ color: "#c9ff87" }}><CheckCircle2 size={16} style={{ verticalAlign: "middle" }}/> {notice}</p>}
