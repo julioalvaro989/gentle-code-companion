@@ -19,10 +19,10 @@ export function FitnessProfilePage() {
   const [birthDate, setBirthDate] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
-  const [goal, setGoal] = useState<Goal>("hipertrofia");
-  const [level, setLevel] = useState<Level>("iniciante");
-  const [frequency, setFrequency] = useState("3");
-  const [place, setPlace] = useState<Place>("academia");
+  const [goal, setGoal] = useState<Goal | "">("");
+  const [level, setLevel] = useState<Level | "">("");
+  const [frequency, setFrequency] = useState("");
+  const [place, setPlace] = useState<Place | "">("");
   const [preferences, setPreferences] = useState("");
   const [limitations, setLimitations] = useState("");
   const [sessionMinutes, setSessionMinutes] = useState("");
@@ -54,10 +54,10 @@ export function FitnessProfilePage() {
         setBirthDate(saved?.birth_date || "");
         setWeight(saved?.weight_kg == null ? "" : String(saved.weight_kg));
         setHeight(saved?.height_cm == null ? "" : String(saved.height_cm));
-        setGoal(saved?.primary_goal || "hipertrofia");
-        setLevel(saved?.experience_level || "iniciante");
-        setFrequency(String(saved?.weekly_frequency || 3));
-        setPlace(saved?.training_location || "academia");
+        setGoal(saved?.primary_goal || "");
+        setLevel(saved?.experience_level || "");
+        setFrequency(saved?.weekly_frequency == null ? "" : String(saved.weekly_frequency));
+        setPlace(saved?.training_location || "");
         setPreferences(saved?.preferences || "");
         setLimitations(saved?.physical_limitations || "");
         const onboarding = await getFitnessOnboardingAnswers(current);
@@ -83,6 +83,7 @@ export function FitnessProfilePage() {
     setError(""); setNotice("");
     const kg = Number(weight), cm = Number(height), weekly = Number(frequency);
     if (name.trim().length < 2) { setError("Informe seu nome ou como prefere ser chamado."); return; }
+    if (!goal || !level || !place) { setError("Selecione seu objetivo, nível de experiência e local de treino."); return; }
     if (!Number.isFinite(kg) || kg < 20 || kg > 500) { setError("Informe um peso entre 20 e 500 kg."); return; }
     if (!Number.isFinite(cm) || cm < 80 || cm > 250) { setError("Informe uma altura entre 80 e 250 cm."); return; }
     if (!Number.isInteger(weekly) || weekly < 1 || weekly > 7) { setError("Escolha uma frequência entre 1 e 7 dias por semana."); return; }
@@ -139,10 +140,10 @@ export function FitnessProfilePage() {
           <label style={labelStyle}>Altura (cm)<input style={inputStyle} type="number" inputMode="numeric" min="80" max="250" step="0.1" value={height} onChange={e=>setHeight(e.target.value)} required /></label>
         </section>
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
-          <label style={labelStyle}>Objetivo principal<select style={inputStyle} value={goal} onChange={e=>setGoal(e.target.value as Goal)}><option value="emagrecimento">Emagrecimento</option><option value="hipertrofia">Hipertrofia</option><option value="condicionamento">Condicionamento físico</option><option value="saude_geral">Saúde geral</option></select></label>
-          <label style={labelStyle}>Experiência com treino<select style={inputStyle} value={level} onChange={e=>setLevel(e.target.value as Level)}><option value="iniciante">Iniciante</option><option value="intermediario">Intermediário</option><option value="avancado">Avançado</option></select></label>
-          <label style={labelStyle}>Frequência semanal<select style={inputStyle} value={frequency} onChange={e=>setFrequency(e.target.value)}>{[1,2,3,4,5,6,7].map(n=><option key={n} value={n}>{n} {n===1?"dia":"dias"} por semana</option>)}</select></label>
-          <label style={labelStyle}>Onde costuma treinar?<select style={inputStyle} value={place} onChange={e=>setPlace(e.target.value as Place)}><option value="academia">Academia</option><option value="casa">Em casa</option><option value="outro">Outro local</option></select></label>
+          <label style={labelStyle}>Objetivo principal<select style={inputStyle} value={goal} onChange={e=>setGoal(e.target.value as Goal | "")} required><option value="">Selecione seu objetivo</option><option value="emagrecimento">Emagrecimento</option><option value="hipertrofia">Hipertrofia</option><option value="condicionamento">Condicionamento físico</option><option value="saude_geral">Saúde geral</option></select></label>
+          <label style={labelStyle}>Experiência com treino<select style={inputStyle} value={level} onChange={e=>setLevel(e.target.value as Level | "")} required><option value="">Selecione seu nível</option><option value="iniciante">Iniciante</option><option value="intermediario">Intermediário</option><option value="avancado">Avançado</option></select></label>
+          <label style={labelStyle}>Frequência semanal<select style={inputStyle} value={frequency} onChange={e=>setFrequency(e.target.value)} required><option value="">Selecione os dias</option>{[1,2,3,4,5,6,7].map(n=><option key={n} value={n}>{n} {n===1?"dia":"dias"} por semana</option>)}</select></label>
+          <label style={labelStyle}>Onde costuma treinar?<select style={inputStyle} value={place} onChange={e=>setPlace(e.target.value as Place | "")} required><option value="">Selecione o local</option><option value="academia">Academia</option><option value="casa">Em casa</option><option value="outro">Outro local</option></select></label>
         </section>
         <label style={labelStyle}>Preferências ou restrições relevantes <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><textarea style={{ ...inputStyle, minHeight: 92, resize: "vertical" }} value={preferences} onChange={e=>setPreferences(e.target.value)} maxLength={1500} placeholder="Ex.: equipamentos disponíveis, preferências de treino ou alimentação." /></label>
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
