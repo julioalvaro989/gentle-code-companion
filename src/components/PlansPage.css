@@ -20,11 +20,11 @@
 .vibra-plans-athlete-overlay p{font-size:clamp(26px,3vw,39px);font-weight:500;line-height:1.08;letter-spacing:-1.4px;margin:12px 0 0}
 .vibra-plans-athlete-overlay strong{color:#b7ff35}
 .vibra-plans-offers{min-width:0}
-.vibra-plans-period{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;padding:5px;border:1px solid #292532;background:rgba(14,13,18,.86);border-radius:13px;margin:0 auto 20px}
-.vibra-plans-period-active,.vibra-plans-period-disabled{display:flex;align-items:center;gap:7px;border-radius:9px;padding:10px 18px;font-size:12px;font-weight:700;white-space:nowrap}
-.vibra-plans-period-active{background:#b7ff35;color:#11130b;box-shadow:0 0 18px rgba(183,255,53,.13)}
-.vibra-plans-period-disabled{color:#777381}
-.vibra-plans-period-disabled small{font-size:9px;color:#9a94a6;border:1px solid #393342;border-radius:5px;padding:2px 4px}
+
+
+
+
+
 .vibra-plans-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
 .vibra-plans-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:clamp(20px,2.5vw,30px);border:1px solid rgba(150,66,255,.55);border-radius:20px;background:linear-gradient(145deg,rgba(28,15,42,.96),rgba(9,8,14,.98) 70%);box-shadow:0 18px 48px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.035)}
 .vibra-plans-card-basic{border-color:rgba(145,54,255,.58);box-shadow:0 0 28px rgba(112,0,255,.075),0 18px 48px rgba(0,0,0,.25)}
@@ -57,7 +57,7 @@
 @media(min-width:1500px){.vibra-plans-content{gap:60px}.vibra-plans-athlete{min-height:540px}}
 @media(max-width:980px){.vibra-plans-content{grid-template-columns:minmax(180px,.62fr) minmax(0,1.4fr);gap:20px}.vibra-plans-athlete{min-height:460px}.vibra-plans-options{gap:12px}.vibra-plans-card{padding:20px}.vibra-plans-card h2{font-size:22px}.vibra-plan-price{font-size:27px}.vibra-plan-features{font-size:11px}}
 @media(max-width:720px){.vibra-plans-page{padding:18px 16px 32px}.vibra-plans-back{margin-bottom:16px}.vibra-plans-header{margin-bottom:28px}.vibra-plans-brand{margin-bottom:22px}.vibra-plans-shell h1{letter-spacing:-1.5px}.vibra-plans-intro{font-size:13px;margin-top:14px}.vibra-plans-content{grid-template-columns:1fr}.vibra-plans-athlete{min-height:230px;max-height:270px;background-position:center 38%;border-radius:18px}.vibra-plans-athlete-overlay{bottom:18px}.vibra-plans-athlete-overlay p{font-size:28px}.vibra-plans-options{grid-template-columns:repeat(2,minmax(0,1fr))}.vibra-plans-card{padding:20px 16px}.vibra-plans-card h2{font-size:clamp(19px,4vw,24px)}.vibra-plan-price{font-size:clamp(24px,5vw,30px)}.vibra-plans-trust{gap:10px}.vibra-trust-item{flex-direction:column;text-align:center;gap:8px}.vibra-trust-item p{max-width:180px}}
-@media(max-width:480px){.vibra-plans-options{grid-template-columns:1fr;gap:20px}.vibra-plans-card{padding:24px}.vibra-plans-card h2{font-size:25px}.vibra-plans-card .vibra-plans-description{min-height:0}.vibra-plan-price{font-size:34px}.vibra-plan-features{font-size:13px}.vibra-plans-options .vibra-plans-cta{min-height:50px!important;font-size:13px!important}.vibra-plans-trust{grid-template-columns:1fr;gap:18px}.vibra-trust-item{flex-direction:row;justify-content:flex-start;text-align:left}.vibra-trust-item p{max-width:none}.vibra-plans-period-active,.vibra-plans-period-disabled{padding:9px 12px}}
+@media(max-width:480px){.vibra-plans-options{grid-template-columns:1fr;gap:20px}.vibra-plans-card{padding:24px}.vibra-plans-card h2{font-size:25px}.vibra-plans-card .vibra-plans-description{min-height:0}.vibra-plan-price{font-size:34px}.vibra-plan-features{font-size:13px}.vibra-plans-options .vibra-plans-cta{min-height:50px!important;font-size:13px!important}.vibra-plans-trust{grid-template-columns:1fr;gap:18px}.vibra-trust-item{flex-direction:row;justify-content:flex-start;text-align:left}.vibra-trust-item p{max-width:none}}
 @media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 /* Planos sem seletor de periodicidade; atletas decorativos ficam atrás dos cartões. */
@@ -69,6 +69,6 @@
 .vibra-plans-offers{position:relative;z-index:1;width:min(100%,940px);margin:0 auto}
 .vibra-plans-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,28px)}
 .vibra-plans-card{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.vibra-plans-period,.vibra-plans-period-active,.vibra-plans-period-disabled{display:none!important}
+.vibra-plans-period,
 @media(max-width:720px){.vibra-plans-content{padding-bottom:10px}.vibra-plans-athlete-backdrop{inset:auto -16px 0;height:240px;opacity:.38}.vibra-plans-athlete-backdrop:before,.vibra-plans-athlete-backdrop:after{width:65%;background-position:center 30%}.vibra-plans-offers{width:100%}.vibra-plans-card{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}}
 @media(max-width:480px){.vibra-plans-athlete-backdrop{height:190px;opacity:.3}.vibra-plans-athlete-backdrop:before,.vibra-plans-athlete-backdrop:after{width:75%}}
