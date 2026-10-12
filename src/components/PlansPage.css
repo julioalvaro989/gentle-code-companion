@@ -1,36 +1,61 @@
-.vibra-plans-page{position:relative;isolation:isolate;min-height:100vh;overflow:hidden;background:#05060b;color:#f8f9ff;padding:clamp(24px,5vw,64px) 20px;font-family:inherit}
-.vibra-plans-glow{position:absolute;z-index:-1;inset:-10% -20% auto;height:560px;background:radial-gradient(ellipse at 20% 20%,rgba(121,0,255,.28),transparent 55%),radial-gradient(ellipse at 80% 10%,rgba(183,255,53,.09),transparent 45%);pointer-events:none}
-.vibra-plans-shell{width:min(100%,760px);margin:0 auto}
-.vibra-plans-back{display:inline-flex;align-items:center;gap:8px;color:#c9c9dd;text-decoration:none;font-size:14px;margin-bottom:46px;background:transparent;border:0;padding:0;cursor:pointer;font-family:inherit}
+.vibra-plans-page{position:relative;isolation:isolate;min-height:100vh;overflow:hidden;background:#050507;color:#f8f8fb;padding:26px clamp(18px,4vw,56px) 42px;font-family:inherit}
+.vibra-plans-atmosphere{position:absolute;z-index:-2;inset:0;pointer-events:none;background:radial-gradient(ellipse at 8% 42%,rgba(112,0,255,.16),transparent 32%),radial-gradient(ellipse at 90% 28%,rgba(183,255,53,.075),transparent 26%),radial-gradient(ellipse at 50% 100%,rgba(76,18,140,.12),transparent 40%)}
+.vibra-plans-atmosphere:after{content:"";position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,black,transparent 78%)}
+.vibra-plans-shell{position:relative;width:min(100%,1240px);margin:0 auto}
+.vibra-plans-back{display:inline-flex;align-items:center;gap:8px;color:#a9a7b6;font-size:13px;margin-bottom:20px;background:transparent;border:0;padding:8px 0;cursor:pointer;font-family:inherit;transition:color .2s}
 .vibra-plans-back:hover{color:#b7ff35}
-.vibra-plans-brand{display:flex;align-items:center;gap:7px;font-size:25px;font-weight:850;letter-spacing:-1.4px;margin-bottom:44px}
-.vibra-plans-brand>span:first-child{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#b7ff35;color:#090b0e;font-size:20px}
-.vibra-plans-brand>span:last-child{color:#b7ff35;margin-left:-7px}
-.vibra-plans-eyebrow{display:flex;align-items:center;gap:8px;color:#b7ff35;font-size:12px;font-weight:800;letter-spacing:1.8px;margin:0 0 16px}
-.vibra-plans-shell h1{font-size:clamp(38px,7vw,64px);line-height:1.04;letter-spacing:-2.8px;margin:0;max-width:700px}
-.vibra-plans-shell h1 span{color:#b7ff35}
-.vibra-plans-intro{max-width:620px;color:#a8b4d8;font-size:16px;line-height:1.8;margin:22px 0 32px}
-.vibra-plans-card{padding:clamp(24px,5vw,38px);border:1px solid #30284a;border-radius:24px;background:linear-gradient(145deg,rgba(21,19,37,.96),rgba(10,11,19,.98));box-shadow:0 28px 80px rgba(0,0,0,.28)}
-.vibra-plans-card-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:rgba(183,255,53,.1);color:#b7ff35;margin-bottom:22px}
-.vibra-plans-status{display:inline-flex;border:1px solid rgba(183,255,53,.28);border-radius:999px;padding:7px 10px;color:#b7ff35;font-size:10px;font-weight:800;letter-spacing:1.3px}
-.vibra-plans-card h2{font-size:clamp(25px,4vw,34px);letter-spacing:-.8px;margin:18px 0 10px}
-.vibra-plans-card p{color:#a8b4d8;line-height:1.75;margin:0 0 24px}
-.vibra-plans-cta{min-height:48px!important;border-radius:13px!important;background:#b7ff35!important;color:#080a0c!important;font-weight:800!important}
-.vibra-plans-cta:hover{background:#caff67!important}
-.vibra-plans-card small{display:block;color:#858ba8;font-size:12px;line-height:1.6;margin-top:18px}
-.vibra-plans-confirmation{display:flex;align-items:flex-start;gap:10px;color:#d9fca0;background:rgba(183,255,53,.08);border:1px solid rgba(183,255,53,.2);padding:14px;border-radius:12px;line-height:1.5}
-.vibra-plans-confirmation svg{flex:0 0 auto;margin-top:2px}
-.vibra-plans-footnote{margin-top:24px;color:#777e9a;font-size:12px;text-align:center}
-@media(max-width:520px){.vibra-plans-back{margin-bottom:32px}.vibra-plans-brand{margin-bottom:34px}.vibra-plans-shell h1{letter-spacing:-1.8px}.vibra-plans-card{border-radius:19px}}
-@media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-
-.vibra-plans-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
-.vibra-plans-options .vibra-plans-card{display:flex;flex-direction:column;min-width:0}
-.vibra-plan-price{font-size:clamp(28px,4vw,38px);font-weight:850;letter-spacing:-1.2px;color:#f8f9ff!important;margin:8px 0 22px!important}
-.vibra-plan-price span{font-size:13px;font-weight:500;letter-spacing:0;color:#a8b4d8}
-.vibra-plan-features{display:grid;gap:13px;list-style:none;padding:0;margin:0 0 28px;color:#d4d7e8;font-size:14px;line-height:1.5;flex:1}
+.vibra-plans-header{text-align:center;max-width:850px;margin:0 auto 34px}
+.vibra-plans-brand{display:flex;justify-content:center;align-items:center;margin:0 auto 26px}
+.vibra-plans-brand img{width:clamp(124px,14vw,168px);height:auto;display:block}
+.vibra-plans-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#c4a1ff;font-size:10px;font-weight:800;letter-spacing:2px;margin:0 0 18px;border:1px solid rgba(165,92,255,.48);border-radius:999px;padding:9px 14px;background:rgba(80,30,130,.12);box-shadow:0 0 26px rgba(126,0,255,.09)}
+.vibra-plans-shell h1{font-size:clamp(34px,5.2vw,62px);line-height:1.04;letter-spacing:-2.4px;margin:0 auto;max-width:820px;font-weight:780}
+.vibra-plans-shell h1 span{color:#b7ff35;text-shadow:0 0 30px rgba(183,255,53,.15)}
+.vibra-plans-intro{max-width:650px;color:#aaa8b9;font-size:15px;line-height:1.8;margin:18px auto 0}
+.vibra-plans-content{display:grid;grid-template-columns:minmax(250px,.78fr) minmax(0,1.35fr);gap:clamp(22px,4vw,52px);align-items:center}
+.vibra-plans-athlete{position:relative;align-self:stretch;min-height:490px;overflow:hidden;border-radius:24px;background-image:linear-gradient(180deg,rgba(5,5,7,.05) 20%,rgba(5,5,7,.4) 58%,#050507 100%),linear-gradient(90deg,rgba(5,5,7,.06),rgba(5,5,7,.1)),url("/src/assets/vibra-landing.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;isolation:isolate}
+.vibra-plans-athlete:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 55% 35%,rgba(137,25,255,.24),transparent 50%),linear-gradient(90deg,rgba(5,5,7,.1),transparent 65%)}
+.vibra-plans-athlete:after{content:"";position:absolute;inset:1px;border:1px solid rgba(170,108,255,.18);border-radius:23px;pointer-events:none}
+.vibra-plans-athlete-overlay{position:absolute;left:clamp(18px,3vw,32px);right:18px;bottom:28px;text-shadow:0 2px 20px #000}
+.vibra-plans-athlete-kicker{display:inline-flex;align-items:center;gap:7px;color:#d4ff8a;font-size:10px;font-weight:800;letter-spacing:1.8px}
+.vibra-plans-athlete-overlay p{font-size:clamp(26px,3vw,39px);font-weight:500;line-height:1.08;letter-spacing:-1.4px;margin:12px 0 0}
+.vibra-plans-athlete-overlay strong{color:#b7ff35}
+.vibra-plans-offers{min-width:0}
+.vibra-plans-period{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;padding:5px;border:1px solid #292532;background:rgba(14,13,18,.86);border-radius:13px;margin:0 auto 20px}
+.vibra-plans-period-active,.vibra-plans-period-disabled{display:flex;align-items:center;gap:7px;border-radius:9px;padding:10px 18px;font-size:12px;font-weight:700;white-space:nowrap}
+.vibra-plans-period-active{background:#b7ff35;color:#11130b;box-shadow:0 0 18px rgba(183,255,53,.13)}
+.vibra-plans-period-disabled{color:#777381}
+.vibra-plans-period-disabled small{font-size:9px;color:#9a94a6;border:1px solid #393342;border-radius:5px;padding:2px 4px}
+.vibra-plans-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.vibra-plans-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:clamp(20px,2.5vw,30px);border:1px solid rgba(150,66,255,.55);border-radius:20px;background:linear-gradient(145deg,rgba(28,15,42,.96),rgba(9,8,14,.98) 70%);box-shadow:0 18px 48px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.035)}
+.vibra-plans-card-basic{border-color:rgba(145,54,255,.58);box-shadow:0 0 28px rgba(112,0,255,.075),0 18px 48px rgba(0,0,0,.25)}
+.vibra-plans-card-premium{border-color:rgba(151,255,49,.58);background:linear-gradient(145deg,rgba(36,20,49,.98),rgba(11,10,15,.99) 70%);box-shadow:0 0 0 1px rgba(146,255,50,.07),0 0 34px rgba(137,31,255,.13),0 18px 48px rgba(0,0,0,.32)}
+.vibra-plans-popular{position:absolute;top:-12px;right:18px;padding:6px 10px;border-radius:999px;background:#b7ff35;color:#15170c;font-size:9px;font-weight:900;letter-spacing:1.1px;box-shadow:0 0 20px rgba(183,255,53,.16)}
+.vibra-plans-status{display:inline-flex;align-self:flex-start;border:1px solid rgba(183,255,53,.24);border-radius:999px;padding:7px 9px;color:#c7f77d;font-size:9px;font-weight:800;letter-spacing:1.2px}
+.vibra-plans-card h2{font-size:clamp(21px,2.2vw,28px);letter-spacing:-.8px;margin:20px 0 8px;white-space:nowrap}
+.vibra-plans-card h2 span{color:#b7ff35}
+.vibra-plans-card .vibra-plans-description{min-height:44px;color:#aaa6b8;font-size:12px;line-height:1.7;margin:0 0 20px}
+.vibra-plan-price{font-size:clamp(25px,3vw,35px);font-weight:850;letter-spacing:-1.3px;color:#fff;margin:0 0 22px;white-space:nowrap}
+.vibra-plan-price span{font-size:11px;font-weight:500;letter-spacing:0;color:#aaa6b8;margin-left:5px}
+.vibra-plan-features{display:grid;gap:14px;list-style:none;padding:0;margin:0 0 28px;color:#dedbe6;font-size:12px;line-height:1.55;flex:1}
 .vibra-plan-features li{display:flex;align-items:flex-start;gap:9px}
-.vibra-plan-features svg{flex:0 0 auto;color:#b7ff35;margin-top:2px}
-.vibra-plans-options .vibra-plans-cta{width:100%;justify-content:center}
-.vibra-plans-card-premium{border-color:rgba(183,255,53,.55);box-shadow:0 28px 80px rgba(183,255,53,.07)}
-@media(max-width:640px){.vibra-plans-options{grid-template-columns:1fr}.vibra-plans-options .vibra-plans-card{padding:24px}}
+.vibra-feature-check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;border-radius:50%;background:rgba(183,255,53,.13);color:#b7ff35;margin-top:0}
+.vibra-plans-options .vibra-plans-cta{display:flex;width:100%;justify-content:center;gap:8px;min-height:46px!important;border-radius:11px!important;font-size:12px!important;font-weight:850!important;white-space:nowrap}
+.vibra-plans-cta-outline{background:transparent!important;color:#b7ff35!important;border:1px solid #8acb2a!important;box-shadow:inset 0 0 16px rgba(183,255,53,.035)}
+.vibra-plans-cta-outline:hover{background:rgba(183,255,53,.08)!important}
+.vibra-plans-cta-filled{background:#b7ff35!important;color:#10120b!important;border:1px solid #b7ff35!important;box-shadow:0 0 24px rgba(183,255,53,.12)}
+.vibra-plans-cta-filled:hover{background:#caff67!important}
+.vibra-plans-trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:32px 0 0;padding:22px 0;border-top:1px solid rgba(160,153,178,.17);border-bottom:1px solid rgba(160,153,178,.17)}
+.vibra-trust-item{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0}
+.vibra-trust-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(162,92,255,.48);border-radius:50%;color:#c7a2ff;background:rgba(101,33,164,.1);box-shadow:0 0 20px rgba(123,0,255,.07)}
+.vibra-trust-item strong{display:block;font-size:12px;color:#f0edf6;margin-bottom:5px}
+.vibra-trust-item p{margin:0;color:#918c9e;font-size:10px;line-height:1.55}
+.vibra-plans-footer{text-align:center;padding-top:28px}
+.vibra-footer-zap{display:grid;place-items:center;width:30px;height:30px;margin:0 auto 10px;border-radius:10px;background:rgba(139,50,255,.12);color:#b97cff}
+.vibra-plans-footer>strong{font-size:17px;letter-spacing:-.3px}
+.vibra-plans-footer>p{color:#aaa6b8;font-size:12px;margin:8px 0 16px}
+.vibra-plans-footer>small{display:block;max-width:720px;margin:0 auto;color:#777282;font-size:10px;line-height:1.6}
+@media(min-width:1500px){.vibra-plans-content{gap:60px}.vibra-plans-athlete{min-height:540px}}
+@media(max-width:980px){.vibra-plans-content{grid-template-columns:minmax(180px,.62fr) minmax(0,1.4fr);gap:20px}.vibra-plans-athlete{min-height:460px}.vibra-plans-options{gap:12px}.vibra-plans-card{padding:20px}.vibra-plans-card h2{font-size:22px}.vibra-plan-price{font-size:27px}.vibra-plan-features{font-size:11px}}
+@media(max-width:720px){.vibra-plans-page{padding:18px 16px 32px}.vibra-plans-back{margin-bottom:16px}.vibra-plans-header{margin-bottom:28px}.vibra-plans-brand{margin-bottom:22px}.vibra-plans-shell h1{letter-spacing:-1.5px}.vibra-plans-intro{font-size:13px;margin-top:14px}.vibra-plans-content{grid-template-columns:1fr}.vibra-plans-athlete{min-height:230px;max-height:270px;background-position:center 38%;border-radius:18px}.vibra-plans-athlete-overlay{bottom:18px}.vibra-plans-athlete-overlay p{font-size:28px}.vibra-plans-options{grid-template-columns:repeat(2,minmax(0,1fr))}.vibra-plans-card{padding:20px 16px}.vibra-plans-card h2{font-size:clamp(19px,4vw,24px)}.vibra-plan-price{font-size:clamp(24px,5vw,30px)}.vibra-plans-trust{gap:10px}.vibra-trust-item{flex-direction:column;text-align:center;gap:8px}.vibra-trust-item p{max-width:180px}}
+@media(max-width:480px){.vibra-plans-options{grid-template-columns:1fr;gap:20px}.vibra-plans-card{padding:24px}.vibra-plans-card h2{font-size:25px}.vibra-plans-card .vibra-plans-description{min-height:0}.vibra-plan-price{font-size:34px}.vibra-plan-features{font-size:13px}.vibra-plans-options .vibra-plans-cta{min-height:50px!important;font-size:13px!important}.vibra-plans-trust{grid-template-columns:1fr;gap:18px}.vibra-trust-item{flex-direction:row;justify-content:flex-start;text-align:left}.vibra-trust-item p{max-width:none}.vibra-plans-period-active,.vibra-plans-period-disabled{padding:9px 12px}}
+@media(prefers-reduced-motion:reduce){.vibra-plans-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
