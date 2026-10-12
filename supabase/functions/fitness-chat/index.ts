@@ -258,7 +258,7 @@ Deno.serve(async (req: Request) => {
         temperature: 0.5,
         max_tokens: 900,
         messages: [
-          { role: "system", content: buildFitnessSystemContext(fitnessProfile, safeMessages) },
+          { role: "system", content: buildFitnessSystemContext(fitnessProfile, onboardingAnswers, safeMessages) },
           ...safeMessages,
         ],
       }),
