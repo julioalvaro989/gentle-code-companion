@@ -5,6 +5,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const openAiKey = Deno.env.get("OPENAI_API_KEY") ?? "";
+const openAiModel = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const allowedOrigins = new Set((Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((value) => value.trim()).filter(Boolean));
 const requestsByUser = new Map<string, number[]>();
@@ -77,8 +78,18 @@ Deno.serve(async (req: Request) => {
   if (!origin || !allowedOrigins.has(origin)) {
     return new Response("Origem não autorizada.", { status: 403, headers: { "Cache-Control": "no-store" } });
   }
-  if (!supabaseUrl || !supabaseKey || !serviceRoleKey || !openAiKey || allowedOrigins.size === 0) {
-    return jsonError("O serviço de IA não está configurado corretamente.", 503, origin);
+  if (!openAiKey) {
+    console.error("[fitness-chat] OPENAI_API_KEY secret is not configured");
+    return jsonError("O chat está temporariamente indisponível. O administrador precisa configurar a chave da OpenAI no servidor.", 503, origin);
+  }
+  if (!supabaseUrl || !supabaseKey || !serviceRoleKey || allowedOrigins.size === 0) {
+    console.error("[fitness-chat] Required Supabase or origin configuration is missing", {
+      supabaseUrlConfigured: Boolean(supabaseUrl),
+      supabaseKeyConfigured: Boolean(supabaseKey),
+      serviceRoleConfigured: Boolean(serviceRoleKey),
+      allowedOriginsConfigured: allowedOrigins.size > 0,
+    });
+    return jsonError("O serviço de IA está temporariamente indisponível. O administrador precisa verificar a configuração do Supabase.", 503, origin);
   }
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: responseHeaders(origin) });
   if (req.method !== "POST") return jsonError("Método não permitido.", 405, origin);
@@ -206,7 +217,7 @@ Deno.serve(async (req: Request) => {
       headers: { Authorization: `Bearer ${openAiKey}`, "Content-Type": "application/json" },
       signal: AbortSignal.timeout(20_000),
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: openAiModel,
         temperature: 0.5,
         max_tokens: 900,
         messages: [
@@ -217,7 +228,11 @@ Deno.serve(async (req: Request) => {
     });
     const result = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
-      console.error("OpenAI chat error", upstream.status);
+      console.error("[fitness-chat] OpenAI request failed", { status: upstream.status });
+      if (upstream.status === 429) return jsonError("O chat está recebendo muitas solicitações. Aguarde um pouco e tente novamente.", 429, origin);
+      if (upstream.status === 401 || upstream.status === 403) {
+        return jsonError("O serviço de IA está com uma configuração inválida. O administrador precisa verificar as credenciais no servidor.", 503, origin);
+      }
       return jsonError("Não foi possível obter uma resposta agora. Tente novamente em instantes.", 502, origin);
     }
     const reply = result?.choices?.[0]?.message?.content;
