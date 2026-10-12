@@ -15,7 +15,7 @@ export function PlansPage() {
         <button className="vibra-plans-back" type="button" onClick={() => window.location.assign("/")}>
           <ArrowLeft size={16} /> Voltar ao aplicativo
         </button>
-        <div className="vibra-plans-brand"><span>V</span> vibra<span>.</span></div>
+        <div className="vibra-plans-brand"><img src="/vibra-logo-horizontal.svg" alt="Vibra" style={{ width: 150, height: "auto", display: "block" }} /></div>
         <p className="vibra-plans-eyebrow"><ShieldCheck size={15} /> ESCOLHA SEU PLANO</p>
         <h1>Seu próximo passo,<br /><span>no seu ritmo.</span></h1>
         <p className="vibra-plans-intro">Escolha o plano ideal para acompanhar sua evolução na Vibra.</p>
