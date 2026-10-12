@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, ShieldCheck } from "lucide-react";
-import "../routes/legal.css";
+import "./LegalDocument.css";
 
 type Section = { id: string; title: string; paragraphs: string[]; bullets?: string[] };
 type DocumentData = { title: string; intro: string; sections: Section[] };
