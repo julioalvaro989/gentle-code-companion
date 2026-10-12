@@ -5,10 +5,9 @@ import {
   TrendingUp, UserRound, X, Zap, Clock3, Salad, ClipboardCheck,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import vibraLogoAsset from "../assets/vibra-logo.png.asset.json";
 import "./PublicLanding.css";
 
-const vibraLogoUrl = vibraLogoAsset.url;
+const vibraLogoUrl = "/vibra-logo-horizontal.svg";
 
 type Props = { onAuth: (mode: "login" | "signup") => void; onPlans: () => void };
 
