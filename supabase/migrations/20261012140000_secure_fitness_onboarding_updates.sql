@@ -165,27 +165,53 @@ alter function public.update_own_fitness_onboarding_answers(jsonb, timestamptz) 
 revoke all on function public.update_own_fitness_onboarding_answers(jsonb, timestamptz) from public, anon, authenticated;
 grant execute on function public.update_own_fitness_onboarding_answers(jsonb, timestamptz) to authenticated;
 
--- Remove table-level and column-level UPDATE paths from client roles. Existing
--- SELECT/INSERT grants and all RLS policies are left untouched.
-revoke update on table public.fitness_onboarding_profiles from public, anon, authenticated;
+-- Remove client INSERT/UPDATE paths at both table and column level.
+-- Revoke from PUBLIC as well as the API roles. Do not touch service_role or
+-- database-owner grants. RLS policies remain intact but are not a substitute
+-- for server-side payload validation.
+revoke insert, update on table public.fitness_onboarding_profiles
+  from public, anon, authenticated;
 
 do $privileges$
 declare
   v_columns text;
+  v_table oid := 'public.fitness_onboarding_profiles'::regclass;
+  v_column record;
 begin
   select pg_catalog.string_agg(pg_catalog.format('%I', a.attname), ', ' order by a.attnum)
     into v_columns
     from pg_catalog.pg_attribute a
-   where a.attrelid = 'public.fitness_onboarding_profiles'::regclass
+   where a.attrelid = v_table
      and a.attnum > 0
      and not a.attisdropped;
 
   if v_columns is not null then
     execute pg_catalog.format(
-      'revoke update (%s) on table public.fitness_onboarding_profiles from public, anon, authenticated',
+      'revoke insert (%1$s), update (%1$s) on table public.fitness_onboarding_profiles from public, anon, authenticated',
       v_columns
     );
   end if;
+
+  -- Fail closed if authenticated still receives either privilege through a
+  -- grant to a role it inherits. We deliberately do not revoke from arbitrary
+  -- shared parent roles because that could break unrelated applications.
+  if pg_catalog.has_table_privilege('authenticated', v_table, 'INSERT')
+     or pg_catalog.has_table_privilege('authenticated', v_table, 'UPDATE') then
+    raise exception 'Authenticated retains table-level INSERT/UPDATE through another grant; inspect inherited role grants before applying';
+  end if;
+
+  for v_column in
+    select a.attname
+      from pg_catalog.pg_attribute a
+     where a.attrelid = v_table
+       and a.attnum > 0
+       and not a.attisdropped
+  loop
+    if pg_catalog.has_column_privilege('authenticated', v_table, v_column.attname, 'INSERT')
+       or pg_catalog.has_column_privilege('authenticated', v_table, v_column.attname, 'UPDATE') then
+      raise exception 'Authenticated retains INSERT/UPDATE on column % through another grant; inspect inherited role grants before applying', v_column.attname;
+    end if;
+  end loop;
 end
 $privileges$;
 
