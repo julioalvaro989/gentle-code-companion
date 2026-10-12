@@ -168,7 +168,7 @@ alter table public.vibra_subscriptions enable row level security;
 drop policy if exists vibra_subscriptions_select_own on public.vibra_subscriptions;
 create policy vibra_subscriptions_select_own on public.vibra_subscriptions
   for select to authenticated using (user_id=(select auth.uid()));
-revoke all privileges on table public.vibra_subscriptions from anon,authenticated;
+revoke all privileges on table public.vibra_subscriptions from public,anon,authenticated;
 grant select on table public.vibra_subscriptions to authenticated;
 revoke insert,update,delete,truncate on public.vibra_subscriptions from anon,authenticated;
 
@@ -189,7 +189,7 @@ revoke insert,update on public.fitness_profiles from anon,authenticated;
 grant insert (id,username,email,goal,updated_at,birth_date,weight_kg,height_cm,primary_goal,
   experience_level,weekly_frequency,training_location,preferences,physical_limitations,profile_completed)
   on public.fitness_profiles to authenticated;
-grant update (username,email,goal,updated_at,birth_date,weight_kg,height_cm,primary_goal,
+grant update (id,username,email,goal,updated_at,birth_date,weight_kg,height_cm,primary_goal,
   experience_level,weekly_frequency,training_location,preferences,physical_limitations,profile_completed)
   on public.fitness_profiles to authenticated;
 grant insert (user_id,completed_exercises,water_glasses,goal,updated_at)
