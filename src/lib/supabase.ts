@@ -275,7 +275,7 @@ export async function saveFitnessOnboardingAnswers(session: AuthSession, answers
   if (!current) throw new Error("Ainda não existe um registro de onboarding para atualizar. Complete o onboarding primeiro.");
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.rpc("update_own_fitness_onboarding_answers", {
-    p_patch: patch,
+    p_patch: patch as import("../integrations/supabase/types").Json,
     p_expected_updated_at: current.updated_at,
   });
   if (error) {
