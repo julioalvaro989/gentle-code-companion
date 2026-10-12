@@ -377,7 +377,7 @@ export type Database = {
     }
     Functions: {
       update_own_fitness_onboarding_answers: {
-        Args: { p_patch: Json; p_expected_updated_at: string }
+        Args: { p_patch: Json; p_expected_updated_at: string | null }
         Returns: string
       }
       is_admin: { Args: never; Returns: boolean }
