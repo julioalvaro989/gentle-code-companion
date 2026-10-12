@@ -251,8 +251,12 @@ export async function saveFullFitnessProfile(session: AuthSession, profile: Fitn
 async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boolean;allowed:boolean;reason?:string}> {
   try {
     const { supabase } = await import("@/integrations/supabase/client");
+    // Use the exact, already-verified session passed by the caller. During
+    // sign-in/restore, relying on the singleton client's implicit token can race
+    // the auth-state update and send an absent or stale bearer to the Edge Function.
     const { data, error } = await supabase.functions.invoke("vibra-admin-session", {
       body: { action: "claim" },
+      headers: { Authorization: `Bearer ${session.access_token}` },
     });
     if (error) {
       // Preserve actionable diagnostics in browser logs while never logging tokens or headers.
