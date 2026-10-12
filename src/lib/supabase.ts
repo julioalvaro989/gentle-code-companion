@@ -269,16 +269,29 @@ async function getAdministrativeAccess(session: AuthSession): Promise<{admin:boo
         message: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString(),
       });
-      throw new Error(context?.status === 401 ? "Sua sessão expirou. Entre novamente." : context?.status === 403 ? "A origem deste ambiente não está autorizada no serviço de acesso." : context?.status === 503 ? "O serviço de autorização está sem configuração ou temporariamente indisponível." : "Não foi possível validar as permissões de acesso.");
+      if (context?.status === 401) {
+        throw new Error("Sua sessão expirou. Entre novamente.");
+      }
+      // Admin-session tracking is an optional privilege check. If that Edge
+      // Function is unavailable/misconfigured, continue with the normal
+      // subscription lookup below instead of blocking every regular member.
+      // This does not grant admin access or bypass subscription authorization.
+      return { admin: false, allowed: false };
     }
     if (!data || typeof data.admin !== "boolean" || typeof data.allowed !== "boolean") {
       throw new Error("O serviço de autorização retornou uma resposta inválida.");
     }
     return { admin: data.admin, allowed: data.allowed, reason: typeof data.reason === "string" ? data.reason : undefined };
   } catch (error) {
-    // Do not reinterpret an authorization-service failure as a confirmed non-admin.
-    // Callers must keep the user in a loading/error state rather than redirect to plans.
-    throw error instanceof Error ? error : new Error("Não foi possível validar as permissões de acesso.");
+    // Keep expired-session errors actionable. Other Edge Function/network errors
+    // must not prevent ordinary users from reaching their subscription lookup.
+    if (error instanceof Error && error.message === "Sua sessão expirou. Entre novamente.") throw error;
+    console.error("[Vibra admin authorization] Falling back to subscription access check", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString(),
+    });
+    return { admin: false, allowed: false };
   }
 }
 
