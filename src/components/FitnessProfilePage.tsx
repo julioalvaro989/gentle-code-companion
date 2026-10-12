@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Activity, ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
-import { adoptSupabaseSession, getFitnessProfile, getVibraAccess, saveFullFitnessProfile, type AuthSession, type FitnessProfileInput } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessOnboardingAnswers, saveFitnessOnboardingAnswers, getVibraAccess, saveFullFitnessProfile, type AuthSession, type FitnessProfileInput } from "../lib/supabase";
 
 const inputStyle = { width: "100%", boxSizing: "border-box" as const, padding: "12px 14px", border: "1px solid #343047", borderRadius: 12, background: "#10101b", color: "#f8f7ff", font: "inherit" };
 const labelStyle = { display: "grid", gap: 7, color: "#d8d5e7", fontSize: 13, fontWeight: 600 as const };
@@ -58,11 +58,13 @@ export function FitnessProfilePage() {
         setPlace(saved?.training_location || "academia");
         setPreferences(saved?.preferences || "");
         setLimitations(saved?.physical_limitations || "");
-        setSessionMinutes(saved?.training_session_minutes == null ? "" : String(saved.training_session_minutes));
-        setEquipment((saved?.available_equipment || []).join(", "));
-        setFoodBudget(saved?.monthly_food_budget_brl == null ? "" : String(saved.monthly_food_budget_brl));
-        setDietaryRestrictions((saved?.dietary_restrictions || []).join(", "));
-        setDietaryPreferences((saved?.dietary_preferences || []).join(", "));
+        const onboarding = await getFitnessOnboardingAnswers(current);
+        if (!active) return;
+        setSessionMinutes(onboarding?.sessionMinutes == null ? "" : String(onboarding.sessionMinutes));
+        setEquipment(Array.isArray(onboarding?.equipment) ? onboarding.equipment.join(", ") : typeof onboarding?.equipment === "string" ? onboarding.equipment : "");
+        setFoodBudget(onboarding?.foodBudget == null ? "" : String(onboarding.foodBudget));
+        setDietaryRestrictions(Array.isArray(onboarding?.dietaryRestrictions) ? onboarding.dietaryRestrictions.join(", ") : typeof onboarding?.dietaryRestrictions === "string" ? onboarding.dietaryRestrictions : "");
+        setDietaryPreferences(Array.isArray(onboarding?.preferredFoods) ? onboarding.preferredFoods.join(", ") : typeof onboarding?.preferredFoods === "string" ? onboarding.preferredFoods : "");
       } catch {
         if (active) setError("Não foi possível validar seu acesso ou recuperar o perfil. O acesso permanece bloqueado; tente novamente.");
       } finally { if (active) setLoading(false); }
@@ -80,14 +82,6 @@ export function FitnessProfilePage() {
     if (!Number.isFinite(cm) || cm < 80 || cm > 250) { setError("Informe uma altura entre 80 e 250 cm."); return; }
     if (!Number.isInteger(weekly) || weekly < 1 || weekly > 7) { setError("Escolha uma frequência entre 1 e 7 dias por semana."); return; }
     if (birthDate && (new Date(birthDate).getTime() > Date.now() || new Date(birthDate).getFullYear() < 1900)) { setError("Confira a data de nascimento informada."); return; }
-    const minutes = sessionMinutes.trim() ? Number(sessionMinutes) : null;
-    const budget = foodBudget.trim() ? Number(foodBudget.replace(",", ".")) : null;
-    if (minutes !== null && (!Number.isInteger(minutes) || minutes < 10 || minutes > 240)) { setError("O tempo por sessão deve ser entre 10 e 240 minutos."); return; }
-    if (budget !== null && (!Number.isFinite(budget) || budget < 0 || budget > 100000)) { setError("Informe um orçamento mensal entre R$ 0 e R$ 100.000."); return; }
-    const splitList = (value: string, maxItems: number, maxLength: number) => value.split(",").map(item => item.trim().slice(0, maxLength)).filter(Boolean).slice(0, maxItems);
-    const equipmentList = splitList(equipment, 30, 80);
-    const restrictionList = splitList(dietaryRestrictions, 30, 100);
-    const dietaryPreferenceList = splitList(dietaryPreferences, 30, 100);
     setSaving(true);
     try {
       const profile: FitnessProfileInput = {
@@ -103,14 +97,16 @@ export function FitnessProfilePage() {
         training_location: place,
         preferences: preferences.trim() || null,
         physical_limitations: limitations.trim() || null,
-        training_session_minutes: minutes,
-        available_equipment: equipmentList.length ? equipmentList : null,
-        monthly_food_budget_brl: budget,
-        dietary_restrictions: restrictionList.length ? restrictionList : null,
-        dietary_preferences: dietaryPreferenceList.length ? dietaryPreferenceList : null,
         profile_completed: true,
       };
       await saveFullFitnessProfile(session, profile);
+      await saveFitnessOnboardingAnswers(session, {
+        sessionMinutes: sessionMinutes.trim() ? Number(sessionMinutes) : null,
+        equipment: equipment.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
+        foodBudget: foodBudget.trim() ? Number(foodBudget.replace(",", ".")) : null,
+        dietaryRestrictions: dietaryRestrictions.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
+        preferredFoods: dietaryPreferences.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
+      });
       setNotice("Perfil salvo com sucesso. Abrindo seu espaço Vibra…");
       window.location.assign("/");
     } catch (e) {
