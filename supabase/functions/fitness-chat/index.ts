@@ -73,10 +73,11 @@ function buildFitnessSystemContext(profile: Record<string, unknown> | null, mess
     local_treino: textValue(profile.training_location, 80),
     preferencias_restricoes_informadas: textValue(profile.preferences, 1500),
     limitacoes_fisicas_informadas: textValue(profile.physical_limitations, 1000),
-    tempo_por_sessao_minutos: null,
-    equipamentos_disponiveis: null,
-    orcamento_mensal_alimentacao: null,
-    restricoes_alimentares_estruturadas: null,
+    tempo_por_sessao_minutos: numeric(profile.training_session_minutes),
+    equipamentos_disponiveis: Array.isArray(profile.available_equipment) ? profile.available_equipment.filter((v): v is string => typeof v === "string").slice(0, 30).map(v => v.slice(0, 80)) : null,
+    orcamento_mensal_alimentacao_brl: numeric(profile.monthly_food_budget_brl),
+    restricoes_alimentares: Array.isArray(profile.dietary_restrictions) ? profile.dietary_restrictions.filter((v): v is string => typeof v === "string").slice(0, 30).map(v => v.slice(0, 100)) : null,
+    preferencias_alimentares: Array.isArray(profile.dietary_preferences) ? profile.dietary_preferences.filter((v): v is string => typeof v === "string").slice(0, 30).map(v => v.slice(0, 100)) : null,
     nota: "Campos null não foram encontrados no perfil estruturado disponível; não presumir valores. O texto de preferências só deve ser interpretado como informação se o usuário realmente o tiver informado."
   };
   const latest = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
