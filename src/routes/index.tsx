@@ -121,9 +121,12 @@ function GymApp() {
         return;
       }
       const requestedAuth = params.get("auth");
+      const forceLoginForm = requestedAuth === "login";
       if (requestedAuth === "login" || requestedAuth === "signup") {
         setAuthMode(requestedAuth);
         setShowAuth(true);
+        setAuthError("");
+        setAuthMessage("");
       }
       const fromUrl = params.get("plan");
       let fromStorage: string | null = null;
@@ -139,6 +142,15 @@ function GymApp() {
       try {
         const current = await adoptSupabaseSession();
         if (!active) return;
+        // When the visitor explicitly chooses “Já tenho conta”, keep the
+        // email/password form visible even if this browser has a stale saved
+        // session. Otherwise the automatic subscription check can redirect to
+        // /plans before the user gets a chance to sign in with the intended account.
+        if (current && forceLoginForm) {
+          setProgressHydrated(false);
+          setAccessReady(true);
+          return;
+        }
         if (current) {
           setSession(current);
           const name = current.user.user_metadata?.full_name || current.user.email?.split("@")[0] || "Aluno Vibra";
