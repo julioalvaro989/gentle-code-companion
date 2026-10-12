@@ -227,46 +227,62 @@ export type VibraAccess = {
 
 export type FitnessOnboardingAnswers = Record<string, unknown>;
 
-export async function getFitnessOnboardingAnswers(session: AuthSession): Promise<FitnessOnboardingAnswers | null> {
-  const rows = await request("rest/v1/fitness_onboarding_profiles?select=answers&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1", {}, session.access_token);
-  const answers = rows?.[0]?.answers;
-  return answers && typeof answers === "object" && !Array.isArray(answers) ? answers as FitnessOnboardingAnswers : null;
+export type FitnessOnboardingRecord = { answers: FitnessOnboardingAnswers; updated_at: string };
+
+export async function getFitnessOnboardingAnswers(session: AuthSession): Promise<FitnessOnboardingRecord | null> {
+  const rows = await request(
+    "rest/v1/fitness_onboarding_profiles?select=answers,updated_at&user_id=eq." + encodeURIComponent(session.user.id) + "&limit=1",
+    {},
+    session.access_token,
+  );
+  const row = rows?.[0];
+  const answers = row?.answers;
+  if (!row || typeof row.updated_at !== "string" || !answers || typeof answers !== "object" || Array.isArray(answers)) return null;
+  return { answers: answers as FitnessOnboardingAnswers, updated_at: row.updated_at };
 }
 
 export async function saveFitnessOnboardingAnswers(session: AuthSession, answers: FitnessOnboardingAnswers): Promise<void> {
-  // Merge only the known preference keys into the current user's existing JSONB onboarding record.
-  const allowed: Record<string, unknown> = {
-    sessionMinutes: answers.sessionMinutes,
-    equipment: answers.equipment,
-    foodBudget: answers.foodBudget,
-    dietaryRestrictions: answers.dietaryRestrictions,
-    preferredFoods: answers.preferredFoods,
-  };
-  if (allowed.sessionMinutes !== undefined && allowed.sessionMinutes !== null) {
-    const value = Number(allowed.sessionMinutes);
-    if (!Number.isInteger(value) || value < 10 || value > 240) throw new Error("O tempo por sessão deve ser entre 10 e 240 minutos.");
-    allowed.sessionMinutes = value;
+  const allowedKeys = new Set(["sessionMinutes", "equipment", "foodBudget", "dietaryRestrictions", "preferredFoods", "allergies", "dislikedFoods"]);
+  const patch: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(answers)) {
+    if (!allowedKeys.has(key)) throw new Error("O perfil contém um campo que não pode ser editado por esta operação.");
+    patch[key] = value;
   }
-  if (allowed.foodBudget !== undefined && allowed.foodBudget !== null && allowed.foodBudget !== "") {
-    const value = Number(String(allowed.foodBudget).replace(",", "."));
-    if (!Number.isFinite(value) || value < 0 || value > 100000) throw new Error("O orçamento mensal deve estar entre R$ 0 e R$ 100.000.");
-    allowed.foodBudget = value;
-  }
-  for (const key of ["equipment", "dietaryRestrictions", "preferredFoods"]) {
-    if (allowed[key] !== undefined && allowed[key] !== null) {
-      const values = Array.isArray(allowed[key]) ? allowed[key] : String(allowed[key]).split(",");
-      if (values.length > 30 || values.some((item) => typeof item !== "string" || item.trim().length > 100)) throw new Error("Confira os itens informados nas preferências.");
-      allowed[key] = values.map((item) => String(item).trim()).filter(Boolean);
+  if (Object.keys(patch).length === 0) throw new Error("Nenhuma preferência foi informada para salvar.");
+
+  if (Object.hasOwn(patch, "sessionMinutes") && patch.sessionMinutes !== null) {
+    if (typeof patch.sessionMinutes !== "number" || !Number.isInteger(patch.sessionMinutes) || patch.sessionMinutes < 10 || patch.sessionMinutes > 240) {
+      throw new Error("O tempo por sessão deve ser um número inteiro entre 10 e 240 minutos.");
     }
   }
+  if (Object.hasOwn(patch, "foodBudget") && patch.foodBudget !== null) {
+    if (typeof patch.foodBudget !== "number" || !Number.isFinite(patch.foodBudget) || patch.foodBudget < 0 || patch.foodBudget > 100000) {
+      throw new Error("O orçamento mensal deve estar entre R$ 0 e R$ 100.000.");
+    }
+  }
+  for (const key of ["equipment", "dietaryRestrictions", "preferredFoods", "allergies", "dislikedFoods"]) {
+    if (!Object.hasOwn(patch, key) || patch[key] === null) continue;
+    const values = patch[key];
+    if (!Array.isArray(values) || values.length > 30 || values.some((item) => typeof item !== "string" || item.trim().length === 0 || item.trim().length > 100)) {
+      throw new Error("Cada lista deve conter até 30 itens de texto, com 1 a 100 caracteres por item.");
+    }
+    patch[key] = values.map((item: string) => item.trim());
+  }
+
+  // Optimistic concurrency: the database RPC atomically merges only the allowed keys
+  // if updated_at still matches this read. The server revalidates every value.
   const current = await getFitnessOnboardingAnswers(session);
   if (!current) throw new Error("Ainda não existe um registro de onboarding para atualizar. Complete o onboarding primeiro.");
-  const merged = { ...current, ...allowed };
-  await request("rest/v1/fitness_onboarding_profiles?user_id=eq." + encodeURIComponent(session.user.id), {
-    method: "PATCH",
-    headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ answers: merged, updated_at: new Date().toISOString() }),
-  }, session.access_token);
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase.rpc("update_own_fitness_onboarding_answers", {
+    p_patch: patch,
+    p_expected_updated_at: current.updated_at,
+  });
+  if (error) {
+    if (error.code === "40001") throw new Error("Seu perfil foi atualizado em outro dispositivo. Recarregue os dados e tente novamente.");
+    throw new Error("Não foi possível salvar suas preferências com segurança. Tente novamente.");
+  }
+  if (data === null || data === undefined) throw new Error("A atualização não foi confirmada. Recarregue o perfil antes de continuar.");
 }
 
 export async function getFitnessProfile(session: AuthSession): Promise<FitnessProfile | null> {
