@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Clock3, LockKeyhole, MessageCircle, ShieldCheck, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, LockKeyhole, MessageCircle, ShieldCheck } from "lucide-react";
 import { Button } from "./ui/button";
 import "./PlansPage.css";
 import { VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
@@ -27,18 +27,8 @@ export function PlansPage() {
         </header>
 
         <section className="vibra-plans-content" aria-label="Compare os planos da Vibra">
-          <div className="vibra-plans-athlete" role="img" aria-label="Imagem fitness com iluminação dramática em tons roxos">
-            <div className="vibra-plans-athlete-overlay">
-              <span className="vibra-plans-athlete-kicker"><Zap size={14} aria-hidden="true" /> EVOLUÇÃO CONTÍNUA</span>
-              <p>Seu ritmo.<br /><strong>Sua evolução.</strong></p>
-            </div>
-          </div>
-
+          <div className="vibra-plans-athlete-backdrop" aria-hidden="true" />
           <div className="vibra-plans-offers">
-            <div className="vibra-plans-period" aria-label="Periodicidade disponível">
-              <span className="vibra-plans-period-active">Mensal</span>
-              <span className="vibra-plans-period-disabled" aria-label="Trimestral indisponível">Trimestral <small>indisponível</small></span>
-            </div>
             <div className="vibra-plans-options">
               <article className="vibra-plans-card vibra-plans-card-basic">
                 <div className="vibra-plans-status">PLANO ESSENCIAL</div>
