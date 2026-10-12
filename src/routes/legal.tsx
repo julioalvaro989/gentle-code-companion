@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, ShieldCheck } from "lucide-react";
 import "./legal.css";
 
@@ -56,7 +56,7 @@ const docs: Record<string, DocumentData> = {
   }
 };
 
-function LegalDocument({ kind }: { kind: keyof typeof docs }) {
+export function LegalDocument({ kind }: { kind: keyof typeof docs }) {
   const doc = docs[kind];
   return <main className="legal-shell">
     <header className="legal-header"><Link to="/" className="legal-back"><ArrowLeft size={16}/> Voltar para a Vibra</Link><span className="legal-brand"><span className="legal-mark">V</span> VIBRA</span></header>
@@ -73,6 +73,3 @@ function LegalDocument({ kind }: { kind: keyof typeof docs }) {
   </main>;
 }
 
-export const TermsRoute = createFileRoute("/termos-de-uso")({ head: () => ({ meta: [{ title: "Termos de Uso — Vibra" }, { name: "robots", content: "index, follow" }] }), component: () => <LegalDocument kind="terms" /> });
-export const PrivacyRoute = createFileRoute("/politica-de-privacidade")({ head: () => ({ meta: [{ title: "Política de Privacidade — Vibra" }, { name: "robots", content: "index, follow" }] }), component: () => <LegalDocument kind="privacy" /> });
-export const SubscriptionRoute = createFileRoute("/politica-de-assinatura")({ head: () => ({ meta: [{ title: "Política de Assinatura — Vibra" }, { name: "robots", content: "index, follow" }] }), component: () => <LegalDocument kind="subscription" /> });
