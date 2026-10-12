@@ -5,7 +5,10 @@ import {
   TrendingUp, UserRound, X, Zap, Clock3, Salad, ClipboardCheck,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import vibraLogoAsset from "../assets/vibra-logo.png.asset.json";
 import "./PublicLanding.css";
+
+const vibraLogoUrl = vibraLogoAsset.url;
 
 type Props = { onAuth: (mode: "login" | "signup") => void; onPlans: () => void };
 
@@ -139,7 +142,7 @@ export function PublicLanding({ onAuth, onPlans }: Props) {
       <header className="vp-header">
         <div className="vp-container vp-header-inner">
           <a className="vp-brand" href="#inicio" aria-label="Vibra, início" onClick={(event) => { event.preventDefault(); goTo("inicio"); }}>
-            <span aria-hidden="true">V</span>vibra<span className="vp-brand-dot">.</span>
+            <img className="vp-brand-logo" src={vibraLogoUrl} alt="Vibra — Fitness com IA" />
           </a>
           <nav className="vp-desktop-nav" aria-label="Menu principal">
             {nav.map((item) => <Button variant="ghost" key={item.id} onClick={() => goTo(item.id)}>{item.label}</Button>)}
