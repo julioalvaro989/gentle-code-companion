@@ -56,6 +56,14 @@ commit;
 - O logout tenta liberar a sessão no servidor; se o navegador estiver offline, a expiração é a alternativa.
 - Os eventos de concessão/recusa/liberação são gravados em `vibra_admin_audit`. Concessão/revogação da função é auditada pelo procedimento SQL acima.
 
+## Drift de schema encontrado no ambiente conectado
+
+A inspeção somente leitura do banco conectado ao projeto Lovable encontrou `profiles`, `fitness_profiles` e `fitness_progress`, mas **não** encontrou `vibra_subscriptions`, `vibra_admins`, `vibra_admin_sessions`, `vibra_admin_audit` nem as RPCs `vibra_claim_admin_session`, `vibra_release_admin_session`, `vibra_is_current_admin` e `vibra_has_active_subscription`. Também faltavam as colunas estendidas do formulário fitness, incluindo `profile_completed`. Isso explica por que a validação compartilhada falha tanto no login quanto ao continuar o cadastro: a Edge Function chama a RPC administrativa ausente e devolve HTTP 503; o fluxo de cliente também depende da tabela de assinaturas ausente.
+
+A migration de reconciliação `20261012130000_vibra_access_schema_reconciliation.sql` foi preparada para criar os objetos ausentes com RLS e grants restritos, adicionar as colunas fitness e registrar diagnósticos sanitizados da Edge Function. Ela **não foi aplicada automaticamente**. Antes de aplicar, faça backup e execute no projeto Supabase que realmente atende o app.
+
+**Importante sobre a concessão administrativa:** a tabela legada `profiles.is_admin` tinha privilégios de INSERT/UPDATE para `authenticated`, portanto não é uma fonte segura para conceder automaticamente privilégios. A migration de reconciliação remove esses grants de escrita e usa `vibra_admins` + sessão registrada como fonte autoritativa. Depois da migration, um operador autorizado precisa inserir manualmente o UUID da conta administrativa confirmada em `vibra_admins` e registrar a concessão em `vibra_admin_audit`, conforme o procedimento acima. Não copie automaticamente `is_admin=true` para a nova tabela.
+
 ## Testes antes de produção
 
 Executar no staging: 1, 2 e 3 sessões distintas; a 4ª sessão deve ser negada; duas tentativas concorrentes quando já existem duas sessões; renovação do mesmo `session_id`; expiração; logout; revogação da função; acesso RLS de usuário comum sem assinatura; acesso RLS de cliente com pagamento ativo; tentativa de escrita direta em `vibra_admins` e `vibra_admin_sessions` como `authenticated`. Confirmar também que uma sessão negada não consegue ler/alterar perfil, progresso ou chamar recursos pagos.
