@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  Activity, AlertCircle, ArrowDownRight, ArrowUpRight, Bot, CircleDollarSign,
-  ClipboardList, CreditCard, LayoutDashboard, LogOut, RefreshCw, Settings2,
-  ShieldCheck, Users, Wallet, Wifi, ArrowLeft, LockKeyhole, Database,
+  Activity, AlertCircle, Bot, CircleDollarSign, ClipboardList, CreditCard,
+  LayoutDashboard, LogOut, Settings2, ShieldCheck, Users, Wallet, ArrowLeft,
+  LockKeyhole, Database,
 } from "lucide-react";
 import { adoptSupabaseSession, signIn, signOut, type AuthSession } from "../lib/supabase";
 import { supabase } from "../integrations/supabase/client";
