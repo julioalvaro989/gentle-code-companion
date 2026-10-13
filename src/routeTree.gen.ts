@@ -15,6 +15,9 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FitnessProfileRouteImport } from './routes/fitness-profile'
 import { Route as PlansRouteImport } from './routes/plans'
+import { Route as PoliticaDeAssinaturaRouteImport } from './routes/politica-de-assinatura'
+import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
+import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +49,21 @@ const PlansRoute = PlansRouteImport.update({
   path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PoliticaDeAssinaturaRoute = PoliticaDeAssinaturaRouteImport.update({
+  id: '/politica-de-assinatura',
+  path: '/politica-de-assinatura',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosDeUsoRoute = TermosDeUsoRouteImport.update({
+  id: '/termos-de-uso',
+  path: '/termos-de-uso',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +72,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/fitness-profile': typeof FitnessProfileRoute
   '/plans': typeof PlansRoute
+  '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +83,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/fitness-profile': typeof FitnessProfileRoute
   '/plans': typeof PlansRoute
+  '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,14 +95,33 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/fitness-profile': typeof FitnessProfileRoute
   '/plans': typeof PlansRoute
+  '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admin' | '/checkout' | '/dashboard' | '/fitness-profile' | '/plans'
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/dashboard'
+    | '/fitness-profile'
+    | '/plans'
+    | '/politica-de-assinatura'
+    | '/politica-de-privacidade'
+    | '/termos-de-uso'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/admin' | '/checkout' | '/dashboard' | '/fitness-profile' | '/plans'
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/dashboard'
+    | '/fitness-profile'
+    | '/plans'
+    | '/politica-de-assinatura'
+    | '/politica-de-privacidade'
+    | '/termos-de-uso'
   id:
     | '__root__'
     | '/'
@@ -87,6 +130,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/fitness-profile'
     | '/plans'
+    | '/politica-de-assinatura'
+    | '/politica-de-privacidade'
+    | '/termos-de-uso'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -96,6 +142,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FitnessProfileRoute: typeof FitnessProfileRoute
   PlansRoute: typeof PlansRoute
+  PoliticaDeAssinaturaRoute: typeof PoliticaDeAssinaturaRoute
+  PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
+  TermosDeUsoRoute: typeof TermosDeUsoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -142,6 +191,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/politica-de-assinatura': {
+      id: '/politica-de-assinatura'
+      path: '/politica-de-assinatura'
+      fullPath: '/politica-de-assinatura'
+      preLoaderRoute: typeof PoliticaDeAssinaturaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos-de-uso': {
+      id: '/termos-de-uso'
+      path: '/termos-de-uso'
+      fullPath: '/termos-de-uso'
+      preLoaderRoute: typeof TermosDeUsoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -152,6 +222,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FitnessProfileRoute: FitnessProfileRoute,
   PlansRoute: PlansRoute,
+  PoliticaDeAssinaturaRoute: PoliticaDeAssinaturaRoute,
+  PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
+  TermosDeUsoRoute: TermosDeUsoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
