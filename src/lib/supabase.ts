@@ -223,6 +223,7 @@ export type FitnessProfile = {
   profile_completed?: boolean;
   created_at?: string;
   updated_at?: string;
+  avatar_path?: string | null;
 };
 export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
@@ -407,6 +408,59 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
     planId: subscription?.plan_id === "basic" || subscription?.plan_id === "premium" ? subscription.plan_id : null,
     profileCompleted: profile?.profile_completed === true,
   };
+}
+
+
+export async function getFitnessAvatarUrl(session: AuthSession, avatarPath?: string | null): Promise<string | null> {
+  if (!avatarPath) return null;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data: authData, error: authError } = await supabase.auth.getSession();
+  if (authError || !authData.session || authData.session.user.id !== session.user.id) {
+    throw new Error("Sua sessão expirou. Entre novamente.");
+  }
+  const { data, error } = await supabase.storage.from("user-avatars").createSignedUrl(avatarPath, 60 * 60);
+  if (error || !data?.signedUrl) throw new Error("Não foi possível carregar a foto do perfil.");
+  return data.signedUrl;
+}
+
+export async function saveFitnessAvatar(session: AuthSession, file: File): Promise<string> {
+  if (!url || !key) throw new Error("O backend do Supabase não está disponível.");
+  if (file.type !== "image/webp" || file.size > 1024 * 1024) {
+    throw new Error("A imagem otimizada precisa estar em WebP e ter até 1 MB.");
+  }
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data: authData, error: authError } = await supabase.auth.getSession();
+  if (authError || !authData.session) throw new Error("Sua sessão expirou. Entre novamente.");
+  const { data: verified, error: verifyError } = await supabase.auth.getUser(authData.session.access_token);
+  if (verifyError || !verified.user || verified.user.id !== session.user.id) {
+    throw new Error("Sua sessão expirou ou não corresponde à conta ativa. Entre novamente.");
+  }
+
+  const path = `${verified.user.id}/avatar.webp`;
+  const { error: uploadError } = await supabase.storage.from("user-avatars").upload(path, file, {
+    cacheControl: "0",
+    contentType: "image/webp",
+    upsert: true,
+  });
+  if (uploadError) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) throw new Error("Sem conexão com a internet. Verifique sua conexão e tente novamente.");
+    if (uploadError.message.toLowerCase().includes("jwt") || uploadError.message.toLowerCase().includes("auth")) {
+      throw new Error("Sua sessão expirou. Entre novamente.");
+    }
+    throw new Error("Não foi possível enviar a foto. Tente novamente.");
+  }
+
+  const rows = await request("rest/v1/fitness_profiles?id=eq." + encodeURIComponent(verified.user.id) + "&select=id", {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ avatar_path: path, updated_at: new Date().toISOString() }),
+  }, authData.session.access_token);
+  if (!Array.isArray(rows) || rows.length !== 1) {
+    throw new Error("A foto foi enviada, mas o perfil não confirmou a atualização. Tente salvar novamente.");
+  }
+  const { data: signed, error: signedError } = await supabase.storage.from("user-avatars").createSignedUrl(path, 60 * 60);
+  if (signedError || !signed?.signedUrl) throw new Error("A foto foi salva, mas não foi possível carregá-la agora. Reabra o perfil.");
+  return signed.signedUrl;
 }
 
 export async function getFitnessProgress(session: AuthSession): Promise<FitnessProgress | null> {
