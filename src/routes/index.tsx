@@ -5,12 +5,12 @@ import { PublicLanding } from "../components/PublicLanding";
 import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
-import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { useEffect, useRef, useState, type FormEvent, type CSSProperties } from "react";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, getFitnessAvatarUrl, saveFitnessAvatar, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen, Droplets, RotateCw, BarChart3, CalendarCheck, Timer, ChevronLeft } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen, Droplets, RotateCw, BarChart3, CalendarCheck, Timer, ChevronLeft, Camera } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -73,6 +73,14 @@ function GymApp() {
   const [accessError, setAccessError] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<VibraPlanId | null>(null);
   const [profileName, setProfileName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState<{type:"success"|"error";text:string}|null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -97,6 +105,99 @@ function GymApp() {
   const [demoExercise, setDemoExercise] = useState<{id:string;name:string} | null>(null);
   const [goal, setGoal] = useState("");
   const [water, setWater] = useState(0);
+
+  const cancelAvatarSelection = () => {
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setAvatarMessage(null);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  };
+
+  const handleAvatarSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+    setAvatarMessage(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarMessage({type:"error",text:"A imagem original deve ter no máximo 5 MB."});
+      input.value = "";
+      return;
+    }
+    try {
+      const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+      const isJpeg = header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+      const isPng = header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4e && header[3] === 0x47 && header[4] === 0x0d && header[5] === 0x0a && header[6] === 0x1a && header[7] === 0x0a;
+      const isWebp = header[0] === 0x52 && header[1] === 0x49 && header[2] === 0x46 && header[3] === 0x46 && header[8] === 0x57 && header[9] === 0x45 && header[10] === 0x42 && header[11] === 0x50;
+      const detectedType = isJpeg ? "image/jpeg" : isPng ? "image/png" : isWebp ? "image/webp" : "";
+      if (!detectedType || file.type !== detectedType) {
+        setAvatarMessage({type:"error",text:"Formato inválido. Selecione uma imagem JPEG, PNG ou WebP válida."});
+        input.value = "";
+        return;
+      }
+      const bitmap = await createImageBitmap(file);
+      if (bitmap.width < 1 || bitmap.height < 1 || bitmap.width > 12000 || bitmap.height > 12000 || bitmap.width * bitmap.height > 40000000) {
+        bitmap.close();
+        setAvatarMessage({type:"error",text:"A resolução desta imagem é muito alta para ser processada com segurança."});
+        input.value = "";
+        return;
+      }
+      const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) {
+        bitmap.close();
+        throw new Error("Não foi possível preparar a imagem neste dispositivo.");
+      }
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const toWebp = (quality: number) => new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Não foi possível comprimir esta imagem.")), "image/webp", quality);
+      });
+      let blob = await toWebp(0.88);
+      for (const quality of [0.8, 0.72, 0.64, 0.56]) {
+        if (blob.size <= 1024 * 1024) break;
+        blob = await toWebp(quality);
+      }
+      if (blob.size > 1024 * 1024) {
+        setAvatarMessage({type:"error",text:"Não foi possível otimizar a imagem para menos de 1 MB. Escolha outra imagem."});
+        input.value = "";
+        return;
+      }
+      const optimized = new File([blob], "avatar.webp", {type:"image/webp",lastModified:Date.now()});
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+      setAvatarFile(optimized);
+      setAvatarPreview(URL.createObjectURL(optimized));
+      setAvatarMessage(null);
+    } catch {
+      setAvatarMessage({type:"error",text:"Não foi possível abrir esta imagem. O arquivo pode estar corrompido ou não ser compatível."});
+      input.value = "";
+    }
+  };
+
+  const saveAvatarSelection = async () => {
+    if (!session || !avatarFile || avatarBusy) return;
+    setAvatarBusy(true);
+    setAvatarMessage(null);
+    try {
+      const nextUrl = await saveFitnessAvatar(session, avatarFile);
+      setAvatarUrl(nextUrl);
+      setAvatarPath(`${session.user.id}/avatar.webp`);
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+      setAvatarFile(null);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      setAvatarMessage({type:"success",text:"Sua foto de perfil foi salva com sucesso."});
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      setAvatarMessage({type:"error",text:message || "Não foi possível salvar a foto. Tente novamente."});
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
   const changePage = (page: string) => {
     setActiveNav((current) => {
       if (current !== page) setNavHistory((history) => [...history, current]);
@@ -207,6 +308,16 @@ function GymApp() {
           }
           const profile = await getFitnessProfile(current).catch(() => null);
           if (profile?.username) setProfileName(profile.username);
+          if (profile?.avatar_path) {
+            setAvatarPath(profile.avatar_path);
+            setAvatarLoading(true);
+            try { setAvatarUrl(await getFitnessAvatarUrl(current, profile.avatar_path)); }
+            catch { setAvatarUrl(null); }
+            finally { setAvatarLoading(false); }
+          } else {
+            setAvatarPath(null);
+            setAvatarUrl(null);
+          }
           if (profile?.goal) setGoal(profile.goal);
           const saved = await getFitnessProgress(current).catch(() => null);
           if (saved) {
@@ -441,10 +552,10 @@ function GymApp() {
       <a className="gym-logo" href="#inicio" aria-label="Vibra, início" onClick={() => changePage("Visão geral")}><img className="gym-logo-img" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></a><button type="button" className="sidebar-close" aria-label="Fechar menu lateral" onClick={() => setMobileMenu(false)}><X size={20}/></button>
       <div className="side-label">SEU ESPAÇO</div>
       <nav className="side-nav">{navItems.map(({name,icon:Icon})=><button key={name} className={"nav-item "+(activeNav===name?"active":"")} onClick={()=>changePage(name)}><Icon size={18}/>{name}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">{(profileName || "V").slice(0,2).toUpperCase()}</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
+      <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar fit-avatar-mini">{avatarUrl ? <img src={avatarUrl} alt="" /> : (profileName || "V").slice(0,2).toUpperCase()}</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
     </aside></>
     <main className="main-content" id="inicio">
-      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> {dateLabel}</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
+      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> {dateLabel}</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil" /> : (profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
         {activeNav==="Visão geral" && <>
@@ -501,7 +612,20 @@ function GymApp() {
         {activeNav==="Nutrição" && <section className="fit-page-section"><div className="section-kicker"><span/> NUTRIÇÃO E BEM-ESTAR</div><h1>Nutrição com <span>contexto.</span></h1><p className="fit-page-intro">Esta área pode reunir registros de refeições e preferências alimentares. Nenhum registro nutricional estruturado está disponível no momento.</p><div className="fit-nutrition-layout"><article className="panel fit-food-summary"><div className="section-kicker">HÁBITO DE HIDRATAÇÃO</div><div className="fit-big-number">{water} <small>copos registrados</small></div><div className="nutrition-bar"><i style={{width:(water/8*100)+"%"}}/></div><p className="fit-page-intro">Registro salvo na conta; a data de cada registro não está disponível para confirmar um resumo diário.</p><div className="fit-water-box"><div><Apple size={19}/><strong>Hidratação</strong><small>{water} de 8 copos registrados</small></div><button className="green-button" onClick={()=>setWater(Math.min(8,water+1))} disabled={water>=8}><Plus size={16}/> Adicionar copo</button></div></article><article className="panel"><div className="panel-heading"><div><div className="section-kicker">REGISTROS ALIMENTARES</div><h3>Refeições</h3></div><Utensils size={20}/></div><div className="fit-empty-state"><Leaf size={25}/><strong>Nenhuma refeição registrada</strong><p>Quando o registro alimentar estiver conectado, suas refeições e nutrientes aparecerão aqui.</p></div></article></div><div className="fit-note"><HeartPulse size={18}/> <span>Orientações clínicas e metas nutricionais individuais devem ser definidas por profissional qualificado.</span></div></section>}
         {activeNav==="Especialistas" && <section className="fit-page-section"><div className="section-kicker"><span/> ACOMPANHAMENTO PROFISSIONAL</div><h1>Orientação com <span>confiança.</span></h1><p className="fit-page-intro">O diretório de profissionais ainda não está conectado a uma fonte verificada de perfis e disponibilidade.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><HeartPulse size={28}/><strong>Profissionais ainda não disponíveis</strong><p>Quando houver cadastro verificado e agenda integrada, você poderá consultar perfis e solicitar acompanhamento por aqui.</p></div></div></section>}
         {activeNav==="Progresso" && <section className="fit-page-section fit-progress-page"><div className="section-kicker"><span/> SUA EVOLUÇÃO</div><div className="fit-progress-heading"><div><h1>Sua <span>evolução.</span></h1><p className="fit-page-intro">Olá, {profileName || session?.user.user_metadata?.full_name || session?.user.email?.split("@")[0] || "atleta"}. Acompanhe os registros que já existem na sua conta.</p></div><div className="fit-progress-date"><CalendarDays size={16}/><span>{dateLabel}</span></div></div><section className="fit-impulse-card" aria-labelledby="fit-impulse-title"><div className="fit-impulse-mark"><Sparkles size={22}/></div><div className="fit-impulse-content"><div className="section-kicker" id="fit-impulse-title">IMPULSO DO DIA <span className="fit-impulse-category">{progressInspirations[inspirationIndex]?.category}</span></div><p className="fit-impulse-quote">{progressInspirations[inspirationIndex]?.text}</p><span className="fit-impulse-caption">Um passo de cada vez. No seu ritmo.</span></div></section><div className="fit-records-label"><div><div className="section-kicker">SEUS REGISTROS</div><h2>O que você já registrou</h2></div><span className="fit-records-note">Dados salvos na sua conta</span></div><div className="stats-grid fit-progress-stats"><article className="stat-card fit-progress-stat"><div className="stat-top"><span>Exercícios registrados</span><span className="stat-icon"><Dumbbell size={18}/></span></div><div className="stat-value">{done.length}</div><div className="stat-bottom"><span>{done.length ? "Exercícios na sua lista salva" : "Registre seu primeiro treino para acompanhar sua evolução."}</span></div></article><article className="stat-card fit-progress-stat"><div className="stat-top"><span>Hidratação registrada</span><span className="stat-icon"><Apple size={18}/></span></div><div className="stat-value">{water}<small> copos</small></div><div className="stat-bottom"><span>Contagem salva; não há data individual por registro.</span></div><div className="mini-progress fit-progress-water" role="progressbar" aria-label="Copos registrados em relação à referência de 8" aria-valuemin={0} aria-valuemax={8} aria-valuenow={Math.min(water,8)}><i style={{width:(Math.min(water,8)/8*100)+"%"}}/></div></article><article className="stat-card fit-progress-stat"><div className="stat-top"><span>Tempo de treino</span><span className="stat-icon"><Clock3 size={18}/></span></div><div className="stat-value stat-value-text">Sem dados</div><div className="stat-bottom"><span>A duração das sessões não é armazenada atualmente.</span></div></article><article className="stat-card fit-progress-stat"><div className="stat-top"><span>Progresso semanal</span><span className="stat-icon"><Trophy size={18}/></span></div><div className="stat-value stat-value-text">Sem dados</div><div className="stat-bottom"><span>O backend não fornece histórico datado para calcular tendências.</span></div></article></div><section className="fit-next-step"><div className="fit-next-icon"><Target size={21}/></div><div className="fit-next-copy"><div className="section-kicker">SEU PRÓXIMO PASSO</div><h2>{done.length ? "Continue sua rotina" : "Comece pelo primeiro registro"}</h2><p>{done.length ? "Consulte sua biblioteca e escolha um exercício para seguir com seu planejamento." : "Explore os exercícios disponíveis e comece a montar sua rotina no seu ritmo."}</p></div><button type="button" className="green-button" onClick={()=>changePage(done.length ? "Treinos" : "Biblioteca de Exercícios")}>{done.length ? "Ver meus treinos" : "Explorar exercícios"} <ArrowRight size={16}/></button></section><div className="panel fit-goal-panel"><div><div className="section-kicker">SEU OBJETIVO ATUAL</div><h3>{goal || "Defina seu objetivo"}</h3><p>Escolha uma meta pessoal para personalizar sua experiência.</p></div><select value={goal} onChange={e=>setGoal(e.target.value)}><option value="">Selecione um objetivo</option><option value="Ganhar massa muscular">Ganhar massa muscular</option><option value="Perder gordura">Perder gordura</option><option value="Melhorar condicionamento">Melhorar condicionamento</option><option value="Ter mais saúde e energia">Ter mais saúde e energia</option></select></div><p className="fit-progress-limit-note"><Activity size={15}/> O histórico por data e a duração dos treinos ainda não estão disponíveis no backend; por isso, gráficos de tendência e linha do tempo não são exibidos.</p></section>}
-        {(activeNav==="Meu perfil"||activeNav==="Configurações") && <section className="fit-page-section"><div className="section-kicker"><span/> CONTA E PREFERÊNCIAS</div><h1>Seu espaço, <span>do seu jeito.</span></h1><p className="fit-page-intro">Gerencie suas preferências e o foco da sua jornada fitness.</p><div className="panel fit-profile-panel"><div className="fit-profile-avatar">{(profileName||"V").slice(0,2).toUpperCase()}</div><div className="fit-profile-info"><h3>{profileName || "Aluno Vibra"}</h3><p>{session.user.email || "Conta Vibra"}</p><label htmlFor="fit-goal">Meu objetivo principal</label><select id="fit-goal" value={goal} onChange={e=>setGoal(e.target.value)}><option value="">Selecione um objetivo</option><option value="Ganhar massa muscular">Ganhar massa muscular</option><option value="Perder gordura">Perder gordura</option><option value="Melhorar condicionamento">Melhorar condicionamento</option><option value="Ter mais saúde e energia">Ter mais saúde e energia</option></select><button type="button" className="green-button" style={{marginTop:12}} onClick={()=>window.location.assign("/fitness-profile")}>Editar perfil fitness <ArrowRight size={16}/></button></div></div><div className="fit-note"><Settings size={18}/><span>Seu perfil está conectado à sua conta. Seu progresso e suas preferências são salvos na nuvem.</span></div></section>}
+        {(activeNav==="Meu perfil"||activeNav==="Configurações") && <section className="fit-page-section"><div className="section-kicker"><span/> CONTA E PREFERÊNCIAS</div><h1>Seu espaço, <span>do seu jeito.</span></h1><p className="fit-page-intro">Gerencie suas preferências e o foco da sua jornada fitness.</p><div className="panel fit-profile-panel">
+          <div className="fit-avatar-editor">
+            <input ref={avatarInputRef} className="fit-avatar-file-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarSelection} aria-label="Selecionar foto de perfil" disabled={avatarBusy}/>
+            <button type="button" className="fit-profile-avatar fit-profile-avatar-button" onClick={()=>avatarInputRef.current?.click()} aria-label="Alterar foto de perfil" disabled={avatarBusy}>
+              {avatarPreview || avatarUrl ? <img src={avatarPreview || avatarUrl || ""} alt="Prévia da foto de perfil"/> : <span>{avatarLoading ? "…" : (profileName||"V").slice(0,2).toUpperCase()}</span>}
+              <span className="fit-avatar-camera"><Camera size={17}/></span>
+            </button>
+            <button type="button" className="fit-avatar-change" onClick={()=>avatarInputRef.current?.click()} disabled={avatarBusy}><Camera size={15}/> Alterar foto</button>
+            {avatarLoading && <span className="fit-avatar-help">Carregando foto atual…</span>}
+          </div>
+          <div className="fit-profile-info"><h3>{profileName || "Aluno Vibra"}</h3><p>{session.user.email || "Conta Vibra"}</p>
+          {avatarMessage && <div className={"fit-avatar-message "+(avatarMessage.type==="success"?"is-success":"is-error")} role={avatarMessage.type==="success"?"status":"alert"}>{avatarMessage.text}</div>}
+          {avatarFile && <div className="fit-avatar-actions"><span>Prévia pronta · {(avatarFile.size/1024).toFixed(0)} KB</span><button type="button" className="green-button" onClick={saveAvatarSelection} disabled={avatarBusy}>{avatarBusy ? <><span className="fit-avatar-spinner"/> Enviando foto…</> : "Salvar foto"}</button><button type="button" className="fit-avatar-cancel" onClick={cancelAvatarSelection} disabled={avatarBusy}>Cancelar</button></div>}
+          <label htmlFor="fit-goal">Meu objetivo principal</label><select id="fit-goal" value={goal} onChange={e=>setGoal(e.target.value)}><option value="">Selecione um objetivo</option><option value="Ganhar massa muscular">Ganhar massa muscular</option><option value="Perder gordura">Perder gordura</option><option value="Melhorar condicionamento">Melhorar condicionamento</option><option value="Ter mais saúde e energia">Ter mais saúde e energia</option></select><button type="button" className="green-button" style={{marginTop:12}} onClick={()=>window.location.assign("/fitness-profile")}>Editar perfil fitness <ArrowRight size={16}/></button></div></div><div className="fit-note"><Settings size={18}/><span>Seu perfil está conectado à sua conta. Seu progresso e suas preferências são salvos na nuvem.</span></div></section>}
         {activeNav==="IA Fitness" && <section className="fit-page-section"><div className="section-kicker"><span/> ASSISTENTE DE IA</div><h1>Conheça a <span>Vibra AI.</span></h1><p className="fit-page-intro">Use o assistente para dúvidas sobre exercícios, hábitos e sua rotina. O acesso e os limites continuam sendo validados pela conta e pelo plano.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><Sparkles size={28}/><strong>Seu assistente está no botão flutuante</strong><p>Abra a Vibra AI pelo atalho flutuante no canto da tela. Se o seu plano não incluir esse recurso, as permissões existentes continuarão sendo respeitadas.</p></div></div></section>}
         {activeNav==="Comunidade" && <section className="fit-page-section"><div className="section-kicker"><span/> COMUNIDADE VIBRA</div><h1>Evolução em <span>conjunto.</span></h1><p className="fit-page-intro">A área de comunidade ainda não está conectada a publicações, grupos ou interações reais.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><MessageCircle size={28}/><strong>Comunidade em preparação</strong><p>Quando os recursos sociais estiverem disponíveis, eles aparecerão aqui sem conteúdo ou atividades fictícias.</p></div></div></section>}
         <footer className="app-footer"><span>© 2026 VIBRA</span><span>Feito para sua evolução <span className="footer-heart">♥</span></span></footer>
