@@ -227,6 +227,65 @@ export type FitnessProfile = {
 };
 export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at" | "avatar_path">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
+
+export type WorkoutSessionStatus = "planned" | "completed" | "partial" | "missed";
+export type WorkoutSession = {
+  id: string;
+  user_id: string;
+  title: string;
+  status: WorkoutSessionStatus;
+  planned_for: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_minutes: number | null;
+  notes: string | null;
+  created_at: string;
+};
+
+export async function listWorkoutSessions(session: AuthSession, fromDate?: string, toDate?: string): Promise<WorkoutSession[]> {
+  const params = new URLSearchParams({
+    select: "id,user_id,title,status,planned_for,started_at,completed_at,duration_minutes,notes,created_at",
+    user_id: "eq." + session.user.id,
+    order: "completed_at.desc.nullslast,created_at.desc",
+    limit: "200",
+  });
+  if (fromDate) params.set("completed_at", "gte." + fromDate);
+  if (toDate) params.set("and", "(completed_at.lte." + toDate + ")");
+  const rows = await request("rest/v1/workout_sessions?" + params.toString(), {}, session.access_token);
+  return Array.isArray(rows) ? rows as WorkoutSession[] : [];
+}
+
+export async function recordCompletedWorkout(
+  session: AuthSession,
+  input: { title: string; durationMinutes?: number | null; notes?: string | null },
+): Promise<WorkoutSession> {
+  const title = input.title.trim();
+  if (!title || title.length > 160) throw new Error("Informe um nome de treino com até 160 caracteres.");
+  const duration = input.durationMinutes ?? null;
+  if (duration !== null && (!Number.isInteger(duration) || duration < 1 || duration > 600)) {
+    throw new Error("A duração deve ser um número inteiro entre 1 e 600 minutos.");
+  }
+  const notes = input.notes?.trim() || null;
+  if (notes && notes.length > 1000) throw new Error("As observações devem ter até 1.000 caracteres.");
+  const now = new Date().toISOString();
+  const rows = await request("rest/v1/workout_sessions", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      title,
+      status: "completed",
+      started_at: null,
+      completed_at: now,
+      duration_minutes: duration,
+      notes,
+      updated_at: now,
+    }),
+  }, session.access_token);
+  if (!Array.isArray(rows) || !rows[0]?.id) throw new Error("O treino não foi confirmado pelo servidor. Tente novamente.");
+  return rows[0] as WorkoutSession;
+}
+
 export type VibraAccess = {
   adminSessionLimit?: boolean;
   status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
