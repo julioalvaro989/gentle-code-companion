@@ -516,7 +516,7 @@ function GymApp() {
           window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
         }
       }
-    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível entrar com Google."); }
+    } catch { setAccessReady(true); setAccessError("Não foi possível validar o acesso. Entre novamente para continuar."); setAuthError("Não foi possível entrar com o Google. Tente novamente."); }
     finally { setAuthBusy(false); }
   }
 
