@@ -8,6 +8,7 @@ import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
+import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
@@ -58,6 +59,9 @@ const meals = [
 ];
 
 function GymApp() {
+  const localToday = useLocalToday();
+  const formattedToday = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(localToday);
+  const dateLabel = formattedToday.charAt(0).toLocaleUpperCase("pt-BR") + formattedToday.slice(1);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [accessReady, setAccessReady] = useState(false);
@@ -418,7 +422,7 @@ function GymApp() {
       <div className="sidebar-bottom"><div className="coach-card"><div className="coach-icon"><HeartPulse size={20}/></div><strong>Seu próximo nível.</strong><p>Consistência hoje. Resultados amanhã.</p><button onClick={()=>changePage("Especialistas")}>Falar com especialista <ChevronRight size={15}/></button></div><button className="nav-item settings-item" onClick={()=>changePage("Configurações")}><Settings size={18}/> Configurações</button><div className="user-mini"><div className="avatar">JD</div><div><strong>{profileName || "Aluno Vibra"}</strong><small>Área do aluno</small></div><button aria-label="Abrir perfil" onClick={()=>changePage("Meu perfil")}><ChevronRight size={17}/></button></div></div>
     </aside></>
     <main className="main-content" id="inicio">
-      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> Quinta-feira, 8 de outubro</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
+      <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> {dateLabel}</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{(profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
         {activeNav==="Visão geral" && <>
