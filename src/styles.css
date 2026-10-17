@@ -291,3 +291,139 @@ input::placeholder, textarea::placeholder { color:var(--vibra-muted); opacity:.8
 
 .gym-logo-img{height:46px;width:auto;display:block;border-radius:11px}
 .mobile-brand-logo{height:32px;width:auto;display:block;border-radius:8px}
+
+
+/* Vibra dashboard premium pass — scoped to the authenticated application */
+.fit-app {
+  --green: var(--vibra-lime);
+  --green-dark: var(--vibra-lime-light);
+  --line: var(--vibra-border);
+  --muted: var(--vibra-muted);
+  --panel: var(--vibra-surface);
+  --panel2: var(--vibra-surface-raised);
+}
+.fit-app .sidebar {
+  background: linear-gradient(180deg, #0B0C16 0%, #080911 100%);
+  border-right-color: var(--vibra-border);
+}
+.fit-app .topbar {
+  background: rgb(5 6 11 / 88%);
+  border-bottom-color: var(--vibra-border);
+  backdrop-filter: blur(18px);
+}
+.fit-app .nav-item { border-radius: 12px; transition: background .18s ease, border-color .18s ease, color .18s ease; }
+.fit-app .nav-item:hover { background: rgb(121 0 255 / 10%); border-color: rgb(168 85 247 / 22%); }
+.fit-app .nav-item.active {
+  background: linear-gradient(100deg, rgb(121 0 255 / 24%), rgb(168 85 247 / 7%));
+  border-color: rgb(168 85 247 / 48%);
+  color: var(--vibra-lime);
+  box-shadow: inset 3px 0 0 var(--vibra-purple-light);
+}
+.fit-app .coach-card {
+  border-color: rgb(168 85 247 / 30%);
+  background: radial-gradient(ellipse at 0 0, rgb(121 0 255 / 18%), transparent 76%), var(--vibra-surface);
+}
+.fit-app .coach-icon, .fit-app .stat-icon, .fit-app .nutrition-icon {
+  background: rgb(121 0 255 / 18%);
+  color: var(--vibra-purple-light);
+}
+.fit-app .fit-hero {
+  border-color: rgb(168 85 247 / 34%);
+  background: var(--vibra-surface);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 32%);
+}
+.fit-app .fit-hero-shade {
+  background: linear-gradient(90deg, rgb(5 6 11 / 96%) 0%, rgb(5 6 11 / 86%) 38%, rgb(5 6 11 / 42%) 74%, rgb(5 6 11 / 28%) 100%), linear-gradient(0deg, rgb(5 6 11 / 48%), transparent 58%);
+}
+.fit-app .fit-hero-copy h2 span, .fit-app .welcome-row h1 span, .fit-app .fit-page-section > h1 span {
+  color: var(--vibra-lime);
+}
+.fit-app .hero-pill {
+  border-color: rgb(168 85 247 / 42%);
+  background: rgb(121 0 255 / 17%);
+  color: var(--vibra-lime);
+}
+.fit-app .fit-float {
+  border-color: rgb(168 85 247 / 34%);
+  background: rgb(11 12 22 / 88%);
+}
+.fit-app .fit-float-icon {
+  background: var(--vibra-purple);
+  color: var(--vibra-text);
+}
+.fit-app .fit-pulse { background: var(--vibra-lime); box-shadow: 0 0 0 6px rgb(183 255 53 / 14%); }
+.fit-app .stat-card, .fit-app .panel {
+  border-color: var(--vibra-border);
+  background: linear-gradient(145deg, rgb(17 18 31 / 98%), rgb(11 12 22 / 98%));
+}
+.fit-app .stat-card:hover { border-color: rgb(168 85 247 / 48%); }
+.fit-app .green-button {
+  background: var(--vibra-lime);
+  color: #080911;
+  box-shadow: 0 5px 22px rgb(183 255 53 / 12%);
+}
+.fit-app .green-button:hover { background: var(--vibra-lime-light); }
+.fit-app .start-bottom {
+  border-color: rgb(168 85 247 / 42%);
+  background: rgb(121 0 255 / 10%);
+  color: var(--vibra-lime);
+}
+.fit-app .text-button, .fit-app .trend, .fit-app .fit-inline-action,
+.fit-app .fit-meal-row small, .fit-app .goal-percent { color: var(--vibra-lime); }
+.fit-app .progress-track i, .fit-app .mini-progress i, .fit-app .goal-track i,
+.fit-app .nutrition-bar i { background: linear-gradient(90deg, var(--vibra-purple-light), var(--vibra-lime)); }
+.fit-app .calorie-ring {
+  background: radial-gradient(closest-side, var(--vibra-surface-raised) 75%, transparent 78%), conic-gradient(var(--vibra-purple-light) 58%, var(--vibra-border) 0);
+}
+.fit-app .calorie-ring span { color: var(--vibra-lime); }
+.fit-app .fit-calendar-panel { margin-top: 18px; }
+.fit-app .fit-calendar-month { color: var(--vibra-purple-light); font-size: 12px; font-weight: 750; text-transform: capitalize; }
+.fit-app .fit-calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; margin-top:18px; }
+.fit-app .fit-calendar-weekday { color:var(--vibra-muted); text-align:center; font-size:11px; font-weight:750; padding:8px 0; }
+.fit-app .fit-calendar-blank { min-height:38px; }
+.fit-app .fit-calendar-day {
+  display:grid; place-items:center; min-height:38px; border:1px solid transparent; border-radius:10px;
+  background:rgb(255 255 255 / 2%); color:var(--vibra-text); font-size:12px;
+}
+.fit-app .fit-calendar-day.is-today {
+  border-color:var(--vibra-purple-light); background:rgb(121 0 255 / 24%);
+  color:var(--vibra-lime); font-weight:850; box-shadow:inset 0 0 0 1px rgb(168 85 247 / 20%);
+}
+.fit-app .fit-empty-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  min-height:180px; padding:22px; text-align:center; color:var(--vibra-muted);
+}
+.fit-app .fit-empty-state > svg { color:var(--vibra-purple-light); }
+.fit-app .fit-empty-state strong { color:var(--vibra-text); font-size:14px; }
+.fit-app .fit-empty-state p { max-width:440px; margin:0; font-size:12px; line-height:1.7; color:var(--vibra-muted); }
+.fit-app .fit-empty-state .green-button { margin-top:7px; }
+.fit-app .fit-empty-state-compact { min-height:130px; }
+.fit-app .fit-empty-state-panel { padding:8px; }
+.fit-app .stat-value-text { white-space:normal; overflow-wrap:anywhere; font-size:clamp(15px,1.4vw,20px); line-height:1.3; }
+.fit-app .fit-bottom-nav { display:none; }
+.fit-app .app-footer { color:var(--vibra-muted); border-top:1px solid rgb(41 35 63 / 55%); margin-top:24px; padding-top:18px; }
+@media (max-width: 760px) {
+  .fit-app { padding-bottom:calc(70px + env(safe-area-inset-bottom)); }
+  .fit-app .fit-bottom-nav {
+    position:fixed; inset:auto 0 0; z-index:30; display:grid; grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:2px; padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--vibra-border); background:rgb(5 6 11 / 94%); backdrop-filter:blur(18px);
+  }
+  .fit-app .fit-bottom-nav button {
+    display:flex; min-width:0; min-height:48px; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    border:1px solid transparent; border-radius:11px; background:transparent; color:var(--vibra-muted);
+    font-size:10px; font-weight:650; cursor:pointer;
+  }
+  .fit-app .fit-bottom-nav button.active {
+    color:var(--vibra-lime); border-color:rgb(168 85 247 / 28%); background:rgb(121 0 255 / 18%);
+  }
+  .fit-app .fit-calendar-grid { gap:4px; }
+  .fit-app .fit-calendar-day, .fit-app .fit-calendar-blank { min-height:34px; }
+  .fit-app .fit-calendar-day { border-radius:8px; }
+  .fit-app .fit-calendar-panel .panel-heading { flex-direction:column; }
+  .fit-app .fit-hero { min-height:340px; }
+  .fit-app .fit-float { display:none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fit-app *, .fit-app *::before, .fit-app *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
