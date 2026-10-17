@@ -50,6 +50,7 @@ export type Database = {
           goal: string
           height_cm: number | null
           id: string
+          avatar_path: string | null
           physical_limitations: string | null
           preferences: string | null
           primary_goal: string | null
@@ -68,6 +69,7 @@ export type Database = {
           goal?: string
           height_cm?: number | null
           id: string
+          avatar_path?: string | null
           physical_limitations?: string | null
           preferences?: string | null
           primary_goal?: string | null
@@ -86,6 +88,7 @@ export type Database = {
           goal?: string
           height_cm?: number | null
           id?: string
+          avatar_path?: string | null
           physical_limitations?: string | null
           preferences?: string | null
           primary_goal?: string | null
