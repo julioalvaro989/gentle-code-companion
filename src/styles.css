@@ -427,3 +427,32 @@ input::placeholder, textarea::placeholder { color:var(--vibra-muted); opacity:.8
 @media (prefers-reduced-motion: reduce) {
   .fit-app *, .fit-app *::before, .fit-app *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+
+.fit-app .fit-shortcuts {
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 0 20px;
+}
+.fit-app .fit-shortcut-card {
+  display:flex; align-items:center; gap:12px; min-width:0; padding:15px 14px;
+  border:1px solid var(--vibra-border); border-radius:15px;
+  background:linear-gradient(140deg,var(--vibra-surface-raised),var(--vibra-surface));
+  color:var(--vibra-text); text-align:left; transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.fit-app .fit-shortcut-card:hover { transform:translateY(-2px); border-color:rgb(168 85 247 / 52%); background:linear-gradient(140deg,rgb(121 0 255 / 14%),var(--vibra-surface)); }
+.fit-app .fit-shortcut-icon {
+  display:grid; place-items:center; flex:none; width:39px; height:39px; border-radius:12px;
+  background:rgb(121 0 255 / 18%); color:var(--vibra-purple-light);
+}
+.fit-app .fit-shortcut-card > span:nth-child(2) { display:grid; gap:5px; min-width:0; }
+.fit-app .fit-shortcut-card strong { font-size:12px; }
+.fit-app .fit-shortcut-card small { color:var(--vibra-muted); font-size:10px; line-height:1.4; }
+.fit-app .fit-shortcut-card > svg { flex:none; margin-left:auto; color:var(--vibra-lime); }
+@media (max-width: 1050px) {
+  .fit-app .fit-shortcuts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 420px) {
+  .fit-app .fit-shortcut-card { gap:9px; padding:12px 10px; }
+  .fit-app .fit-shortcut-icon { width:34px; height:34px; }
+  .fit-app .fit-shortcut-card strong { font-size:11px; }
+  .fit-app .fit-shortcut-card small { font-size:9px; }
+}
