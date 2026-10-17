@@ -10,7 +10,7 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAc
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -47,11 +47,6 @@ const navItems = [
   { name: "Especialistas", icon: HeartPulse },
   { name: "Meu perfil", icon: UserRound },
 ];
-// A biblioteca contém exercícios de referência, mas ainda não existe um plano
-// individual agendado nem registros alimentares estruturados no backend.
-const exercises: Array<{ id: string; name: string; detail: string; time: string }> = [];
-const meals: Array<{ time: string; meal: string; food: string; kcal: string }> = [];
-
 function GymApp() {
   const localToday = useLocalToday();
   const formattedToday = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(localToday);
@@ -79,14 +74,11 @@ function GymApp() {
   const [activeNav, setActiveNav] = useState("Visão geral");
   const [navHistory, setNavHistory] = useState<string[]>([]);
   const [done, setDone] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
-  const [started, setStarted] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [demoExercise, setDemoExercise] = useState<{id:string;name:string} | null>(null);
   const [goal, setGoal] = useState("");
   const [water, setWater] = useState(0);
-  const filtered = exercises.filter(x => x.name.toLowerCase().includes(query.toLowerCase()));
   const changePage = (page: string) => {
     setActiveNav((current) => {
       if (current !== page) setNavHistory((history) => [...history, current]);
@@ -111,7 +103,6 @@ function GymApp() {
     setNavHistory([]);
     setMobileMenu(false);
   };
-  const progress = exercises.length ? Math.round(done.length / exercises.length * 100) : 0;
   const greetingHour = new Date().getHours();
   const greeting = greetingHour < 12 ? "Bom dia" : greetingHour < 18 ? "Boa tarde" : "Boa noite";
   const calendarDays = Array.from({ length: new Date(localToday.getFullYear(), localToday.getMonth() + 1, 0).getDate() }, (_, index) => index + 1);
