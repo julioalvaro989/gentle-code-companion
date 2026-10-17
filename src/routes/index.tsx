@@ -418,7 +418,7 @@ function GymApp() {
         {activeNav==="Visão geral" && <>
           <section className="welcome-row"><div><div className="section-kicker"><span/> SUA JORNADA COMEÇA AQUI</div><h1>{greeting}, <span>{profileName || "bem-vindo à Vibra"}.</span></h1><p>{dateLabel}. Um passo de cada vez — acompanhe sua jornada com dados reais.</p></div><button className="outline-button" onClick={()=>changePage("Progresso")}><Activity size={17}/> Minha evolução</button></section>
           <section className="fit-hero">
-            <video className="fit-hero-video" autoPlay muted loop playsInline preload="metadata" poster="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1600"><source src="https://videos.pexels.com/video-files/3195394/3195394-hd_1920_1080_25fps.mp4" type="video/mp4"/></video>
+            <img className="fit-hero-image" src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1600&q=85" alt="" aria-hidden="true" width={1600} height={900} loading="eager" fetchPriority="high" decoding="async"/>
             <div className="fit-hero-shade"/>
             <div className="fit-float fit-float-one"><span className="fit-float-icon"><Sparkles size={17}/></span><div><b>Seu próximo passo</b><small>feito no seu ritmo</small></div></div>
             <div className="fit-float fit-float-two"><span className="fit-pulse"/><div><b>Vibra</b><small>Treino, hábitos e evolução</small></div></div>
