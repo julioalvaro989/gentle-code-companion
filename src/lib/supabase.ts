@@ -97,6 +97,14 @@ export async function resendSignupConfirmation(email: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (typeof window === "undefined") throw new Error("A recuperação de senha só pode ser iniciada no navegador.");
+  const { supabase } = await import("@/integrations/supabase/client");
+  const redirectTo = new URL("/reset-password", window.location.origin).toString();
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+  if (error) throw error;
+}
+
 export async function signIn(email: string, password: string) {
   const { supabase } = await import("@/integrations/supabase/client");
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
