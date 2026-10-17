@@ -117,6 +117,9 @@ function GymApp() {
     const input = event.currentTarget;
     const file = input.files?.[0];
     if (!file) return;
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarPreview(null);
+    setAvatarFile(null);
     setAvatarMessage(null);
     if (file.size > 5 * 1024 * 1024) {
       setAvatarMessage({type:"error",text:"A imagem original deve ter no máximo 5 MB."});
@@ -309,7 +312,7 @@ function GymApp() {
           if (profile?.avatar_path) {
             setAvatarLoading(true);
             try { setAvatarUrl(await getFitnessAvatarUrl(current, profile.avatar_path)); }
-            catch { setAvatarUrl(null); }
+            catch { setAvatarUrl(null); setAvatarMessage({type:"error",text:"Não foi possível carregar sua foto atual. Verifique a conexão e tente novamente."}); }
             finally { setAvatarLoading(false); }
           } else {
             setAvatarUrl(null);
