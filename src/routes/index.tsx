@@ -14,6 +14,36 @@ import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, Circ
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
+function getLoginErrorMessage(error: unknown): string {
+  const candidate = error && typeof error === "object"
+    ? error as { message?: unknown; code?: unknown; status?: unknown; name?: unknown }
+    : {};
+  const code = typeof candidate.code === "string" ? candidate.code.toLowerCase() : "";
+  const message = typeof candidate.message === "string" ? candidate.message.toLowerCase() : "";
+  const status = typeof candidate.status === "number" ? candidate.status : 0;
+
+  if (code === "email_not_confirmed" || message.includes("email not confirmed")) {
+    return "Confirme seu e-mail antes de entrar. Confira sua caixa de entrada.";
+  }
+  if (status === 429 || code.includes("rate_limit") || code.includes("too_many_requests") ||
+      message.includes("too many requests") || message.includes("rate limit") ||
+      message.includes("too many attempts") || message.includes("over_request_rate_limit")) {
+    return "Muitas tentativas de acesso. Aguarde alguns minutos antes de tentar novamente.";
+  }
+  if (code === "invalid_credentials" || code === "invalid_grant" ||
+      message.includes("invalid login credentials") || message.includes("invalid credentials") ||
+      message.includes("invalid email or password")) {
+    return "E-mail ou senha incorretos. Confira seus dados e tente novamente.";
+  }
+  if (candidate.name === "AuthRetryableFetchError" || message.includes("failed to fetch") ||
+      message.includes("fetch failed") || message.includes("network request failed") ||
+      message.includes("networkerror") || message.includes("load failed") ||
+      (typeof navigator !== "undefined" && !navigator.onLine)) {
+    return "Não foi possível conectar. Verifique sua internet e tente novamente.";
+  }
+  return "Não foi possível entrar agora. Tente novamente em alguns instantes.";
+}
+
 const progressInspirations = [
   { category: "CONSISTÊNCIA", text: "Cada treino é uma escolha a favor da pessoa que você quer se tornar." },
   { category: "DISCIPLINA", text: "Você não precisa ser perfeito. Precisa continuar." },
@@ -365,7 +395,23 @@ function GymApp() {
   }, [session, progressHydrated, done, water, goal, profileName]);
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setAuthError(""); setAuthMessage("");
+    e.preventDefault();
+    setAuthError("");
+    setAuthMessage("");
+    if (authBusy) return;
+
+    if (authMode === "login") {
+      const email = authEmail.trim();
+      if (!email || !authPassword) {
+        setAuthError("Preencha o e-mail e a senha para continuar.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAuthError("Informe um endereço de e-mail válido.");
+        return;
+      }
+    }
+
     setAuthBusy(true);
     try {
       let next: AuthSession | null;
@@ -399,8 +445,13 @@ function GymApp() {
         const nextPlan = access.planId || selectedPlan;
         window.location.assign(access.status === "pending" || nextPlan ? "/checkout" + (nextPlan ? "?plan=" + nextPlan : "") : "/plans");
       }
-    } catch (e) { setAccessReady(true); setAccessError(e instanceof Error ? e.message : "Não foi possível validar o acesso."); setAuthError(e instanceof Error ? e.message : "Não foi possível concluir o acesso."); }
-    finally { setAuthBusy(false); }
+    } catch (e) {
+      setAccessReady(true);
+      setAccessError("Não foi possível validar o acesso. Entre novamente para continuar.");
+      setAuthError(authMode === "login"
+        ? getLoginErrorMessage(e)
+        : "Não foi possível concluir o cadastro agora. Confira os dados e tente novamente.");
+    } finally { setAuthBusy(false); }
   }
 
   async function submitPasswordRecovery(e: FormEvent<HTMLFormElement>) {
@@ -523,9 +574,9 @@ function GymApp() {
             <button disabled={resetBusy} type="submit" className="va-submit">{resetBusy ? <><span className="va-spinner" /> Enviando...</> : <>Enviar instruções <ArrowRight size={17}/></>}</button>
             <button type="button" className="va-back-link" onClick={()=>{setShowForgotPassword(false);setAuthError("");setAuthMessage("");}}>Voltar para o login</button>
           </> : <>
-            {authMode === "signup" && <label>Nome de usuário<input required minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
-            <label>E-mail<input required type="email" autoComplete="email" placeholder="voce@exemplo.com" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} /></label>
-            <label>Senha<div className="va-password-field"><input required minLength={6} type={showPassword ? "text" : "password"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Mínimo de 6 caracteres" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} /><button type="button" className="va-password-toggle" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword} onClick={()=>setShowPassword(value=>!value)}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button></div></label>
+            {authMode === "signup" && <label>Nome de usuário<input required disabled={authBusy} minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
+            <label>E-mail<input required disabled={authBusy} type="email" autoComplete="email" placeholder="voce@exemplo.com" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} /></label>
+            <label>Senha<div className="va-password-field"><input required disabled={authBusy} minLength={6} type={showPassword ? "text" : "password"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Mínimo de 6 caracteres" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} /><button type="button" className="va-password-toggle" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword} disabled={authBusy} onClick={()=>setShowPassword(value=>!value)}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button></div></label>
             {authMode === "login" && <div className="va-forgot-row"><button type="button" onClick={()=>{setResetEmail(authEmail);setShowForgotPassword(true);setAuthError("");setAuthMessage("");}}>Esqueci minha senha?</button></div>}
             {authError && <div role="alert" className="va-message va-error">{authError}</div>}
             {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
@@ -536,7 +587,7 @@ function GymApp() {
         {!showForgotPassword && <>
           <div className="va-divider"><span/>ou continue com<span/></div>
           <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
-          <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");setShowPassword(false);}}> {authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
+          <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" disabled={authBusy} onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");setShowPassword(false);}}> {authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
           <p className="va-disclaimer">Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
         </>}
       </section>
