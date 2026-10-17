@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Activity, ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessOnboardingAnswers, saveFitnessOnboardingAnswers, getVibraAccess, saveFullFitnessProfile, type AuthSession, type FitnessProfileInput } from "../lib/supabase";
+import { formatLocalDateInput, isCivilDateInFuture, isValidCivilDate, useLocalToday } from "../lib/date-utils";
 
 const inputStyle = { width: "100%", boxSizing: "border-box" as const, padding: "12px 14px", border: "1px solid #343047", borderRadius: 12, background: "#10101b", color: "#f8f7ff", font: "inherit" };
 const labelStyle = { display: "grid", gap: 7, color: "#d8d5e7", fontSize: 13, fontWeight: 600 as const };
@@ -9,6 +10,7 @@ type Level = NonNullable<FitnessProfileInput["experience_level"]>;
 type Place = NonNullable<FitnessProfileInput["training_location"]>;
 
 export function FitnessProfilePage() {
+  const today = useLocalToday();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
@@ -87,7 +89,7 @@ export function FitnessProfilePage() {
     if (!Number.isFinite(kg) || kg < 20 || kg > 500) { setError("Informe um peso entre 20 e 500 kg."); return; }
     if (!Number.isFinite(cm) || cm < 80 || cm > 250) { setError("Informe uma altura entre 80 e 250 cm."); return; }
     if (!Number.isInteger(weekly) || weekly < 1 || weekly > 7) { setError("Escolha uma frequência entre 1 e 7 dias por semana."); return; }
-    if (birthDate && (new Date(birthDate).getTime() > Date.now() || new Date(birthDate).getFullYear() < 1900)) { setError("Confira a data de nascimento informada."); return; }
+    if (birthDate && (!isValidCivilDate(birthDate) || isCivilDateInFuture(birthDate, today) || Number(birthDate.slice(0, 4)) < 1900)) { setError("Confira a data de nascimento informada."); return; }
     setSaving(true);
     try {
       const profile: FitnessProfileInput = {
@@ -135,7 +137,7 @@ export function FitnessProfilePage() {
       <form onSubmit={submit} style={{ border: "1px solid #302b43", background: "rgba(18,17,29,.94)", borderRadius: 22, padding: "clamp(18px,4vw,34px)", display: "grid", gap: 22 }}>
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
           <label style={labelStyle}>Nome ou nome de preferência<input style={inputStyle} value={name} onChange={e=>setName(e.target.value)} required minLength={2} maxLength={80} autoComplete="name" /></label>
-          <label style={labelStyle}>Data de nascimento <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><input style={inputStyle} type="date" value={birthDate} onChange={e=>setBirthDate(e.target.value)} max={new Date().toISOString().slice(0,10)} /></label>
+          <label style={labelStyle}>Data de nascimento <span style={{ color: "#8d89a1", fontWeight: 400 }}>(opcional)</span><input style={inputStyle} type="date" value={birthDate} onChange={e=>setBirthDate(e.target.value)} max={formatLocalDateInput(today)} /></label>
           <label style={labelStyle}>Peso atual (kg)<input style={inputStyle} type="number" inputMode="decimal" min="20" max="500" step="0.1" value={weight} onChange={e=>setWeight(e.target.value)} required /></label>
           <label style={labelStyle}>Altura (cm)<input style={inputStyle} type="number" inputMode="numeric" min="80" max="250" step="0.1" value={height} onChange={e=>setHeight(e.target.value)} required /></label>
         </section>
