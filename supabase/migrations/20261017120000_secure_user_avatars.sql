@@ -36,6 +36,10 @@ $preflight$;
 alter table public.fitness_profiles
   add column if not exists avatar_path text;
 
+-- Allow only the avatar reference and timestamp to be patched through the user API;
+-- existing row-level policies still decide which profile row the caller may update.
+grant update (avatar_path, updated_at) on table public.fitness_profiles to authenticated;
+
 -- Private bucket. Re-running this migration does not make an existing bucket public.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('user-avatars', 'user-avatars', false, 1048576, array['image/webp']::text[])
