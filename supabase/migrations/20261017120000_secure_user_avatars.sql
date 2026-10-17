@@ -91,4 +91,63 @@ create policy "Users can delete their own avatar"
     and storage.filename(name) = 'avatar.webp'
   );
 
+
+-- Restrictive owner-boundary policies ensure that any pre-existing permissive
+-- Storage policy cannot accidentally grant cross-user access to this bucket.
+-- Other buckets retain their existing policy behavior.
+drop policy if exists "Avatar owner boundary select" on storage.objects;
+create policy "Avatar owner boundary select"
+  on storage.objects as restrictive for select
+  to public
+  using (
+    bucket_id <> 'user-avatars'
+    or (
+      (storage.foldername(name))[1] = (select auth.uid())::text
+      and storage.filename(name) = 'avatar.webp'
+    )
+  );
+
+drop policy if exists "Avatar owner boundary insert" on storage.objects;
+create policy "Avatar owner boundary insert"
+  on storage.objects as restrictive for insert
+  to public
+  with check (
+    bucket_id <> 'user-avatars'
+    or (
+      (storage.foldername(name))[1] = (select auth.uid())::text
+      and storage.filename(name) = 'avatar.webp'
+    )
+  );
+
+drop policy if exists "Avatar owner boundary update" on storage.objects;
+create policy "Avatar owner boundary update"
+  on storage.objects as restrictive for update
+  to public
+  using (
+    bucket_id <> 'user-avatars'
+    or (
+      (storage.foldername(name))[1] = (select auth.uid())::text
+      and storage.filename(name) = 'avatar.webp'
+    )
+  )
+  with check (
+    bucket_id <> 'user-avatars'
+    or (
+      (storage.foldername(name))[1] = (select auth.uid())::text
+      and storage.filename(name) = 'avatar.webp'
+    )
+  );
+
+drop policy if exists "Avatar owner boundary delete" on storage.objects;
+create policy "Avatar owner boundary delete"
+  on storage.objects as restrictive for delete
+  to public
+  using (
+    bucket_id <> 'user-avatars'
+    or (
+      (storage.foldername(name))[1] = (select auth.uid())::text
+      and storage.filename(name) = 'avatar.webp'
+    )
+  );
+
 commit;
