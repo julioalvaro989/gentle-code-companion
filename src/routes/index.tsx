@@ -6,10 +6,10 @@ import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useState, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, Flame, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, Video, X, Apple, MessageCircle, Play, Plus, BookOpen } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -66,6 +66,10 @@ function GymApp() {
   const [profileName, setProfileName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
   const [authUsername, setAuthUsername] = useState("");
   const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
   const [showAuth, setShowAuth] = useState(false);
@@ -263,6 +267,27 @@ function GymApp() {
     finally { setAuthBusy(false); }
   }
 
+  async function submitPasswordRecovery(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setAuthError("");
+    setAuthMessage("");
+    const email = resetEmail.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAuthError("Informe um endereço de e-mail válido.");
+      return;
+    }
+    setResetBusy(true);
+    try {
+      await requestPasswordReset(email);
+      setAuthMessage("Se houver uma conta associada a esse e-mail, você receberá instruções para redefinir sua senha.");
+    } catch {
+      // Do not show provider details or disclose whether the address has an account.
+      setAuthError("Não foi possível processar a solicitação agora. Tente novamente em alguns minutos.");
+    } finally {
+      setResetBusy(false);
+    }
+  }
+
   async function resendConfirmationEmail() {
     if (!authEmail.trim()) {
       setAuthError("Informe o e-mail usado no cadastro para reenviar a confirmação.");
@@ -349,24 +374,35 @@ function GymApp() {
       <section className="va-auth-panel" aria-labelledby="va-title">
         <div className="va-panel-top"><span className="va-mobile-brand"><img className="va-brand-logo" src={vibraLogoUrl} alt="Vibra — Fitness com IA" /></span><span className="va-secure"><span /> ACESSO À SUA CONTA</span></div>
         <div className="va-form-heading">
-          <div className="va-form-eyebrow">{authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
-          <h2 id="va-title">{authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
-          <p>{authMode === "signup" ? "Crie sua conta e organize os próximos passos da sua jornada." : "Entre para continuar de onde você parou."}</p>
+          <div className="va-form-eyebrow">{showForgotPassword ? "RECUPERAÇÃO DE ACESSO" : authMode === "signup" ? "COMECE POR AQUI" : "BEM-VINDO DE VOLTA"}</div>
+          <h2 id="va-title">{showForgotPassword ? <>Recupere sua <span>conta.</span></> : authMode === "signup" ? <>Comece sua <span>evolução.</span></> : <>Bom ter você <span>de volta.</span></>}</h2>
+          <p>{showForgotPassword ? "Informe seu e-mail para receber as instruções de redefinição de senha." : authMode === "signup" ? "Crie sua conta e organize os próximos passos da sua jornada." : "Entre para continuar de onde você parou."}</p>
           {authMode === "signup" && selectedPlan && <div className="va-message va-success">Plano selecionado: <strong>{VIBRA_PLANS[selectedPlan].name} · {VIBRA_PLANS[selectedPlan].priceLabel}/mês</strong>. A cobrança só libera o acesso após confirmação real.</div> }
         </div>
-        <form className="va-form" onSubmit={submitAuth}>
-          {authMode === "signup" && <label>Nome de usuário<input required minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
-          <label>E-mail<input required type="email" autoComplete="email" placeholder="voce@exemplo.com" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} /></label>
-          <label>Senha<input required minLength={6} type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Mínimo de 6 caracteres" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} /></label>
-          {authError && <div role="alert" className="va-message va-error">{authError}</div>}
-          {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
-          {authMessage && authMode === "signup" && <button type="button" className="va-resend" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
-          <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/></>}</button>
+        <form className="va-form" onSubmit={showForgotPassword ? submitPasswordRecovery : submitAuth}>
+          {showForgotPassword ? <>
+            <label>E-mail cadastrado<input required type="email" autoComplete="email" placeholder="voce@exemplo.com" value={resetEmail} onChange={e=>setResetEmail(e.target.value)} /></label>
+            {authError && <div role="alert" className="va-message va-error">{authError}</div>}
+            {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
+            <button disabled={resetBusy} type="submit" className="va-submit">{resetBusy ? <><span className="va-spinner" /> Enviando...</> : <>Enviar instruções <ArrowRight size={17}/></>}</button>
+            <button type="button" className="va-back-link" onClick={()=>{setShowForgotPassword(false);setAuthError("");setAuthMessage("");}}>Voltar para o login</button>
+          </> : <>
+            {authMode === "signup" && <label>Nome de usuário<input required minLength={2} autoComplete="username" placeholder="Como podemos chamar você?" value={authUsername} onChange={e=>setAuthUsername(e.target.value)} /></label>}
+            <label>E-mail<input required type="email" autoComplete="email" placeholder="voce@exemplo.com" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} /></label>
+            <label>Senha<div className="va-password-field"><input required minLength={6} type={showPassword ? "text" : "password"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} placeholder="Mínimo de 6 caracteres" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} /><button type="button" className="va-password-toggle" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword} onClick={()=>setShowPassword(value=>!value)}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button></div></label>
+            {authMode === "login" && <div className="va-forgot-row"><button type="button" onClick={()=>{setResetEmail(authEmail);setShowForgotPassword(true);setAuthError("");setAuthMessage("");}}>Esqueci minha senha?</button></div>}
+            {authError && <div role="alert" className="va-message va-error">{authError}</div>}
+            {authMessage && <div role="status" className="va-message va-success">{authMessage}</div>}
+            {authMessage && authMode === "signup" && <button type="button" className="va-resend" onClick={resendConfirmationEmail} disabled={resendBusy || authBusy}>{resendBusy ? "Reenviando..." : "Reenviar e-mail de confirmação"}</button>}
+            <button disabled={authBusy} type="submit" className="va-submit">{authBusy ? <><span className="va-spinner" /> Aguarde...</> : authMode === "signup" ? <>Criar minha conta <ArrowRight size={17}/></> : <>Entrar na Vibra <ArrowRight size={17}/></>}</button>
+          </>}
         </form>
-        <div className="va-divider"><span/>ou continue com<span/></div>
-        <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
-        <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");}}>{authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
-        <p className="va-disclaimer">Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
+        {!showForgotPassword && <>
+          <div className="va-divider"><span/>ou continue com<span/></div>
+          <button type="button" className="va-google" onClick={googleAuth} disabled={authBusy}><span className="va-google-g">G</span> Continuar com Google</button>
+          <p className="va-switch">{authMode === "signup" ? "Já tem uma conta?" : "Ainda não tem conta?"}<button type="button" onClick={()=>{setAuthMode(authMode==="signup"?"login":"signup");setAuthError("");setAuthMessage("");setShowPassword(false);}}> {authMode === "signup" ? "Entrar" : "Criar conta"}</button></p>
+          <p className="va-disclaimer">Ao continuar, você concorda em usar a Vibra de forma responsável.</p>
+        </>}
       </section>
     </main>
   </div>;
