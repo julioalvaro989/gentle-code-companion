@@ -225,7 +225,7 @@ export type FitnessProfile = {
   updated_at?: string;
   avatar_path?: string | null;
 };
-export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at">;
+export type FitnessProfileInput = Omit<FitnessProfile, "id" | "created_at" | "updated_at" | "avatar_path">;
 export type FitnessProgress = { user_id: string; completed_exercises: string[]; water_glasses: number; goal: string; updated_at?: string };
 export type VibraAccess = {
   adminSessionLimit?: boolean;
@@ -413,6 +413,8 @@ export async function getVibraAccess(session: AuthSession): Promise<VibraAccess>
 
 export async function getFitnessAvatarUrl(session: AuthSession, avatarPath?: string | null): Promise<string | null> {
   if (!avatarPath) return null;
+  const expectedPath = `${session.user.id}/avatar.webp`;
+  if (avatarPath !== expectedPath) throw new Error("A referência da foto não corresponde à conta autenticada.");
   const { supabase } = await import("@/integrations/supabase/client");
   const { data: authData, error: authError } = await supabase.auth.getSession();
   if (authError || !authData.session || authData.session.user.id !== session.user.id) {
