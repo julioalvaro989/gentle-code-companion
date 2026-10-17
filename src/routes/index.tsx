@@ -10,7 +10,7 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAc
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen, Droplets, RotateCw, BarChart3, CalendarCheck, Timer, ChevronLeft } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -53,6 +53,7 @@ const authInputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", 
 
 const navItems = [
   { name: "Visão geral", icon: Home },
+  { name: "Calendário", icon: CalendarDays },
   { name: "Treinos", icon: Dumbbell },
   { name: "IA Fitness", icon: Sparkles },
   { name: "Progresso", icon: TrendingUp },
@@ -88,6 +89,8 @@ function GymApp() {
   const [progressHydrated, setProgressHydrated] = useState(false);
   const [activeNav, setActiveNav] = useState("Visão geral");
   const [inspirationIndex, setInspirationIndex] = useState(() => Math.floor(Math.random() * progressInspirations.length));
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date(localToday.getFullYear(), localToday.getMonth(), 1));
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => new Date(localToday.getFullYear(), localToday.getMonth(), localToday.getDate()));
   const [navHistory, setNavHistory] = useState<string[]>([]);
   const [done, setDone] = useState<string[]>([]);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -102,7 +105,7 @@ function GymApp() {
     setMobileMenu(false);
   };
   useEffect(() => {
-    if (activeNav !== "Progresso") return;
+    if (activeNav !== "Calendário" && activeNav !== "Progresso") return;
     setInspirationIndex(current => {
       if (progressInspirations.length < 2) return current;
       let next = Math.floor(Math.random() * progressInspirations.length);
@@ -129,9 +132,13 @@ function GymApp() {
   };
   const greetingHour = new Date().getHours();
   const greeting = greetingHour < 12 ? "Bom dia" : greetingHour < 18 ? "Boa tarde" : "Boa noite";
-  const calendarDays = Array.from({ length: new Date(localToday.getFullYear(), localToday.getMonth() + 1, 0).getDate() }, (_, index) => index + 1);
-  const calendarOffset = new Date(localToday.getFullYear(), localToday.getMonth(), 1).getDay();
-  const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(localToday);
+  const calendarDays = Array.from({ length: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate() }, (_, index) => index + 1);
+  const calendarOffset = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay();
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth);
+  const selectedDayLabel = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" }).format(selectedCalendarDate);
+  const changeCalendarMonth = (delta: number) => {
+    setCalendarMonth(current => new Date(current.getFullYear(), current.getMonth() + delta, 1));
+  };
 
   useEffect(() => {
     let forceLoginForm = false;
@@ -466,9 +473,28 @@ function GymApp() {
             <article className="panel workout-panel"><div className="panel-heading"><div><div className="section-kicker">SEU PLANEJAMENTO</div><h3>Treino de hoje</h3><p>O plano individual será exibido quando estiver configurado.</p></div><button className="text-button" onClick={()=>changePage("Treinos")}>Abrir treinos <ChevronRight size={15}/></button></div><div className="fit-empty-state"><Dumbbell size={25}/><strong>Nenhum treino programado</strong><p>Explore a biblioteca de exercícios ou complete seu perfil fitness para personalizar sua rotina.</p><button className="green-button" onClick={()=>changePage("Biblioteca de Exercícios")}>Explorar exercícios <ArrowRight size={16}/></button></div></article>
             <article className="panel nutrition-teaser"><div className="panel-heading"><div><div className="section-kicker">NUTRIÇÃO E HÁBITOS</div><h3>Registro alimentar</h3><p>Seus dados aparecerão aqui quando forem registrados.</p></div><span className="nutrition-icon"><Utensils size={19}/></span></div><div className="fit-empty-state fit-empty-state-compact"><Leaf size={23}/><strong>Sem registros alimentares</strong><p>Ainda não há refeições ou valores nutricionais salvos para exibir.</p></div><button className="start-bottom" onClick={()=>changePage("Nutrição")}>Abrir nutrição <ArrowRight size={17}/></button></article>
           </section>
-          <section className="panel fit-calendar-panel"><div className="panel-heading"><div><div className="section-kicker">CALENDÁRIO</div><h3>Seu mês</h3><p>Dia atual em destaque; sem eventos de treino registrados.</p></div><span className="fit-calendar-month">{monthLabel}</span></div><div className="fit-calendar-grid">{["D","S","T","Q","Q","S","S"].map((day,index)=><span className="fit-calendar-weekday" key={index}>{day}</span>)}{Array.from({length:calendarOffset},(_,index)=><span className="fit-calendar-blank" key={"blank-"+index}/>)}{calendarDays.map(day=><span key={day} className={"fit-calendar-day "+(day===localToday.getDate()?"is-today":"")}>{day}</span>)}</div></section>
+          <button type="button" className="panel fit-calendar-panel fit-calendar-preview" onClick={()=>changePage("Calendário")} aria-label="Abrir calendário completo"><div className="panel-heading"><div><div className="section-kicker">CALENDÁRIO</div><h3>Seu mês</h3><p>Consulte seu calendário completo.</p></div><span className="fit-calendar-month">{monthLabel}</span></div><div className="fit-calendar-grid">{["D","S","T","Q","Q","S","S"].map((day,index)=><span className="fit-calendar-weekday" key={index}>{day}</span>)}{Array.from({length:calendarOffset},(_,index)=><span className="fit-calendar-blank" key={"blank-"+index}/>)}{calendarDays.map(day=><span key={day} className={"fit-calendar-day "+(day===localToday.getDate()?"is-today":"")}>{day}</span>)}</div></button>
           <section className="fit-specialist-strip"><div className="fit-specialist-icon"><HeartPulse size={24}/></div><div><span className="section-kicker">ACOMPANHAMENTO PROFISSIONAL</span><h3>Você não precisa fazer isso sozinho.</h3><p>Encontre orientação de nutricionistas e personal trainers cadastrados.</p></div><button className="green-button" onClick={()=>changePage("Especialistas")}>Conhecer especialistas <ArrowRight size={16}/></button></section>
         </>}
+        {activeNav==="Calendário" && <section className="fit-page-section fit-calendar-page">
+          <div className="fit-calendar-intro"><div className="fit-calendar-title"><span className="fit-calendar-title-icon"><CalendarDays size={26}/></span><div><div className="section-kicker"><span/> CALENDÁRIO</div><h1>Seu mês em <span>movimento.</span></h1><p className="fit-page-intro">Aqui você acompanha seus treinos, descansos e toda a sua jornada. Cada dia é uma nova oportunidade de evoluir.</p></div></div>
+            <section className="fit-calendar-motivation"><img src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1200&q=85" alt="Atleta treinando em uma academia" loading="lazy"/><div className="fit-calendar-motivation-shade"/><div className="fit-calendar-motivation-copy"><div className="section-kicker"><Sparkles size={15}/> Impulso do dia</div><p className="fit-impulse-quote">{progressInspirations[inspirationIndex]?.text}</p><button type="button" className="fit-impulse-refresh" onClick={()=>setInspirationIndex(current=>{if(progressInspirations.length<2)return current;let next=Math.floor(Math.random()*progressInspirations.length);while(next===current)next=Math.floor(Math.random()*progressInspirations.length);return next;})}><RotateCw size={15}/> Nova inspiração</button></div></section>
+          </div>
+          <div className="fit-calendar-dashboard">
+            <section className="panel fit-calendar-main-card"><div className="fit-calendar-month-head"><button className="fit-calendar-month-button" aria-label="Mês anterior" onClick={()=>changeCalendarMonth(-1)}><ChevronLeft size={19}/></button><h2>{monthLabel.charAt(0).toLocaleUpperCase("pt-BR")+monthLabel.slice(1)}</h2><button className="fit-calendar-month-button" aria-label="Próximo mês" onClick={()=>changeCalendarMonth(1)}><ArrowRight size={19}/></button></div>
+              <div className="fit-calendar-full-grid">{["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].map((day,index)=><span className="fit-calendar-full-weekday" key={day+index}>{day}</span>)}{Array.from({length:calendarOffset},(_,index)=><span className="fit-calendar-full-blank" key={"blank-"+index}/>)}{calendarDays.map(day=>{const date=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),day);const isToday=date.getFullYear()===localToday.getFullYear()&&date.getMonth()===localToday.getMonth()&&day===localToday.getDate();const isSelected=date.getFullYear()===selectedCalendarDate.getFullYear()&&date.getMonth()===selectedCalendarDate.getMonth()&&day===selectedCalendarDate.getDate();const isPast=date<new Date(localToday.getFullYear(),localToday.getMonth(),localToday.getDate());return <button type="button" key={day} onClick={()=>setSelectedCalendarDate(date)} className={"fit-calendar-full-day"+(isToday?" is-today":"")+(isSelected?" is-selected":"")+(isPast?" is-past":"")} aria-pressed={isSelected} aria-label={new Intl.DateTimeFormat("pt-BR",{day:"numeric",month:"long",year:"numeric"}).format(date)}>{day}</button>;})}</div>
+              <div className="fit-calendar-selected"><CalendarCheck size={17}/><div><strong>{selectedDayLabel.charAt(0).toLocaleUpperCase("pt-BR")+selectedDayLabel.slice(1)}</strong><span>Nenhum evento registrado para esta data.</span></div></div>
+            </section>
+            <section className="panel fit-calendar-summary"><div className="fit-calendar-panel-heading"><div><div className="section-kicker">SEU ACOMPANHAMENTO</div><h2><BarChart3 size={19}/> Resumo do mês</h2></div><button type="button" className="fit-calendar-text-link" onClick={()=>changePage("Progresso")}>Ver detalhes</button></div>
+              <div className="fit-calendar-metric"><span className="fit-calendar-metric-icon"><Dumbbell size={19}/></span><div className="fit-calendar-metric-body"><small>Treinos realizados</small><strong>Sem dados registrados</strong><span>Não há treinos datados para este mês.</span></div></div>
+              <div className="fit-calendar-metric"><span className="fit-calendar-metric-icon"><Droplets size={19}/></span><div className="fit-calendar-metric-body"><small>Hidratação registrada</small><strong>{water} copos registrados</strong><div className="fit-calendar-meter"><i style={{width:Math.min(100,water/8*100)+"%"}}/></div><span>Referência diária: 8 copos</span></div></div>
+              <div className="fit-calendar-metric"><span className="fit-calendar-metric-icon"><Timer size={19}/></span><div className="fit-calendar-metric-body"><small>Tempo de treino</small><strong>Sem dados registrados</strong><span>A duração não está disponível.</span></div></div>
+              <div className="fit-calendar-metric"><span className="fit-calendar-metric-icon"><TrendingUp size={19}/></span><div className="fit-calendar-metric-body"><small>Progresso semanal</small><strong>{done.length ? done.length+" exercícios registrados" : "Sem dados registrados"}</strong><span>Registros sem data não entram no calendário.</span></div></div>
+            </section>
+            <section className="panel fit-calendar-events"><div className="fit-calendar-panel-heading"><div><div className="section-kicker">SUA AGENDA</div><h2><CalendarDays size={19}/> Próximos eventos</h2></div></div><div className="fit-calendar-empty"><span><CalendarDays size={22}/></span><strong>Nenhum evento programado</strong><p>Quando houver treinos com data e horário, eles aparecerão aqui em ordem cronológica.</p><button type="button" className="green-button" onClick={()=>changePage("Treinos")}>Consultar treinos <ArrowRight size={16}/></button></div></section>
+          </div>
+          <section className="fit-calendar-next-step"><span className="fit-calendar-next-icon"><Target size={27}/></span><div><small>Seu próximo passo</small><h2>Organize seu próximo treino.</h2><p>Uma rotina consistente começa com um plano possível, no seu ritmo.</p></div><button type="button" className="green-button" onClick={()=>changePage("Treinos")}>Ver treinos <ArrowRight size={16}/></button><span className="fit-calendar-next-art" aria-hidden="true"/></section>
+        </section>}
         {activeNav==="Treinos" && <section className="fit-page-section"><div className="section-kicker"><span/> PLANEJAMENTO DE TREINO</div><h1>Treine no seu <span>ritmo.</span></h1><p className="fit-page-intro">Os treinos programados aparecerão aqui quando houver um plano associado à sua conta. Enquanto isso, explore o catálogo disponível.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><Dumbbell size={28}/><strong>Nenhum treino programado para hoje</strong><p>Não há um plano individual registrado para esta data. A biblioteca contém exercícios de referência, mas não será tratada como um treino prescrito.</p><button className="green-button" onClick={()=>changePage("Biblioteca de Exercícios")}><BookOpen size={17}/> Abrir biblioteca <ArrowRight size={16}/></button></div></div></section>}
         {activeNav==="Biblioteca de Exercícios" && <ExerciseLibrary />}
         <ExerciseDemoModal exerciseId={demoExercise?.id ?? null} {...(demoExercise ? { workoutName: demoExercise.name } : {})} onClose={()=>setDemoExercise(null)} />
