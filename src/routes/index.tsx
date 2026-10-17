@@ -5,7 +5,7 @@ import { PublicLanding } from "../components/PublicLanding";
 import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
-import { useEffect, useRef, useState, type FormEvent, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type CSSProperties } from "react";
 import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, getFitnessAvatarUrl, saveFitnessAvatar, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
@@ -74,7 +74,6 @@ function GymApp() {
   const [selectedPlan, setSelectedPlan] = useState<VibraPlanId | null>(null);
   const [profileName, setProfileName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -114,7 +113,7 @@ function GymApp() {
     if (avatarInputRef.current) avatarInputRef.current.value = "";
   };
 
-  const handleAvatarSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarSelection = async (event: ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget;
     const file = input.files?.[0];
     if (!file) return;
@@ -130,7 +129,7 @@ function GymApp() {
       const isPng = header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4e && header[3] === 0x47 && header[4] === 0x0d && header[5] === 0x0a && header[6] === 0x1a && header[7] === 0x0a;
       const isWebp = header[0] === 0x52 && header[1] === 0x49 && header[2] === 0x46 && header[3] === 0x46 && header[8] === 0x57 && header[9] === 0x45 && header[10] === 0x42 && header[11] === 0x50;
       const detectedType = isJpeg ? "image/jpeg" : isPng ? "image/png" : isWebp ? "image/webp" : "";
-      if (!detectedType || file.type !== detectedType) {
+      if (!detectedType || (file.type && file.type !== detectedType)) {
         setAvatarMessage({type:"error",text:"Formato inválido. Selecione uma imagem JPEG, PNG ou WebP válida."});
         input.value = "";
         return;
@@ -184,14 +183,13 @@ function GymApp() {
     try {
       const nextUrl = await saveFitnessAvatar(session, avatarFile);
       setAvatarUrl(nextUrl);
-      setAvatarPath(`${session.user.id}/avatar.webp`);
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
       setAvatarFile(null);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
       setAvatarMessage({type:"success",text:"Sua foto de perfil foi salva com sucesso."});
     } catch (error) {
-      const message = error instanceof Error ? error.message : "";
+      const message = typeof navigator !== "undefined" && !navigator.onLine ? "Sem conexão com a internet. Verifique sua conexão e tente novamente." : error instanceof Error ? error.message : "";
       setAvatarMessage({type:"error",text:message || "Não foi possível salvar a foto. Tente novamente."});
     } finally {
       setAvatarBusy(false);
@@ -309,13 +307,11 @@ function GymApp() {
           const profile = await getFitnessProfile(current).catch(() => null);
           if (profile?.username) setProfileName(profile.username);
           if (profile?.avatar_path) {
-            setAvatarPath(profile.avatar_path);
             setAvatarLoading(true);
             try { setAvatarUrl(await getFitnessAvatarUrl(current, profile.avatar_path)); }
             catch { setAvatarUrl(null); }
             finally { setAvatarLoading(false); }
           } else {
-            setAvatarPath(null);
             setAvatarUrl(null);
           }
           if (profile?.goal) setGoal(profile.goal);
