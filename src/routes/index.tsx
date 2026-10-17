@@ -6,7 +6,7 @@ import "../components/AuthPage.css";
 import { VibraChat } from "../components/VibraChat";
 import { Button } from "../components/ui/button";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type CSSProperties } from "react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, getFitnessAvatarUrl, saveFitnessAvatar, signIn, signInWithGoogle, signOut, signUp, type AuthSession } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAccess, requestPasswordReset, resendSignupConfirmation, saveFitnessProfile, saveFitnessProgress, getFitnessAvatarUrl, saveFitnessAvatar, listWorkoutSessions, recordCompletedWorkout, signIn, signInWithGoogle, signOut, signUp, type AuthSession, type WorkoutSession } from "../lib/supabase";
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
@@ -134,6 +134,13 @@ function GymApp() {
   const [demoExercise, setDemoExercise] = useState<{id:string;name:string} | null>(null);
   const [goal, setGoal] = useState("");
   const [water, setWater] = useState(0);
+  const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
+  const [workoutLoggerOpen, setWorkoutLoggerOpen] = useState(false);
+  const [workoutTitle, setWorkoutTitle] = useState("");
+  const [workoutDuration, setWorkoutDuration] = useState("");
+  const [workoutSaveBusy, setWorkoutSaveBusy] = useState(false);
+  const [workoutSaveError, setWorkoutSaveError] = useState("");
+  const [workoutSaveSuccess, setWorkoutSaveSuccess] = useState("");
 
   const cancelAvatarSelection = () => {
     if (avatarPreview) URL.revokeObjectURL(avatarPreview);
@@ -384,6 +391,43 @@ function GymApp() {
     })();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!session) { setWorkoutSessions([]); return; }
+    let active = true;
+    listWorkoutSessions(session).then(rows => {
+      if (active) setWorkoutSessions(rows);
+    }).catch(() => {
+      if (active) setWorkoutSaveError("Não foi possível carregar seu histórico de treinos. Verifique a conexão e tente novamente.");
+    });
+    return () => { active = false; };
+  }, [session]);
+
+  async function handleRecordWorkout(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!session || workoutSaveBusy) return;
+    setWorkoutSaveError("");
+    setWorkoutSaveSuccess("");
+    const title = workoutTitle.trim();
+    if (!title) { setWorkoutSaveError("Informe o nome do treino realizado."); return; }
+    const duration = workoutDuration.trim() ? Number(workoutDuration) : null;
+    if (duration !== null && (!Number.isInteger(duration) || duration < 1 || duration > 600)) {
+      setWorkoutSaveError("Informe uma duração inteira entre 1 e 600 minutos."); return;
+    }
+    setWorkoutSaveBusy(true);
+    try {
+      const created = await recordCompletedWorkout(session, { title, durationMinutes: duration });
+      setWorkoutSessions(current => [created, ...current].sort((a, b) => (b.completed_at || b.created_at).localeCompare(a.completed_at || a.created_at)));
+      setWorkoutTitle("");
+      setWorkoutDuration("");
+      setWorkoutLoggerOpen(false);
+      setWorkoutSaveSuccess("Treino registrado com sucesso.");
+    } catch {
+      setWorkoutSaveError("Não foi possível salvar o treino. Verifique a conexão e tente novamente.");
+    } finally {
+      setWorkoutSaveBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!session || !progressHydrated) return;
@@ -656,7 +700,20 @@ function GymApp() {
           </div>
           <section className="fit-calendar-next-step"><span className="fit-calendar-next-icon"><Target size={27}/></span><div><small>Seu próximo passo</small><h2>Organize seu próximo treino.</h2><p>Uma rotina consistente começa com um plano possível, no seu ritmo.</p></div><button type="button" className="green-button" onClick={()=>changePage("Treinos")}>Ver treinos <ArrowRight size={16}/></button><span className="fit-calendar-next-art" aria-hidden="true"/></section>
         </section>}
-        {activeNav==="Treinos" && <section className="fit-page-section"><div className="section-kicker"><span/> PLANEJAMENTO DE TREINO</div><h1>Treine no seu <span>ritmo.</span></h1><p className="fit-page-intro">Os treinos programados aparecerão aqui quando houver um plano associado à sua conta. Enquanto isso, explore o catálogo disponível.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><Dumbbell size={28}/><strong>Nenhum treino programado para hoje</strong><p>Não há um plano individual registrado para esta data. A biblioteca contém exercícios de referência, mas não será tratada como um treino prescrito.</p><button className="green-button" onClick={()=>changePage("Biblioteca de Exercícios")}><BookOpen size={17}/> Abrir biblioteca <ArrowRight size={16}/></button></div></div></section>}
+        {activeNav==="Treinos" && <section className="fit-page-section"><div className="section-kicker"><span/> PLANEJAMENTO DE TREINO</div><h1>Treine no seu <span>ritmo.</span></h1><p className="fit-page-intro">Os treinos programados aparecerão aqui quando houver um plano associado à sua conta. Enquanto isso, explore o catálogo disponível.</p><div className="panel fit-empty-state-panel"><div className="fit-empty-state"><Dumbbell size={28}/><strong>Nenhum treino programado para hoje</strong><p>Não há um plano individual registrado para esta data. A biblioteca contém exercícios de referência, mas não será tratada como um treino prescrito.</p><button className="green-button" onClick={()=>changePage("Biblioteca de Exercícios")}><BookOpen size={17}/> Abrir biblioteca <ArrowRight size={16}/></button></div></div>
+          <div className="panel" style={{marginTop:20,padding:22}}>
+            <div className="panel-heading"><div><div className="section-kicker">HISTÓRICO PESSOAL</div><h3>Treinos realizados</h3></div><CalendarCheck size={20}/></div>
+            <p className="fit-page-intro">Registre apenas treinos que você realmente concluiu. Esses registros serão usados no seu relatório de evolução.</p>
+            <button type="button" className="green-button" onClick={()=>{setWorkoutLoggerOpen(value=>!value);setWorkoutSaveError("");setWorkoutSaveSuccess("");}} disabled={workoutSaveBusy}><Plus size={16}/> Registrar treino realizado</button>
+            {workoutLoggerOpen && <form onSubmit={handleRecordWorkout} style={{display:"grid",gap:12,marginTop:18,maxWidth:520}}>
+              <label>Nome do treino<input required maxLength={160} value={workoutTitle} onChange={event=>setWorkoutTitle(event.target.value)} placeholder="Ex.: Treino de superiores" disabled={workoutSaveBusy}/></label>
+              <label>Duração em minutos (opcional)<input type="number" min={1} max={600} step={1} value={workoutDuration} onChange={event=>setWorkoutDuration(event.target.value)} placeholder="Ex.: 45" disabled={workoutSaveBusy}/></label>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="green-button" type="submit" disabled={workoutSaveBusy}>{workoutSaveBusy ? "Salvando…" : "Salvar treino concluído"}</button><button className="fit-avatar-cancel" type="button" onClick={()=>setWorkoutLoggerOpen(false)} disabled={workoutSaveBusy}>Cancelar</button></div>
+            </form>}
+            {workoutSaveError && <p role="alert" style={{color:"#ff9caa",marginTop:12}}>{workoutSaveError}</p>}
+            {workoutSaveSuccess && <p role="status" style={{color:"#b7ff35",marginTop:12}}>{workoutSaveSuccess}</p>}
+            {workoutSessions.length===0 ? <div className="fit-empty-state" style={{padding:24}}><CalendarDays size={24}/><strong>Ainda não há treinos datados</strong><p>O histórico começa quando você registrar um treino realizado.</p></div> : <div style={{display:"grid",gap:10,marginTop:18}}>{workoutSessions.slice(0,10).map(item=><article key={item.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:14,flexWrap:"wrap",padding:"13px 15px",borderRadius:14,background:"rgba(255,255,255,.035)",border:"1px solid rgba(168,132,255,.14)"}}><div><strong>{item.title}</strong><div style={{color:"#a8b4d8",fontSize:13,marginTop:4}}>{item.completed_at ? new Date(item.completed_at).toLocaleString("pt-BR",{dateStyle:"medium",timeStyle:"short"}) : "Data não informada"}</div></div><span style={{color:"#b7ff35",fontSize:13}}>{item.duration_minutes ? item.duration_minutes+" min" : "Duração não informada"}</span></article>)}</div>}
+          </div></section>}
         {activeNav==="Biblioteca de Exercícios" && <ExerciseLibrary />}
         <ExerciseDemoModal exerciseId={demoExercise?.id ?? null} {...(demoExercise ? { workoutName: demoExercise.name } : {})} onClose={()=>setDemoExercise(null)} />
         {activeNav==="Nutrição" && <section className="fit-page-section"><div className="section-kicker"><span/> NUTRIÇÃO E BEM-ESTAR</div><h1>Nutrição com <span>contexto.</span></h1><p className="fit-page-intro">Esta área pode reunir registros de refeições e preferências alimentares. Nenhum registro nutricional estruturado está disponível no momento.</p><div className="fit-nutrition-layout"><article className="panel fit-food-summary"><div className="section-kicker">HÁBITO DE HIDRATAÇÃO</div><div className="fit-big-number">{water} <small>copos registrados</small></div><div className="nutrition-bar"><i style={{width:(water/8*100)+"%"}}/></div><p className="fit-page-intro">Registro salvo na conta; a data de cada registro não está disponível para confirmar um resumo diário.</p><div className="fit-water-box"><div><Apple size={19}/><strong>Hidratação</strong><small>{water} de 8 copos registrados</small></div><button className="green-button" onClick={()=>setWater(Math.min(8,water+1))} disabled={water>=8}><Plus size={16}/> Adicionar copo</button></div></article><article className="panel"><div className="panel-heading"><div><div className="section-kicker">REGISTROS ALIMENTARES</div><h3>Refeições</h3></div><Utensils size={20}/></div><div className="fit-empty-state"><Leaf size={25}/><strong>Nenhuma refeição registrada</strong><p>Quando o registro alimentar estiver conectado, suas refeições e nutrientes aparecerão aqui.</p></div></article></div><div className="fit-note"><HeartPulse size={18}/> <span>Orientações clínicas e metas nutricionais individuais devem ser definidas por profissional qualificado.</span></div></section>}
