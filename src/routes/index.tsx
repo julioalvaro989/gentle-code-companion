@@ -485,8 +485,8 @@ function GymApp() {
     try {
       await resendSignupConfirmation(authEmail.trim());
       setAuthMessage("Solicitação enviada. Confira a caixa de entrada e o spam; se a mensagem não chegar, aguarde alguns minutos antes de tentar novamente.");
-    } catch (e) {
-      setAuthError(e instanceof Error ? e.message : "Não foi possível reenviar o e-mail. Confira o endereço e tente novamente.");
+    } catch {
+      setAuthError("Não foi possível reenviar o e-mail agora. Aguarde um pouco e tente novamente.");
     } finally {
       setResendBusy(false);
     }
