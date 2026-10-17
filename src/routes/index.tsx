@@ -10,7 +10,7 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAc
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, Check, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Search, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -75,7 +75,6 @@ function GymApp() {
   const [navHistory, setNavHistory] = useState<string[]>([]);
   const [done, setDone] = useState<string[]>([]);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   const [demoExercise, setDemoExercise] = useState<{id:string;name:string} | null>(null);
   const [goal, setGoal] = useState("");
   const [water, setWater] = useState(0);
@@ -460,6 +459,5 @@ function GymApp() {
     <nav className="fit-bottom-nav" aria-label="Navegação principal mobile">
       {[{name:"Visão geral",label:"Início",icon:Home},{name:"Treinos",label:"Treinos",icon:Dumbbell},{name:"IA Fitness",label:"IA",icon:Sparkles},{name:"Progresso",label:"Evolução",icon:TrendingUp},{name:"Meu perfil",label:"Perfil",icon:UserRound}].map(({name,label,icon:Icon})=><button type="button" key={name} className={activeNav===name?"active":""} onClick={()=>changePage(name)} aria-current={activeNav===name?"page":undefined}><Icon size={18}/><span>{label}</span></button>)}
     </nav>
-    {showVideo&&<div className="modal-backdrop" onClick={()=>setShowVideo(false)}><section className="plan-modal fit-modal" onClick={e=>e.stopPropagation()}><button className="modal-close" aria-label="Fechar" onClick={()=>setShowVideo(false)}><X size={20}/></button><div className="section-kicker">PRÓXIMOS PASSOS</div><h2>Acompanhamento profissional</h2><p className="modal-subtitle">Esta área está preparada para receber perfis verificados, horários disponíveis e contato seguro quando o serviço profissional for conectado.</p><div className="fit-modal-list"><span><Check size={16}/> Perfil e credenciais do profissional</span><span><Check size={16}/> Agenda e disponibilidade</span><span><Check size={16}/> Canal de contato protegido</span></div><button className="green-button modal-done" onClick={()=>setShowVideo(false)}>Entendi <Check size={17}/></button></section></div>}
   </div>;
 }
