@@ -63,13 +63,13 @@ export function FitnessProfilePage() {
         const onboarding = await getFitnessOnboardingAnswers(current);
         if (!active) return;
         const answers = onboarding?.answers;
-        setSessionMinutes(answers?.sessionMinutes == null ? "" : String(answers.sessionMinutes));
-        setEquipment(Array.isArray(answers?.equipment) ? answers.equipment.join(", ") : typeof answers?.equipment === "string" ? answers.equipment : "");
-        setFoodBudget(answers?.foodBudget == null ? "" : String(answers.foodBudget));
-        setDietaryRestrictions(Array.isArray(answers?.dietaryRestrictions) ? answers.dietaryRestrictions.join(", ") : typeof answers?.dietaryRestrictions === "string" ? answers.dietaryRestrictions : "");
-        setDietaryPreferences(Array.isArray(answers?.preferredFoods) ? answers.preferredFoods.join(", ") : typeof answers?.preferredFoods === "string" ? answers.preferredFoods : "");
-        setAllergies(Array.isArray(answers?.allergies) ? answers.allergies.join(", ") : typeof answers?.allergies === "string" ? answers.allergies : "");
-        setDislikedFoods(Array.isArray(answers?.dislikedFoods) ? answers.dislikedFoods.join(", ") : typeof answers?.dislikedFoods === "string" ? answers.dislikedFoods : "");
+        setSessionMinutes(answers?.["sessionMinutes"] == null ? "" : String(answers["sessionMinutes"]));
+        setEquipment(Array.isArray(answers?.["equipment"]) ? answers["equipment"].join(", ") : typeof answers?.["equipment"] === "string" ? answers["equipment"] : "");
+        setFoodBudget(answers?.["foodBudget"] == null ? "" : String(answers["foodBudget"]));
+        setDietaryRestrictions(Array.isArray(answers?.["dietaryRestrictions"]) ? answers["dietaryRestrictions"].join(", ") : typeof answers?.["dietaryRestrictions"] === "string" ? answers["dietaryRestrictions"] : "");
+        setDietaryPreferences(Array.isArray(answers?.["preferredFoods"]) ? answers["preferredFoods"].join(", ") : typeof answers?.["preferredFoods"] === "string" ? answers["preferredFoods"] : "");
+        setAllergies(Array.isArray(answers?.["allergies"]) ? answers["allergies"].join(", ") : typeof answers?.["allergies"] === "string" ? answers["allergies"] : "");
+        setDislikedFoods(Array.isArray(answers?.["dislikedFoods"]) ? answers["dislikedFoods"].join(", ") : typeof answers?.["dislikedFoods"] === "string" ? answers["dislikedFoods"] : "");
       } catch {
         if (active) setError("Não foi possível validar seu acesso ou recuperar o perfil. O acesso permanece bloqueado; tente novamente.");
       } finally { if (active) setLoading(false); }

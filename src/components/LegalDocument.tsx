@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, ShieldCheck } from "lucide-react";
 import "./LegalDocument.css";
 
-type Section = { id: string; title: string; paragraphs: string[]; bullets?: string[] };
+type Section = { id: string; title: string; paragraphs?: string[]; bullets?: string[] };
 type DocumentData = { title: string; intro: string; sections: Section[] };
 
-const docs: Record<string, DocumentData> = {
+const docs: Record<"terms" | "privacy" | "subscription", DocumentData> = {
   terms: {
     title: "Termos de Uso",
     intro: "Este documento descreve as regras gerais de utilização da plataforma Vibra. O texto é uma minuta para revisão jurídica e não deve ser tratado como versão definitiva antes do preenchimento dos campos pendentes e da validação das práticas reais do serviço.",

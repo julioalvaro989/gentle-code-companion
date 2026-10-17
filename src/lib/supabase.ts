@@ -250,13 +250,13 @@ export async function saveFitnessOnboardingAnswers(session: AuthSession, answers
   }
   if (Object.keys(patch).length === 0) throw new Error("Nenhuma preferência foi informada para salvar.");
 
-  if (Object.hasOwn(patch, "sessionMinutes") && patch.sessionMinutes !== null) {
-    if (typeof patch.sessionMinutes !== "number" || !Number.isInteger(patch.sessionMinutes) || patch.sessionMinutes < 10 || patch.sessionMinutes > 240) {
+  if (Object.hasOwn(patch, "sessionMinutes") && patch["sessionMinutes"] !== null) {
+    if (typeof patch["sessionMinutes"] !== "number" || !Number.isInteger(patch["sessionMinutes"]) || patch["sessionMinutes"] < 10 || patch["sessionMinutes"] > 240) {
       throw new Error("O tempo por sessão deve ser um número inteiro entre 10 e 240 minutos.");
     }
   }
-  if (Object.hasOwn(patch, "foodBudget") && patch.foodBudget !== null) {
-    if (typeof patch.foodBudget !== "number" || !Number.isFinite(patch.foodBudget) || patch.foodBudget < 0 || patch.foodBudget > 100000) {
+  if (Object.hasOwn(patch, "foodBudget") && patch["foodBudget"] !== null) {
+    if (typeof patch["foodBudget"] !== "number" || !Number.isFinite(patch["foodBudget"]) || patch["foodBudget"] < 0 || patch["foodBudget"] > 100000) {
       throw new Error("O orçamento mensal deve estar entre R$ 0 e R$ 100.000.");
     }
   }
@@ -273,15 +273,25 @@ export async function saveFitnessOnboardingAnswers(session: AuthSession, answers
   // if updated_at still matches this read. The server revalidates every value.
   const current = await getFitnessOnboardingAnswers(session);
   const { supabase } = await import("@/integrations/supabase/client");
-  const { data, error } = await supabase.rpc("update_own_fitness_onboarding_answers", {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !sessionData.session) throw new Error("Sua sessão expirou. Entre novamente.");
+  // Keep this RPC's contract local until generated database types include it.
+  const response = await fetch(`${url}/rest/v1/rpc/update_own_fitness_onboarding_answers`, {
+    method: "POST",
+    headers: headers(sessionData.session.access_token),
+    body: JSON.stringify({
     p_patch: patch as import("../integrations/supabase/types").Json,
     // NULL is a create-only precondition; the RPC rejects it if a row already exists.
     p_expected_updated_at: current?.updated_at ?? null,
+    }),
   });
-  if (error) {
-    if (error.code === "40001") throw new Error("Seu perfil foi alterado em outro dispositivo. Recarregue os dados e tente novamente.");
-    if (error.code === "P0002") throw new Error("O perfil de onboarding não existe mais. Recarregue a página e tente novamente.");
-    if (error.code === "42501") throw new Error("Sua sessão expirou ou você não tem autorização para salvar. Entre novamente.");
+  const result = await response.json().catch(() => null);
+  const error = !response.ok ? result : null;
+  const data = response.ok ? result : null;
+  if (!response.ok) {
+    if (error?.code === "40001") throw new Error("Seu perfil foi alterado em outro dispositivo. Recarregue os dados e tente novamente.");
+    if (error?.code === "P0002") throw new Error("O perfil de onboarding não existe mais. Recarregue a página e tente novamente.");
+    if (error?.code === "42501") throw new Error("Sua sessão expirou ou você não tem autorização para salvar. Entre novamente.");
     throw new Error("Não foi possível salvar suas preferências com segurança. Tente novamente.");
   }
   if (data === null || data === undefined) throw new Error("A atualização não foi confirmada. Recarregue o perfil antes de continuar.");
