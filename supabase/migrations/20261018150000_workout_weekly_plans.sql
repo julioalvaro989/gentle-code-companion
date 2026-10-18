@@ -1,3 +1,32 @@
+-- Existing frontend code already calls public.workout_sessions, but the remote schema
+-- has no such table. Create the intended per-user history table before adding the
+-- planned-session relation. fitness_progress is an aggregate (water/goal/JSON), not
+-- a workout-session history, so it is not repurposed.
+create table if not exists public.workout_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null check (char_length(btrim(title)) between 1 and 160),
+  status text not null default 'completed' check (status in ('planned','completed','partial','missed')),
+  planned_for date,
+  started_at timestamptz,
+  completed_at timestamptz,
+  duration_minutes integer check (duration_minutes is null or duration_minutes between 1 and 600),
+  notes text check (notes is null or char_length(notes) <= 1000),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists workout_sessions_user_completed_idx
+  on public.workout_sessions (user_id, completed_at desc nulls last, created_at desc);
+alter table public.workout_sessions enable row level security;
+revoke all on public.workout_sessions from anon, public, authenticated;
+grant select, insert on public.workout_sessions to authenticated;
+drop policy if exists "Users can read own workout sessions" on public.workout_sessions;
+create policy "Users can read own workout sessions" on public.workout_sessions
+  for select to authenticated using (auth.uid() = user_id);
+drop policy if exists "Users can insert own workout sessions" on public.workout_sessions;
+create policy "Users can insert own workout sessions" on public.workout_sessions
+  for insert to authenticated with check (auth.uid() = user_id);
+
 -- Weekly workout plans: versioned, user-owned plan snapshots.
 -- This migration is committed for review only; it has NOT been applied to the remote database.
 create table if not exists public.workout_plan_weeks (
