@@ -701,3 +701,77 @@ export async function deleteSleepSession(session: AuthSession, id: string): Prom
 export async function listFitnessProfiles(session: AuthSession): Promise<FitnessProfile[]> {
   return await request("rest/v1/fitness_profiles?select=*&order=created_at.desc", {}, session.access_token) as FitnessProfile[];
 }
+
+export type HydrationEntry = {
+  id: string;
+  user_id: string;
+  amount_ml: number;
+  consumed_at: string;
+  local_date: string;
+  timezone: string;
+  idempotency_key: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function listHydrationEntries(session: AuthSession, localDate: string): Promise<HydrationEntry[]> {
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(localDate)) throw new Error("Data inválida.");
+  const params = new URLSearchParams({
+    select: "id,user_id,amount_ml,consumed_at,local_date,timezone,idempotency_key,created_at,updated_at",
+    user_id: "eq." + session.user.id,
+    local_date: "eq." + localDate,
+    order: "consumed_at.desc",
+    limit: "500",
+  });
+  return await request("rest/v1/hydration_entries?" + params.toString(), {}, session.access_token) as HydrationEntry[];
+}
+
+export async function createHydrationEntry(
+  session: AuthSession,
+  input: { amount_ml: number; local_date: string; timezone: string },
+): Promise<void> {
+  if (!Number.isInteger(input.amount_ml) || input.amount_ml < 1 || input.amount_ml > 5000) {
+    throw new Error("Informe um volume entre 1 e 5.000 mL.");
+  }
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.local_date) || input.local_date > new Date().toLocaleDateString("en-CA")) {
+    throw new Error("A data do registro é inválida ou está no futuro.");
+  }
+  const idempotencyKey = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  await request("rest/v1/hydration_entries", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      amount_ml: input.amount_ml,
+      consumed_at: new Date().toISOString(),
+      local_date: input.local_date,
+      timezone: input.timezone,
+      idempotency_key: idempotencyKey,
+    }),
+  }, session.access_token);
+}
+
+export async function updateHydrationEntry(
+  session: AuthSession,
+  id: string,
+  input: { amount_ml: number },
+): Promise<void> {
+  if (!Number.isInteger(input.amount_ml) || input.amount_ml < 1 || input.amount_ml > 5000) {
+    throw new Error("Informe um volume entre 1 e 5.000 mL.");
+  }
+  await request("rest/v1/hydration_entries?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ amount_ml: input.amount_ml, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
+
+export async function deleteHydrationEntry(session: AuthSession, id: string): Promise<void> {
+  await request("rest/v1/hydration_entries?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
+    method: "DELETE",
+    headers: { Prefer: "return=minimal" },
+  }, session.access_token);
+}
+
