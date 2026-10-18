@@ -1,4 +1,5 @@
 export type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string | undefined; user_metadata?: { full_name?: string; username?: string } | undefined } };
+import { isValidCivilDate } from "./date-utils";
 
 const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
 const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
@@ -728,7 +729,7 @@ export type HydrationEntry = {
 };
 
 export async function listHydrationEntries(session: AuthSession, localDate: string): Promise<HydrationEntry[]> {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) throw new Error("Data inválida.");
+  if (!isValidCivilDate(localDate)) throw new Error("Data inválida.");
   const params = new URLSearchParams({
     select: "id,user_id,amount_ml,consumed_at,local_date,timezone,idempotency_key,created_at,updated_at",
     user_id: "eq." + session.user.id,
@@ -749,7 +750,7 @@ export async function createHydrationEntry(
   }
   const now = new Date();
   const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.local_date) || input.local_date > localToday) {
+  if (!isValidCivilDate(input.local_date) || input.local_date > localToday) {
     throw new Error("A data do registro é inválida ou está no futuro.");
   }
   await request("rest/v1/hydration_entries?on_conflict=user_id,idempotency_key", {
