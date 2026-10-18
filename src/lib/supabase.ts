@@ -1,4 +1,4 @@
-type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string | undefined; user_metadata?: { full_name?: string; username?: string } | undefined } };
+export type AuthSession = { access_token: string; refresh_token: string; user: { id: string; email?: string | undefined; user_metadata?: { full_name?: string; username?: string } | undefined } };
 
 const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
 const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
@@ -533,6 +533,58 @@ export async function saveFitnessProgress(session: AuthSession, progress: Pick<F
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify({ user_id: session.user.id, ...progress, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
+
+export async function listSleepSessions(session: AuthSession) {
+  const params = new URLSearchParams({
+    select: "id,user_id,started_at,ended_at,duration_seconds,quality_rating,wake_feeling,notes,created_at,updated_at",
+    user_id: "eq." + session.user.id,
+    order: "started_at.desc",
+    limit: "100",
+  });
+  return await request("rest/v1/sleep_sessions?" + params.toString(), {}, session.access_token) as import("./sleep-utils").SleepSession[];
+}
+
+export async function startSleepSession(session: AuthSession): Promise<void> {
+  await request("rest/v1/rpc/start_sleep_session", {
+    method: "POST",
+    body: JSON.stringify({}),
+  }, session.access_token);
+}
+
+export async function finishSleepSession(
+  session: AuthSession,
+  id: string,
+  details: { quality_rating: number; wake_feeling: string; notes: string | null },
+): Promise<void> {
+  await request("rest/v1/rpc/finish_sleep_session", {
+    method: "POST",
+    body: JSON.stringify({
+      p_session_id: id,
+      p_quality_rating: details.quality_rating,
+      p_wake_feeling: details.wake_feeling,
+      p_notes: details.notes,
+    }),
+  }, session.access_token);
+}
+
+export async function updateSleepSessionDetails(
+  session: AuthSession,
+  id: string,
+  details: { quality_rating: number; wake_feeling: string; notes: string | null },
+): Promise<void> {
+  await request("rest/v1/sleep_sessions?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ ...details, updated_at: new Date().toISOString() }),
+  }, session.access_token);
+}
+
+export async function deleteSleepSession(session: AuthSession, id: string): Promise<void> {
+  await request("rest/v1/sleep_sessions?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
+    method: "DELETE",
+    headers: { Prefer: "return=minimal" },
   }, session.access_token);
 }
 
