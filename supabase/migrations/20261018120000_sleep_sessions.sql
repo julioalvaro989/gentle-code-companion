@@ -26,21 +26,12 @@ create unique index if not exists sleep_sessions_one_active_per_user_idx
 
 alter table public.sleep_sessions enable row level security;
 revoke all on public.sleep_sessions from anon, public;
-grant select, insert, update, delete on public.sleep_sessions to authenticated;
+grant select, delete on public.sleep_sessions to authenticated;
 
 drop policy if exists "Users can read own sleep sessions" on public.sleep_sessions;
 create policy "Users can read own sleep sessions"
   on public.sleep_sessions for select to authenticated
   using (auth.uid() = user_id);
-drop policy if exists "Users can insert own sleep sessions" on public.sleep_sessions;
-create policy "Users can insert own sleep sessions"
-  on public.sleep_sessions for insert to authenticated
-  with check (auth.uid() = user_id);
-drop policy if exists "Users can update own sleep sessions" on public.sleep_sessions;
-create policy "Users can update own sleep sessions"
-  on public.sleep_sessions for update to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
 drop policy if exists "Users can delete own sleep sessions" on public.sleep_sessions;
 create policy "Users can delete own sleep sessions"
   on public.sleep_sessions for delete to authenticated
@@ -64,13 +55,13 @@ $$;
 
 drop trigger if exists sleep_sessions_calculate_duration on public.sleep_sessions;
 create trigger sleep_sessions_calculate_duration
-before insert or update of started_at, ended_at on public.sleep_sessions
+before insert or update on public.sleep_sessions
 for each row execute function public.set_sleep_session_duration();
 
 create or replace function public.start_sleep_session()
 returns public.sleep_sessions
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare created public.sleep_sessions;
@@ -97,7 +88,7 @@ create or replace function public.finish_sleep_session(
 )
 returns public.sleep_sessions
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare finished public.sleep_sessions;
@@ -132,7 +123,49 @@ begin
 end;
 $$;
 
+create or replace function public.update_sleep_session_details(
+  p_session_id uuid,
+  p_quality_rating smallint,
+  p_wake_feeling text,
+  p_notes text default null
+)
+returns public.sleep_sessions
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare changed public.sleep_sessions;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required' using errcode = '42501';
+  end if;
+  if p_quality_rating is not null and p_quality_rating not between 1 and 5 then
+    raise exception 'Qualidade deve estar entre 1 e 5.' using errcode = '22023';
+  end if;
+  if p_wake_feeling is not null and p_wake_feeling not in ('refrescado','normal','cansado') then
+    raise exception 'Opção de despertar inválida.' using errcode = '22023';
+  end if;
+  if p_notes is not null and char_length(p_notes) > 1000 then
+    raise exception 'Observações excedem o limite.' using errcode = '22023';
+  end if;
+
+  update public.sleep_sessions
+    set quality_rating = p_quality_rating,
+        wake_feeling = p_wake_feeling,
+        notes = nullif(p_notes, '')
+    where id = p_session_id and user_id = auth.uid() and ended_at is not null
+  returning * into changed;
+
+  if not found then
+    raise exception 'Registro finalizado não encontrado para esta conta.' using errcode = 'P0002';
+  end if;
+  return changed;
+end;
+$;
+
 revoke all on function public.start_sleep_session() from public, anon;
 revoke all on function public.finish_sleep_session(uuid, smallint, text, text) from public, anon;
+revoke all on function public.update_sleep_session_details(uuid, smallint, text, text) from public, anon;
 grant execute on function public.start_sleep_session() to authenticated;
 grant execute on function public.finish_sleep_session(uuid, smallint, text, text) to authenticated;
+grant execute on function public.update_sleep_session_details(uuid, smallint, text, text) to authenticated;
