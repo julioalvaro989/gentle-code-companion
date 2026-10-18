@@ -286,6 +286,79 @@ export async function recordCompletedWorkout(
   return rows[0] as WorkoutSession;
 }
 
+
+export type WorkoutPlanWeekRecord = {
+  id: string;
+  user_id: string;
+  week_start: string;
+  profile_snapshot: Record<string, unknown>;
+  days: Array<{
+    date: string;
+    status: "planned" | "rest" | "in_progress" | "completed" | "rescheduled" | "cancelled";
+    title: string;
+    muscleGroups: string[];
+    estimatedMinutes: number;
+    exercises: Array<{
+      exerciseId: string;
+      name: string;
+      primaryMuscle: string;
+      equipment: string;
+      instructions: string[];
+      sets: number;
+      reps: string;
+      restSeconds: number;
+      snapshot: { name: string; primaryMuscle: string; equipment: string; instructions: string[] };
+    }>;
+  }>;
+  generation_version: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getWorkoutPlanWeek(session: AuthSession, weekStart: string): Promise<WorkoutPlanWeekRecord | null> {
+  const rows = await request(
+    "rest/v1/workout_plan_weeks?select=id,user_id,week_start,profile_snapshot,days,generation_version,created_at,updated_at&user_id=eq." +
+    encodeURIComponent(session.user.id) + "&week_start=eq." + encodeURIComponent(weekStart) + "&limit=1",
+    {}, session.access_token,
+  );
+  return Array.isArray(rows) && rows[0]?.id ? rows[0] as WorkoutPlanWeekRecord : null;
+}
+
+export async function saveWorkoutPlanWeek(
+  session: AuthSession,
+  input: { week_start: string; profile_snapshot: Record<string, unknown>; days: WorkoutPlanWeekRecord["days"]; generation_version: number },
+): Promise<WorkoutPlanWeekRecord> {
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.week_start)) throw new Error("A data inicial do plano é inválida.");
+  if (input.days.length !== 7 || input.days.some((day, index) => !day.date || !["planned", "rest"].includes(day.status) || !Array.isArray(day.exercises))) {
+    throw new Error("O plano semanal precisa conter sete dias válidos.");
+  }
+  // The unique user/week constraint makes this idempotent. If another request
+  // created the week concurrently, return that saved version instead of replacing it.
+  const existing = await getWorkoutPlanWeek(session, input.week_start);
+  if (existing) return existing;
+  try {
+    const rows = await request("rest/v1/workout_plan_weeks", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        user_id: session.user.id,
+        week_start: input.week_start,
+        profile_snapshot: input.profile_snapshot,
+        days: input.days,
+        generation_version: input.generation_version,
+      }),
+    }, session.access_token);
+    if (Array.isArray(rows) && rows[0]?.id) return rows[0] as WorkoutPlanWeekRecord;
+  } catch (error) {
+    const concurrent = await getWorkoutPlanWeek(session, input.week_start).catch(() => null);
+    if (concurrent) return concurrent;
+    throw error;
+  }
+  const concurrent = await getWorkoutPlanWeek(session, input.week_start);
+  if (concurrent) return concurrent;
+  throw new Error("O servidor não confirmou o salvamento do plano.");
+}
+
 export type VibraAccess = {
   adminSessionLimit?: boolean;
   status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
