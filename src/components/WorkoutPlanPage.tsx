@@ -31,6 +31,10 @@ export function WorkoutPlanPage({ session, onCompleted }: Props) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [profileLoadError, setProfileLoadError] = useState("");
+  const [planLoadError, setPlanLoadError] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [planLoaded, setPlanLoaded] = useState(false);
   const [notice, setNotice] = useState("");
   const [selectedDate, setSelectedDate] = useState(() => getLocalDateKey(new Date()));
   const [confirmComplete, setConfirmComplete] = useState(false);
@@ -41,19 +45,47 @@ export function WorkoutPlanPage({ session, onCompleted }: Props) {
   const profileComplete = profile ? isPlanProfileComplete(profile) : false;
 
   const load = useCallback(async () => {
-    setLoading(true); setError(""); setNotice("");
-    try {
-      const [fitness, onboarding, saved] = await Promise.all([
-        getFitnessProfile(session),
-        getFitnessOnboardingAnswers(session).catch(() => null),
-        getWorkoutPlanWeek(session, weekKey),
-      ]);
-      const answers = onboarding?.answers ?? null;
-      setProfile(buildProfile(fitness, answers));
-      setRecord(saved);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Não foi possível carregar o planejamento.");
-    } finally { setLoading(false); }
+    setLoading(true);
+    setError("");
+    setProfileLoadError("");
+    setPlanLoadError("");
+    setProfileLoaded(false);
+    setPlanLoaded(false);
+    setNotice("");
+
+    const [fitnessResult, onboardingResult, planResult] = await Promise.allSettled([
+      getFitnessProfile(session),
+      getFitnessOnboardingAnswers(session),
+      getWorkoutPlanWeek(session, weekKey),
+    ]);
+
+    if (fitnessResult.status === "fulfilled") {
+      const answers = onboardingResult.status === "fulfilled" ? onboardingResult.value?.answers ?? null : null;
+      setProfile(buildProfile(fitnessResult.value, answers));
+      setProfileLoaded(true);
+      if (onboardingResult.status === "rejected") {
+        // The required planning fields live in fitness_profiles; onboarding adds
+        // optional personalization and must not turn a valid profile into "incomplete".
+        setNotice("Perfil carregado. Algumas preferências opcionais não puderam ser carregadas.");
+      }
+    } else {
+      setProfile(null);
+      setProfileLoadError(fitnessResult.reason instanceof Error
+        ? fitnessResult.reason.message
+        : "Não foi possível carregar seu perfil fitness.");
+    }
+
+    if (planResult.status === "fulfilled") {
+      setRecord(planResult.value);
+      setPlanLoaded(true);
+    } else {
+      setRecord(null);
+      setPlanLoadError(planResult.reason instanceof Error
+        ? planResult.reason.message
+        : "Não foi possível consultar o plano semanal.");
+    }
+
+    setLoading(false);
   }, [session, weekKey]);
 
   useEffect(() => { void load(); }, [load]);
@@ -109,11 +141,19 @@ export function WorkoutPlanPage({ session, onCompleted }: Props) {
       <button type="button" className="fit-avatar-cancel" onClick={() => changeWeek(1)} aria-label="Próxima semana">→</button>
     </div>
     {error && <div className="wp-alert" role="alert"><AlertCircle size={18}/><span>{error}</span><button type="button" onClick={() => void load()}>Tentar novamente</button></div>}
+    {profileLoadError && <div className="wp-alert" role="alert"><AlertCircle size={18}/><span>Erro ao carregar o perfil fitness: {profileLoadError}</span><button type="button" onClick={() => void load()}>Tentar novamente</button></div>}
+    {planLoadError && <div className="wp-alert" role="alert"><AlertCircle size={18}/><span>Erro ao carregar o plano semanal: {planLoadError}. A existência do perfil não é afetada por esse erro.</span><button type="button" onClick={() => void load()}>Tentar novamente</button></div>}
     {notice && <p className="wp-success" role="status"><CheckCircle2 size={17}/>{notice}</p>}
-    {loading ? <div className="panel wp-loading"><LoaderCircle className="wp-spin"/><span>Carregando seu perfil e plano salvo…</span></div> : !profileComplete ? <div className="panel wp-empty">
+    {loading ? <div className="panel wp-loading"><LoaderCircle className="wp-spin"/><span>Carregando seu perfil e plano salvo…</span></div> : profileLoadError ? <div className="panel wp-empty">
+      <AlertCircle size={28}/><h2>Não foi possível validar seu perfil</h2><p>Ocorreu um erro ao consultar os dados salvos. Não vamos tratar uma falha de consulta como se seu perfil estivesse incompleto.</p>
+    </div> : !profileLoaded || !profile ? <div className="panel wp-empty">
+      <AlertCircle size={28}/><h2>Perfil fitness ainda não encontrado</h2><p>Não encontramos um perfil fitness associado à conta autenticada. Verifique a conta e tente carregar novamente antes de preencher informações.</p><button type="button" className="fit-avatar-cancel" onClick={() => void load()}>Recarregar perfil</button>
+    </div> : !profileComplete ? <div className="panel wp-empty">
       <AlertCircle size={28}/><h2>Precisamos completar seu perfil</h2>
       <p>Para montar um plano compatível, informe pelo menos objetivo, nível de experiência, frequência semanal e local de treino na página Meu perfil. Não vamos presumir essas respostas.</p>
-    </div> : !record ? <div className="panel wp-empty">
+    </div> : planLoadError ? <div className="panel wp-empty">
+      <AlertCircle size={28}/><h2>Seu perfil está carregado, mas o plano não pôde ser consultado</h2><p>Corrija a disponibilidade da tabela do planejamento no banco conectado e tente novamente. Nenhum dado do perfil será solicitado novamente.</p>
+    </div> : !planLoaded ? <div className="panel wp-loading"><LoaderCircle className="wp-spin"/><span>Consultando seu plano semanal…</span></div> : !record ? <div className="panel wp-empty">
       <Sparkles size={28}/><h2>Seu plano ainda não foi criado</h2><p>Gere uma semana para salvar um planejamento individual. A geração não será repetida automaticamente ao abrir esta página.</p>
       {profile?.physicalLimitations?.trim() && <p className="wp-caution">Você informou limitações físicas. O sistema não consegue interpretá-las clinicamente; o planejamento será limitado a exercícios de mobilidade/alongamento e recomendamos validar as escolhas com um profissional qualificado.</p>}
       <button className="green-button" type="button" onClick={() => void generate()} disabled={busy || Boolean(profile?.physicalLimitations?.trim())}>{busy ? <LoaderCircle className="wp-spin"/> : <Sparkles size={17}/>} {profile?.physicalLimitations?.trim() ? "Confirme as limitações com um profissional" : "Gerar meu plano semanal"}</button>
