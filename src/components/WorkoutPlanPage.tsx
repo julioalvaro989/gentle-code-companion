@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, CalendarDays, CheckCircle2, Clock3, Dumbbell, LoaderCircle, Moon, RefreshCw, Sparkles } from "lucide-react";
 import type { AuthSession, FitnessProfile } from "../lib/supabase";
-import { getFitnessOnboardingAnswers, getFitnessProfile, getWorkoutPlanWeek, saveWorkoutPlanWeek, type WorkoutPlanWeekRecord } from "../lib/supabase";
+import { completeWorkoutPlanDay, getFitnessOnboardingAnswers, getFitnessProfile, getWorkoutPlanWeek, saveWorkoutPlanWeek, type WorkoutPlanWeekRecord } from "../lib/supabase";
 import { generateWeeklyWorkoutPlan, getLocalDateKey, getMonday, isPlanProfileComplete, type WorkoutProfile } from "../lib/workout-planner";
 import "./WorkoutPlanPage.css";
 
@@ -76,6 +76,21 @@ export function WorkoutPlanPage({ session, onCompleted }: Props) {
     } finally { setBusy(false); }
   };
 
+  const completeSelectedDay = async () => {
+    if (!record || !selectedDay || selectedDay.status !== "planned" || busy) return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      await completeWorkoutPlanDay(session, record.id, selectedDay.date);
+      const saved = await getWorkoutPlanWeek(session, weekKey);
+      setRecord(saved);
+      setConfirmComplete(false);
+      setNotice("Treino concluído e registrado no seu histórico.");
+      onCompleted?.();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Não foi possível registrar a conclusão.");
+    } finally { setBusy(false); }
+  };
+
   const changeWeek = (delta: number) => {
     const next = new Date(weekStart);
     next.setDate(next.getDate() + delta * 7);
@@ -109,7 +124,7 @@ export function WorkoutPlanPage({ session, onCompleted }: Props) {
           {!selectedDay || selectedDay.status === "rest" ? <div className="wp-empty"><Moon size={30}/><h2>Dia de descanso</h2><p>Recuperação também faz parte do planejamento. Não há treino prescrito para esta data.</p></div> : <>
             <div className="wp-session-heading"><div><div className="section-kicker">{selectedDate === today ? "TREINO DE HOJE" : "SESSÃO PROGRAMADA"}</div><h2>{selectedDay.title}</h2><p>{selectedDay.muscleGroups.join(" · ")}</p></div><span className="wp-duration"><Clock3 size={16}/>{Math.round(selectedDay.estimatedMinutes)} min</span></div>
             <div className="wp-exercises">{selectedDay.exercises.map((exercise, index) => <div className="wp-exercise" key={exercise.exerciseId}><div className="wp-exercise-num">{index+1}</div><div className="wp-exercise-body"><h3>{exercise.name}</h3><p>{exercise.primaryMuscle} · {exercise.equipment}</p><div className="wp-params"><span>{exercise.sets} séries</span><span>{exercise.reps} reps</span><span>{exercise.restSeconds}s descanso</span></div><details><summary>Como fazer</summary><ol>{exercise.instructions.map((instruction, i) => <li key={i}>{instruction}</li>)}</ol></details></div></div>)}</div>
-            {selectedDay.status === "completed" ? <p className="wp-success"><CheckCircle2 size={17}/> Sessão marcada como concluída.</p> : <div className="wp-complete-box"><p>Concluir registra apenas a realização declarada; não aumenta cargas nem inventa séries realizadas.</p>{!confirmComplete ? <button className="green-button" type="button" onClick={() => setConfirmComplete(true)}>Concluir treino</button> : <div className="wp-confirm"><strong>Você terminou esta sessão?</strong><button type="button" className="green-button" onClick={() => setNotice("O registro de conclusão planejada exige a migration aprovada e o backend correspondente; ainda não foi ativado.")}>Confirmar conclusão</button><button type="button" className="fit-avatar-cancel" onClick={() => setConfirmComplete(false)}>Cancelar</button></div>}</div>}
+            {selectedDay.status === "completed" ? <p className="wp-success"><CheckCircle2 size={17}/> Sessão marcada como concluída.</p> : <div className="wp-complete-box"><p>Concluir registra apenas a realização declarada; não aumenta cargas nem inventa séries realizadas.</p>{!confirmComplete ? <button className="green-button" type="button" onClick={() => setConfirmComplete(true)}>Concluir treino</button> : <div className="wp-confirm"><strong>Você terminou esta sessão?</strong><button type="button" className="green-button" onClick={() => void completeSelectedDay()} disabled={busy}>Confirmar conclusão</button><button type="button" className="fit-avatar-cancel" onClick={() => setConfirmComplete(false)}>Cancelar</button></div>}</div>}
           </>}
         </article>
         <aside className="panel wp-summary"><div className="section-kicker">SEU PLANO</div><h3>Resumo da semana</h3><div className="wp-summary-stat"><Dumbbell size={18}/><span>{record.days.filter(day => day.status === "planned" || day.status === "completed").length} sessões planejadas</span></div><div className="wp-summary-stat"><Moon size={18}/><span>{record.days.filter(day => day.status === "rest").length} dias de descanso</span></div><p>Gerado em {new Intl.DateTimeFormat("pt-BR",{dateStyle:"medium"}).format(new Date(record.created_at))}.</p><button type="button" className="fit-avatar-cancel" onClick={() => void load()}><RefreshCw size={15}/> Atualizar</button></aside>
