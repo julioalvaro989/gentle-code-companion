@@ -3,6 +3,7 @@ import { ArrowRight, MoonStar, RefreshCw } from "lucide-react";
 import type { AuthSession } from "../lib/supabase";
 import { listSleepSessions } from "../lib/supabase";
 import { formatSleepDuration, getLastSevenNightAverage } from "../lib/sleep-utils";
+import "./SleepProgressCard.css";
 
 type Props = { session: AuthSession; onOpen: () => void };
 
