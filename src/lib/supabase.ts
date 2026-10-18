@@ -359,6 +359,17 @@ export async function saveWorkoutPlanWeek(
   throw new Error("O servidor não confirmou o salvamento do plano.");
 }
 
+
+export async function completeWorkoutPlanDay(session: AuthSession, planWeekId: string, plannedDate: string): Promise<void> {
+  if (!/^[0-9a-f-]{36}$/i.test(planWeekId) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(plannedDate)) {
+    throw new Error("A sessão planejada é inválida.");
+  }
+  await request("rest/v1/rpc/complete_workout_plan_day", {
+    method: "POST",
+    body: JSON.stringify({ p_plan_week_id: planWeekId, p_planned_date: plannedDate }),
+  }, session.access_token);
+}
+
 export type VibraAccess = {
   adminSessionLimit?: boolean;
   status: "active" | "pending" | "past_due" | "canceled" | "refunded" | "failed" | "none";
