@@ -48,3 +48,102 @@ for each row execute function public.set_workout_plan_week_updated_at();
 -- Plans are immutable once created. Regeneration creates a new version only after
 -- an explicit replacement flow is implemented; direct UPDATE/DELETE is intentionally unavailable.
 revoke all on function public.set_workout_plan_week_updated_at() from public, anon, authenticated;
+
+-- A completion is unique for each planned date and links back to the existing
+-- workout_sessions history instead of creating a second history system.
+create table if not exists public.workout_plan_completions (
+  id uuid primary key default gen_random_uuid(),
+  plan_week_id uuid not null references public.workout_plan_weeks(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  planned_date date not null,
+  workout_session_id uuid not null references public.workout_sessions(id) on delete restrict,
+  completed_at timestamptz not null default now(),
+  constraint workout_plan_completions_one_per_day unique (plan_week_id, planned_date),
+  constraint workout_plan_completions_user_id_unique unique (user_id, workout_session_id)
+);
+
+alter table public.workout_plan_completions enable row level security;
+revoke all on public.workout_plan_completions from anon, public, authenticated;
+grant select on public.workout_plan_completions to authenticated;
+drop policy if exists "Users can read own workout plan completions" on public.workout_plan_completions;
+create policy "Users can read own workout plan completions"
+  on public.workout_plan_completions for select to authenticated
+  using (auth.uid() = user_id);
+
+create or replace function public.complete_workout_plan_day(p_plan_week_id uuid, p_planned_date date)
+returns public.workout_plan_completions
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  plan_row public.workout_plan_weeks;
+  day_row jsonb;
+  inserted_session public.workout_sessions;
+  completion public.workout_plan_completions;
+  day_title text;
+  planned_minutes integer;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required' using errcode = '42501';
+  end if;
+
+  select * into plan_row
+  from public.workout_plan_weeks
+  where id = p_plan_week_id and user_id = auth.uid()
+  for update;
+
+  if not found then
+    raise exception 'Plano não encontrado para esta conta.' using errcode = 'P0002';
+  end if;
+
+  select value into day_row
+  from jsonb_array_elements(plan_row.days)
+  where value->>'date' = p_planned_date::text;
+
+  if day_row is null then
+    raise exception 'Data não pertence a este plano semanal.' using errcode = '22023';
+  end if;
+  if day_row->>'status' = 'rest' then
+    raise exception 'Dia de descanso não pode ser concluído como treino.' using errcode = '22023';
+  end if;
+
+  select * into completion
+  from public.workout_plan_completions
+  where plan_week_id = p_plan_week_id and planned_date = p_planned_date and user_id = auth.uid();
+
+  if found then return completion; end if;
+
+  day_title := left(coalesce(nullif(day_row->>'title',''), 'Treino planejado'), 160);
+  planned_minutes := greatest(1, least(600, coalesce((day_row->>'estimatedMinutes')::integer, 1)));
+
+  insert into public.workout_sessions
+    (user_id, title, status, planned_for, started_at, completed_at, duration_minutes, notes)
+  values
+    (auth.uid(), day_title, 'completed', p_planned_date, null, now(), planned_minutes, 'Conclusão declarada da sessão planejada; séries, cargas e repetições realizadas não foram informadas.')
+  returning * into inserted_session;
+
+  insert into public.workout_plan_completions
+    (plan_week_id, user_id, planned_date, workout_session_id)
+  values
+    (p_plan_week_id, auth.uid(), p_planned_date, inserted_session.id)
+  returning * into completion;
+
+  update public.workout_plan_weeks
+  set days = (
+    select jsonb_agg(
+      case when value->>'date' = p_planned_date::text
+        then jsonb_set(jsonb_set(value, '{status}', '"completed"'::jsonb), '{completedAt}', to_jsonb(now()::text), true)
+        else value
+      end order by ordinality
+    )
+    from jsonb_array_elements(plan_row.days) with ordinality
+  )
+  where id = p_plan_week_id and user_id = auth.uid();
+
+  return completion;
+end;
+$$;
+
+revoke all on function public.complete_workout_plan_day(uuid, date) from public, anon;
+grant execute on function public.complete_workout_plan_day(uuid, date) to authenticated;
