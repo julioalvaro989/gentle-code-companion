@@ -1,0 +1,8 @@
+.sleep-progress-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;margin:0 0 24px;padding:20px;border:1px solid #8a43cb55;border-radius:18px;background:radial-gradient(ellipse at 0 0,#7900ff1c,transparent 62%),linear-gradient(135deg,#11121f,#0b0c16);color:#f8f9ff}
+.sleep-progress-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;border:1px solid #a855f74d;background:#7900ff20;color:#c4b5fd}
+.sleep-progress-copy h2{font-size:17px;letter-spacing:-.3px;margin:6px 0}
+.sleep-progress-copy p{margin:0;color:#a8b4d8;font-size:12px;line-height:1.6}
+.sleep-progress-copy p strong{color:#c8ff58;font-size:14px}
+.sleep-progress-card>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 13px;border:1px solid #b7ff35;border-radius:11px;background:#b7ff35;color:#10120a;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.sleep-progress-status{color:#fca5a5}
+@media(max-width:620px){.sleep-progress-card{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:16px}.sleep-progress-card>button{grid-column:1/-1;width:100%}}
