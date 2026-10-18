@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, Clock3, Droplets, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
-import { createHydrationEntry, deleteHydrationEntry, listHydrationEntries, updateHydrationEntry, type AuthSession, type HydrationEntry } from "../lib/supabase";
+import { createHydrationEntry, createHydrationIdempotencyKey, deleteHydrationEntry, listHydrationEntries, updateHydrationEntry, type AuthSession, type HydrationEntry } from "../lib/supabase";
 import { formatLocalDateInput, useLocalToday } from "../lib/date-utils";
 
 const presets = [150, 250, 350, 500];
@@ -33,6 +33,7 @@ export function WaterTracker({ session }: { session: AuthSession }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [pendingIdempotencyKey, setPendingIdempotencyKey] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedDate(todayKey);
@@ -64,7 +65,10 @@ export function WaterTracker({ session }: { session: AuthSession }) {
     }
     setSaving(true); setError(""); setNotice("");
     try {
-      await createHydrationEntry(session, { amount_ml: amount, local_date: selectedDate, timezone: localTimezone() });
+      const idempotencyKey = pendingIdempotencyKey ?? createHydrationIdempotencyKey();
+      setPendingIdempotencyKey(idempotencyKey);
+      await createHydrationEntry(session, { amount_ml: amount, local_date: selectedDate, timezone: localTimezone() }, idempotencyKey);
+      setPendingIdempotencyKey(null);
       setNotice(`${amount} mL registrados.`);
       await load();
     } catch (cause) {
