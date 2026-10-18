@@ -777,7 +777,7 @@ export async function updateHydrationEntry(
   await request("rest/v1/hydration_entries?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
     method: "PATCH",
     headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ amount_ml: input.amount_ml, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ amount_ml: input.amount_ml }),
   }, session.access_token);
 }
 
