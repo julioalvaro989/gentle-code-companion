@@ -44,7 +44,7 @@ create policy hydration_entries_update_own
   with check (
     user_id = (select auth.uid())
     and amount_ml between 1 and 5000
-    and local_date <= (now() at time zone timezone)::date
+    and char_length(timezone) between 1 and 100
   );
 
 drop policy if exists hydration_entries_delete_own on public.hydration_entries;
