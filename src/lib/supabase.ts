@@ -702,6 +702,19 @@ export async function listFitnessProfiles(session: AuthSession): Promise<Fitness
   return await request("rest/v1/fitness_profiles?select=*&order=created_at.desc", {}, session.access_token) as FitnessProfile[];
 }
 
+
+function createUuid(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, value => value.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+  throw new Error("Seu navegador não oferece geração segura de identificadores. Atualize o navegador e tente novamente.");
+}
+
 export type HydrationEntry = {
   id: string;
   user_id: string;
@@ -733,12 +746,12 @@ export async function createHydrationEntry(
   if (!Number.isInteger(input.amount_ml) || input.amount_ml < 1 || input.amount_ml > 5000) {
     throw new Error("Informe um volume entre 1 e 5.000 mL.");
   }
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.local_date) || input.local_date > new Date().toLocaleDateString("en-CA")) {
+  const now = new Date();
+  const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.local_date) || input.local_date > localToday) {
     throw new Error("A data do registro é inválida ou está no futuro.");
   }
-  const idempotencyKey = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const idempotencyKey = createUuid();
   await request("rest/v1/hydration_entries", {
     method: "POST",
     headers: { Prefer: "return=minimal" },
