@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, Check, Clock3, MoonStar, Pencil, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
+import { Activity, AlarmClock, Check, Clock3, MoonStar, Pencil, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
 import type { AuthSession } from "../lib/supabase";
 import { deleteSleepSession, finishSleepSession, listSleepSessions, startSleepSession, updateSleepSessionDetails } from "../lib/supabase";
 import { formatSleepDate, formatSleepDuration, getLastSevenNightAverage, getSleepDurationSeconds, type SleepSession } from "../lib/sleep-utils";
