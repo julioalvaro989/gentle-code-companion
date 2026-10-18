@@ -129,10 +129,20 @@ export function VibraChat() {
     const initial = launcher.getBoundingClientRect();
     place(stored ?? { x: initial.left, y: initial.top });
     const reflow = () => {
-      if (dragRef.current) {
+      const interruptedDrag = dragRef.current;
+      if (interruptedDrag) {
         dragRef.current = null;
-        suppressClickRef.current = true;
+        // A resize/orientation change should not cancel the next legitimate click
+        // unless the pointer had actually crossed the drag threshold.
+        suppressClickRef.current = interruptedDrag.moved;
         launcher.classList.remove("is-dragging");
+        if (launcher.hasPointerCapture(interruptedDrag.pointerId)) {
+          launcher.releasePointerCapture(interruptedDrag.pointerId);
+        }
+        if (interruptedDrag.moved && positionRef.current) {
+          hasSavedPositionRef.current = true;
+          savePosition(positionRef.current);
+        }
       }
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
@@ -143,7 +153,7 @@ export function VibraChat() {
         place({ x: rect.left, y: rect.top });
       } else if (positionRef.current) {
         place(positionRef.current);
-        if (positionRef.current) savePosition(positionRef.current);
+        savePosition(positionRef.current);
       }
     };
     window.addEventListener("resize", reflow);
@@ -215,7 +225,10 @@ export function VibraChat() {
       hasSavedPositionRef.current = true;
       savePosition(positionRef.current);
     }
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    // pointercancel and lost capture must clean up just like pointerup.
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   }
 
   useEffect(() => {
