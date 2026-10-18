@@ -25,7 +25,7 @@ create unique index if not exists sleep_sessions_one_active_per_user_idx
   on public.sleep_sessions (user_id) where ended_at is null;
 
 alter table public.sleep_sessions enable row level security;
-revoke all on public.sleep_sessions from anon, public;
+revoke all on public.sleep_sessions from anon, public, authenticated;
 grant select, delete on public.sleep_sessions to authenticated;
 
 drop policy if exists "Users can read own sleep sessions" on public.sleep_sessions;
