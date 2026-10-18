@@ -663,35 +663,119 @@ function GymApp() {
       <header className="topbar"><button className="fit-mobile-menu icon-button" aria-label="Abrir menu" onClick={()=>setMobileMenu(!mobileMenu)}><Menu size={20}/></button><div className="mobile-brand"><img className="mobile-brand-logo" src={vibraLogoUrl} alt="Vibra" /></div><div className="breadcrumb">Meu espaço <ChevronRight size={14}/><strong>{activeNav}</strong></div><div className="top-actions"><div className="date-chip"><CalendarDays size={16}/> {dateLabel}</div><button className="icon-button" aria-label="Notificações"><Bell size={18}/><i/></button><button className="avatar top-avatar" title="Sair da conta" onClick={async()=>{try { await signOut(); } catch { setAuthError("Não foi possível confirmar o logout remoto. A sessão local pode ter sido encerrada; confira o acesso antes de continuar."); } finally { setSession(null); setProgressHydrated(false); setAuthMode("login"); }}}>{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil" /> : (profileName||"V").slice(0,2).toUpperCase()}</button></div></header>
       <div className="page-wrap">
         {activeNav !== "Visão geral" && <div className="fit-page-actions"><button className="outline-button fit-back-button" onClick={goBack} aria-label="Voltar para a tela anterior"><ArrowLeft size={17}/> Voltar</button><button type="button" className="outline-button fit-close-page" onClick={closePage} aria-label="Fechar esta página e voltar à visão geral"><X size={17}/><span>Fechar</span></button></div>}
-        {activeNav==="Visão geral" && <>
-          <section className="welcome-row"><div><div className="section-kicker"><span/> SUA JORNADA COMEÇA AQUI</div><h1>{greeting}, <span>{profileName || "bem-vindo à Vibra"}.</span></h1><p>{dateLabel}. Um passo de cada vez — acompanhe sua jornada com dados reais.</p></div><button className="outline-button" onClick={()=>changePage("Progresso")}><Activity size={17}/> Minha evolução</button></section>
-          <section className="fit-hero">
-            <img className="fit-hero-image" src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1600&q=85" alt="" aria-hidden="true" width={1600} height={900} loading="eager" fetchPriority="high" decoding="async"/>
-            <div className="fit-hero-shade"/>
-            <div className="fit-float fit-float-one"><span className="fit-float-icon"><Sparkles size={17}/></span><div><b>Seu próximo passo</b><small>feito no seu ritmo</small></div></div>
-            <div className="fit-float fit-float-two"><span className="fit-pulse"/><div><b>Vibra</b><small>Treino, hábitos e evolução</small></div></div>
-            <div className="hero-copy fit-hero-copy"><div className="hero-pill"><Dumbbell size={14}/> SUA ROTINA FITNESS</div><h2>Construa sua<br/><span>evolução.</span></h2><p>Consulte sua biblioteca, registre seus hábitos e personalize seu perfil para preparar uma rotina que combine com você.</p><div className="hero-meta"><span><BookOpen size={16}/> Biblioteca de exercícios</span><span><Sparkles size={16}/> Vibra AI</span></div><button className="green-button" onClick={()=>changePage("Treinos")}><CirclePlay size={18}/>Explorar treinos<ChevronRight size={17}/></button></div>
-            <div className="fit-hero-caption"><Sparkles size={14}/> SEU RITMO · SUA EVOLUÇÃO</div>
+        {activeNav==="Visão geral" && <div className="vh-home">
+          <section className="vh-hero">
+            <img className="vh-hero-image" src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1600&q=85" alt="" aria-hidden="true" width={1600} height={900} loading="eager" fetchPriority="high" decoding="async"/>
+            <div className="vh-hero-shade" aria-hidden="true"/>
+            <div className="vh-hero-glow" aria-hidden="true"/>
+            <div className="vh-hero-copy">
+              <div className="vh-eyebrow"><Sparkles size={14}/> {dateLabel}</div>
+              <h1>{greeting}, <span>{profileName || "bem-vindo à Vibra"}.</span></h1>
+              <p className="vh-hero-lead">Seu próximo nível começa hoje.</p>
+              <p className="vh-hero-sub">Organize sua rotina, acompanhe sua evolução e transforme consistência em resultado.</p>
+              <div className="vh-hero-actions">
+                <button className="vh-cta" onClick={()=>changePage("Treinos")}>Ver meu plano do dia <ArrowRight size={17}/></button>
+                <button className="vh-ghost" onClick={()=>changePage("Progresso")}><Activity size={16}/> Minha evolução</button>
+              </div>
+            </div>
           </section>
-          <section className="fit-shortcuts" aria-label="Atalhos principais">
-            <button type="button" className="fit-shortcut-card" onClick={()=>changePage("Treinos")}><span className="fit-shortcut-icon"><Dumbbell size={19}/></span><span><strong>Treinos</strong><small>Planejamento e exercícios</small></span><ChevronRight size={17}/></button>
-            <button type="button" className="fit-shortcut-card" onClick={()=>changePage("IA Fitness")}><span className="fit-shortcut-icon"><Sparkles size={19}/></span><span><strong>Vibra AI</strong><small>Ajuda para sua rotina</small></span><ChevronRight size={17}/></button>
-            <button type="button" className="fit-shortcut-card" onClick={()=>changePage("Nutrição")}><span className="fit-shortcut-icon"><Leaf size={19}/></span><span><strong>Nutrição</strong><small>Hábitos e registros</small></span><ChevronRight size={17}/></button>
-            <button type="button" className="fit-shortcut-card" onClick={()=>changePage("Comunidade")}><span className="fit-shortcut-icon"><MessageCircle size={19}/></span><span><strong>Comunidade</strong><small>Novidades do recurso</small></span><ChevronRight size={17}/></button>
+
+          <section className="vh-stats" aria-label="Indicadores rápidos">
+            <article className="vh-stat">
+              <span className="vh-stat-icon vh-stat-icon-purple"><Dumbbell size={19}/></span>
+              <div className="vh-stat-body"><span className="vh-stat-label">Treino</span>
+                {thisWeekSessions.length>0 ? <><strong>{thisWeekSessions.length}<small> treino{thisWeekSessions.length>1?"s":""} esta semana</small></strong><span className="vh-stat-note">Registrados por você</span></> : <><strong>Sem registros</strong><span className="vh-stat-note">Comece pelo seu primeiro treino</span></>}
+              </div>
+              <button className="vh-stat-action" onClick={()=>changePage("Treinos")} aria-label="Abrir treinos"><ChevronRight size={16}/></button>
+            </article>
+            <article className="vh-stat">
+              <span className="vh-stat-icon vh-stat-icon-green"><Utensils size={19}/></span>
+              <div className="vh-stat-body"><span class="vh-stat-label">Alimentação</span>
+                <strong>Sem registros</strong><span className="vh-stat-note">O registro de refeições ainda não está conectado</span>
+              </div>
+              <button className="vh-stat-action" onClick={()=>changePage("Nutrição")} aria-label="Abrir nutrição"><ChevronRight size={16}/></button>
+            </article>
+            <article className="vh-stat">
+              <span className="vh-stat-icon vh-stat-icon-cyan"><Droplets size={19}/></span>
+              <div className="vh-stat-body"><span className="vh-stat-label">Hidratação</span>
+                <strong>{water}<small> / 8 copos</small></strong>
+                <span className="vh-progress" aria-hidden="true"><i style={{width:(water/8*100)+"%"}}/></span>
+              </div>
+              <button className="vh-stat-action" onClick={()=>setWater(Math.min(8,water+1))} aria-label="Registrar um copo de água"><Plus size={16}/></button>
+            </article>
+            <article className="vh-stat">
+              <span className="vh-stat-icon vh-stat-icon-violet"><MoonStar size={19}/></span>
+              <div className="vh-stat-body"><span className="vh-stat-label">Sono</span>
+                <strong>Sem registros</strong><span className="vh-stat-note">O acompanhamento de sono ainda não está disponível</span>
+              </div>
+            </article>
           </section>
-          <section className="stats-grid">
-            <article className="stat-card"><div className="stat-top"><span>Exercícios registrados</span><span className="stat-icon"><Dumbbell size={18}/></span></div><div className="stat-value">{done.length}</div><div className="stat-bottom"><span>Registros disponíveis na conta</span></div></article>
-            <article className="stat-card"><div className="stat-top"><span>Copos registrados</span><span className="stat-icon"><Apple size={18}/></span></div><div className="stat-value">{water}<small> / 8</small></div><div className="stat-bottom"><button className="fit-inline-action" onClick={()=>setWater(Math.min(8,water+1))}><Plus size={13}/> Registrar copo</button><span>meta configurável</span></div><div className="mini-progress"><i style={{width:(water/8*100)+"%"}}/></div></article>
-            <article className="stat-card"><div className="stat-top"><span>Objetivo pessoal</span><span className="stat-icon"><Target size={18}/></span></div><div className="stat-value stat-value-text">{goal || "Não definido"}</div><div className="stat-bottom"><button className="fit-inline-action" onClick={()=>changePage("Meu perfil")}>Personalizar objetivo <ChevronRight size={13}/></button></div></article>
-            <article className="stat-card"><div className="stat-top"><span>Histórico semanal</span><span className="stat-icon"><TrendingUp size={18}/></span></div><div className="stat-value stat-value-text">Sem dados</div><div className="stat-bottom"><span>O histórico por data ainda não está disponível</span></div></article>
-          </section>
-          <section className="lower-grid">
-            <article className="panel workout-panel"><div className="panel-heading"><div><div className="section-kicker">SEU PLANEJAMENTO</div><h3>Treino de hoje</h3><p>O plano individual será exibido quando estiver configurado.</p></div><button className="text-button" onClick={()=>changePage("Treinos")}>Abrir treinos <ChevronRight size={15}/></button></div><div className="fit-empty-state"><Dumbbell size={25}/><strong>Nenhum treino programado</strong><p>Explore a biblioteca de exercícios ou complete seu perfil fitness para personalizar sua rotina.</p><button className="green-button" onClick={()=>changePage("Biblioteca de Exercícios")}>Explorar exercícios <ArrowRight size={16}/></button></div></article>
-            <article className="panel nutrition-teaser"><div className="panel-heading"><div><div className="section-kicker">NUTRIÇÃO E HÁBITOS</div><h3>Registro alimentar</h3><p>Seus dados aparecerão aqui quando forem registrados.</p></div><span className="nutrition-icon"><Utensils size={19}/></span></div><div className="fit-empty-state fit-empty-state-compact"><Leaf size={23}/><strong>Sem registros alimentares</strong><p>Ainda não há refeições ou valores nutricionais salvos para exibir.</p></div><button className="start-bottom" onClick={()=>changePage("Nutrição")}>Abrir nutrição <ArrowRight size={17}/></button></article>
-          </section>
-          <button type="button" className="panel fit-calendar-panel fit-calendar-preview" onClick={()=>changePage("Calendário")} aria-label="Abrir calendário completo"><div className="panel-heading"><div><div className="section-kicker">CALENDÁRIO</div><h3>Seu mês</h3><p>Consulte seu calendário completo.</p></div><span className="fit-calendar-month">{monthLabel}</span></div><div className="fit-calendar-grid">{["D","S","T","Q","Q","S","S"].map((day,index)=><span className="fit-calendar-weekday" key={index}>{day}</span>)}{Array.from({length:calendarOffset},(_,index)=><span className="fit-calendar-blank" key={"blank-"+index}/>)}{calendarDays.map(day=><span key={day} className={"fit-calendar-day "+(day===localToday.getDate()?"is-today":"")}>{day}</span>)}</div></button>
+
+          <div className="vh-grid">
+            <div className="vh-main">
+              <article className="vh-panel vh-workout">
+                <div className="vh-panel-head"><div><div className="vh-kicker">SEU PLANEJAMENTO</div><h2>Treino do dia</h2></div><button className="vh-link" onClick={()=>changePage("Treinos")}>Abrir treinos <ChevronRight size={15}/></button></div>
+                {workoutSessions.length>0 ? <div className="vh-session-list">{workoutSessions.slice(0,3).map(item=><div key={item.id} className="vh-session-row"><span className="vh-session-icon"><Dumbbell size={16}/></span><div><strong>{item.title}</strong><small>{item.completed_at ? new Date(item.completed_at).toLocaleDateString("pt-BR",{day:"2-digit",month:"short"}) : "Data não informada"}{item.duration_minutes ? " · "+item.duration_minutes+" min" : ""}</small></div></div>)}</div> : <div className="vh-empty"><Dumbbell size={26}/><strong>Nenhum treino programado</strong><p>Explore a biblioteca de exercícios ou complete seu perfil fitness para personalizar sua rotina.</p><button className="vh-cta vh-cta-small" onClick={()=>changePage("Biblioteca de Exercícios")}>Explorar exercícios <ArrowRight size={15}/></button></div>}
+              </article>
+
+              <article className="vh-panel vh-evolution">
+                <div className="vh-panel-head"><div><div className="vh-kicker">EVOLUÇÃO PESSOAL</div><h2>Sua evolução</h2></div><button className="vh-link" onClick={()=>changePage("Progresso")}>Ver detalhes <ChevronRight size={15}/></button></div>
+                {workoutSessions.length>0 ? <div className="vh-evolution-body">
+                  <div className="vh-evolution-metrics">
+                    <div><strong>{thisWeekSessions.length}</strong><span>treinos esta semana</span></div>
+                    <div><strong>{previousWeekSessions.length}</strong><span>na semana anterior</span></div>
+                    <div><strong>{workoutSessions.length}</strong><span>registros no total</span></div>
+                  </div>
+                  <div className="vh-bars" aria-hidden="true">{workoutSessions.slice(0,7).map((item,index)=><span key={item.id} style={{height:Math.max(18,100-index*12)+"%"}}/>)}</div>
+                </div> : <div className="vh-empty"><TrendingUp size={26}/><strong>Seu histórico começa com o próximo treino.</strong><p>Registre uma atividade real para acompanhar sua consistência aqui.</p><button className="vh-cta vh-cta-small" onClick={()=>changePage("Treinos")}>Registrar atividade <ArrowRight size={15}/></button></div>}
+              </article>
+
+              <article className="vh-panel vh-nutrition">
+                <div className="vh-panel-head"><div><div className="vh-kicker">ALIMENTAÇÃO E HIDRATAÇÃO</div><h2>Nutrição</h2></div><button className="vh-link" onClick={()=>changePage("Nutrição")}>Abrir nutrição <ChevronRight size={15}/></button></div>
+                <div className="vh-nutrition-grid">
+                  <div className="vh-empty vh-empty-compact"><Leaf size={22}/><strong>Sem refeições registradas</strong><p>Quando o registro alimentar estiver conectado, suas refeições aparecem aqui.</p></div>
+                  <div className="vh-water-card"><span className="vh-stat-icon vh-stat-icon-cyan"><Droplets size={18}/></span><div><strong>Hidratação</strong><span>{water} / 8 copos hoje</span><span className="vh-progress"><i style={{width:(water/8*100)+"%"}}/></span></div><button className="vh-stat-action" onClick={()=>setWater(Math.min(8,water+1))} aria-label="Registrar um copo de água"><Plus size={16}/></button></div>
+                </div>
+              </article>
+            </div>
+
+            <div className="vh-side">
+              <article className="vh-coach">
+                <div className="vh-coach-glow" aria-hidden="true"/>
+                <div className="vh-coach-head"><span className="vh-coach-logo"><img src={vibraLogoUrl} alt=""/></span><div><h2>Vibra Coach</h2><span className="vh-coach-tag">IA</span></div></div>
+                <p>Orientação inteligente para sua rotina.</p>
+                <ul className="vh-coach-list">
+                  <li><Check size={14}/> Dúvidas sobre treino e nutrição</li>
+                  <li><Check size={14}/> Ajustes na sua rotina</li>
+                  <li><Check size={14}/> Acompanhamento da sua evolução</li>
+                </ul>
+                <button className="vh-cta vh-coach-cta" onClick={()=>window.dispatchEvent(new Event("vibra:open-chat"))}>Conversar com a Vibra AI <MessageCircle size={16}/></button>
+                <div className="vh-coach-suggestions">
+                  <button onClick={()=>window.dispatchEvent(new Event("vibra:open-chat"))}>Montar meu treino</button>
+                  <button onClick={()=>window.dispatchEvent(new Event("vibra:open-chat"))}>Sugestões de alimentação</button>
+                  <button onClick={()=>window.dispatchEvent(new Event("vibra:open-chat"))}>Analisar minha evolução</button>
+                </div>
+              </article>
+
+              <article className="vh-panel vh-goal">
+                <div className="vh-panel-head"><div><div className="vh-kicker">SEU OBJETIVO</div><h2>{goal || "Não definido"}</h2></div><span className="vh-stat-icon vh-stat-icon-green"><Target size={18}/></span></div>
+                <p className="vh-goal-text">{goal ? "Você está mais perto do que imagina." : "Defina seu objetivo para personalizar sua jornada."}</p>
+                <button className="vh-link" onClick={()=>changePage("Meu perfil")}>{goal ? "Ajustar objetivo" : "Definir objetivo"} <ChevronRight size={15}/></button>
+              </article>
+
+              <article className="vh-panel vh-week">
+                <div className="vh-panel-head"><div><div className="vh-kicker">RESUMO SEMANAL</div><h2>Sua semana</h2></div></div>
+                {workoutSessions.length>0 ? <div className="vh-week-list">
+                  <div><span className="vh-stat-icon vh-stat-icon-purple"><Dumbbell size={15}/></span><div><strong>Treinos concluídos</strong><small>{thisWeekSessions.length} esta semana</small></div></div>
+                  <div><span className="vh-stat-icon vh-stat-icon-cyan"><Droplets size={15}/></span><div><strong>Hidratação de hoje</strong><small>{water} de 8 copos</small></div></div>
+                  <div><span className="vh-stat-icon vh-stat-icon-green"><Activity size={15}/></span><div><strong>Exercícios registrados</strong><small>{done.length} no total</small></div></div>
+                </div> : <div className="vh-empty vh-empty-compact"><BarChart3 size={22}/><strong>Sem dados desta semana</strong><p>Registre um treino ou um copo de água para começar seu resumo.</p></div>}
+              </article>
+            </div>
+          </div>
+
           <section className="fit-specialist-strip"><div className="fit-specialist-icon"><HeartPulse size={24}/></div><div><span className="section-kicker">ACOMPANHAMENTO PROFISSIONAL</span><h3>Você não precisa fazer isso sozinho.</h3><p>Encontre orientação de nutricionistas e personal trainers cadastrados.</p></div><button className="green-button" onClick={()=>changePage("Especialistas")}>Conhecer especialistas <ArrowRight size={16}/></button></section>
-        </>}
+        </div>}
         {activeNav==="Calendário" && <section className="fit-page-section fit-calendar-page">
           <div className="fit-calendar-intro"><div className="fit-calendar-title"><span className="fit-calendar-title-icon"><CalendarDays size={26}/></span><div><div className="section-kicker"><span/> CALENDÁRIO</div><h1>Seu mês em <span>movimento.</span></h1><p className="fit-page-intro">Aqui você acompanha seus treinos, descansos e toda a sua jornada. Cada dia é uma nova oportunidade de evoluir.</p></div></div>
             <section className="fit-calendar-motivation"><img src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1200&q=85" alt="Atleta treinando em uma academia" loading="lazy"/><div className="fit-calendar-motivation-shade"/><div className="fit-calendar-motivation-copy"><div className="section-kicker"><Sparkles size={15}/> Impulso do dia</div><p className="fit-impulse-quote">{progressInspirations[inspirationIndex]?.text}</p><button type="button" className="fit-impulse-refresh" onClick={()=>setInspirationIndex(current=>{if(progressInspirations.length<2)return current;let next=Math.floor(Math.random()*progressInspirations.length);while(next===current)next=Math.floor(Math.random()*progressInspirations.length);return next;})}><RotateCw size={15}/> Nova inspiração</button></div></section>
