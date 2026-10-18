@@ -275,7 +275,15 @@
 
 
 /* Refinamento compacto do Fibre/Vibra AI: foco em legibilidade, segurança e toque */
-.vibra-chat-root { isolation: isolate; }
+.vibra-chat-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  isolation: isolate;
+  pointer-events: none;
+}
+.vibra-chat-launcher,
+.vibra-chat-panel { pointer-events: auto; }
 .vibra-chat-launcher {
   min-height: 44px;
   min-width: 44px;
