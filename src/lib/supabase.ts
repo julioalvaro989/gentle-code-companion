@@ -752,9 +752,9 @@ export async function createHydrationEntry(
   if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.local_date) || input.local_date > localToday) {
     throw new Error("A data do registro é inválida ou está no futuro.");
   }
-  await request("rest/v1/hydration_entries", {
+  await request("rest/v1/hydration_entries?on_conflict=user_id,idempotency_key", {
     method: "POST",
-    headers: { Prefer: "return=minimal" },
+    headers: { Prefer: "resolution=ignore-duplicates,return=minimal" },
     body: JSON.stringify({
       user_id: session.user.id,
       amount_ml: input.amount_ml,
