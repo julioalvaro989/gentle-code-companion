@@ -117,7 +117,7 @@ export function generateWeeklyWorkoutPlan(profile: WorkoutProfile, startDate: Da
       safeForProfile(exercise, limitations) &&
       exercise.difficulty !== "Avançado" &&
       !/alongamento|mobilidade/.test(normalize(exercise.primaryMuscle)) &&
-      muscleMatches(exercise.primaryMuscle + " " + exercise.secondaryMuscles.join(" "), focus.join(" "))
+      muscleMatches(exercise.primaryMuscle + " " + exercise.secondaryMuscles.join(" "), focus)
     );
     const unique = eligible.filter((exercise, i, all) => all.findIndex(other => other.id === exercise.id) === i);
     const count = Math.max(2, Math.min(6, Math.floor(sessionMinutes / 7)));
