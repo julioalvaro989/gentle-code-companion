@@ -176,3 +176,6 @@ $$;
 
 revoke all on function public.complete_workout_plan_day(uuid, date) from public, anon;
 grant execute on function public.complete_workout_plan_day(uuid, date) to authenticated;
+
+-- Ensure PostgREST refreshes its API schema after this migration is applied.
+notify pgrst, 'reload schema';
