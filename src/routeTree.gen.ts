@@ -17,6 +17,7 @@ import { Route as FitnessProfileRouteImport } from './routes/fitness-profile'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PoliticaDeAssinaturaRouteImport } from './routes/politica-de-assinatura'
 import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
   path: '/politica-de-privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermosDeUsoRoute = TermosDeUsoRouteImport.update({
   id: '/termos-de-uso',
   path: '/termos-de-uso',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/plans': typeof PlansRoute
   '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/plans': typeof PlansRoute
   '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/plans': typeof PlansRoute
   '/politica-de-assinatura': typeof PoliticaDeAssinaturaRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/politica-de-assinatura'
     | '/politica-de-privacidade'
+    | '/reset-password'
     | '/termos-de-uso'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/politica-de-assinatura'
     | '/politica-de-privacidade'
+    | '/reset-password'
     | '/termos-de-uso'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/politica-de-assinatura'
     | '/politica-de-privacidade'
+    | '/reset-password'
     | '/termos-de-uso'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   PlansRoute: typeof PlansRoute
   PoliticaDeAssinaturaRoute: typeof PoliticaDeAssinaturaRoute
   PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TermosDeUsoRoute: typeof TermosDeUsoRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/termos-de-uso': {
       id: '/termos-de-uso'
       path: '/termos-de-uso'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlansRoute: PlansRoute,
   PoliticaDeAssinaturaRoute: PoliticaDeAssinaturaRoute,
   PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TermosDeUsoRoute: TermosDeUsoRoute,
 }
 export const routeTree = rootRouteImport
