@@ -34,6 +34,7 @@ export function WaterTracker({ session }: { session: AuthSession }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [pendingIdempotencyKey, setPendingIdempotencyKey] = useState<string | null>(null);
+  const [pendingAmount, setPendingAmount] = useState<number | null>(null);
 
   useEffect(() => {
     setSelectedDate(todayKey);
@@ -65,10 +66,12 @@ export function WaterTracker({ session }: { session: AuthSession }) {
     }
     setSaving(true); setError(""); setNotice("");
     try {
-      const idempotencyKey = pendingIdempotencyKey ?? createHydrationIdempotencyKey();
+      const idempotencyKey = pendingIdempotencyKey && pendingAmount === amount ? pendingIdempotencyKey : createHydrationIdempotencyKey();
       setPendingIdempotencyKey(idempotencyKey);
+      setPendingAmount(amount);
       await createHydrationEntry(session, { amount_ml: amount, local_date: selectedDate, timezone: localTimezone() }, idempotencyKey);
       setPendingIdempotencyKey(null);
+      setPendingAmount(null);
       setNotice(`${amount} mL registrados.`);
       await load();
     } catch (cause) {
