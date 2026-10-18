@@ -1,0 +1,54 @@
+name: Apply workout profile sync migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type APPLY to apply only the profile-to-workout sync migration"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  apply-migration:
+    if: ${{ inputs.confirm == 'APPLY' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate database secret
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Configure the repository Actions secret SUPABASE_DB_URL with the Supabase PostgreSQL connection URI."
+            exit 1
+          fi
+
+      - name: Apply only the workout sync function migration
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" --set ON_ERROR_STOP=1 --file supabase/migrations/20261018170000_sync_workout_plan_after_profile_save.sql
+
+      - name: Verify function and execute grants
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" --set ON_ERROR_STOP=1 --tuples-only --no-align --command "
+            select case
+              when to_regprocedure('public.sync_own_workout_plan_week(date,jsonb,jsonb,integer)') is null
+                then 'ERROR: function missing'
+              when has_function_privilege('authenticated', 'public.sync_own_workout_plan_week(date,jsonb,jsonb,integer)', 'EXECUTE') is not true
+                then 'ERROR: authenticated cannot execute'
+              when has_function_privilege('anon', 'public.sync_own_workout_plan_week(date,jsonb,jsonb,integer)', 'EXECUTE') is true
+                then 'ERROR: anon can execute'
+              else 'OK: function exists and grants are restricted'
+            end
+          " | grep -Fx "OK: function exists and grants are restricted"
