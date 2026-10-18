@@ -703,7 +703,7 @@ export async function listFitnessProfiles(session: AuthSession): Promise<Fitness
 }
 
 
-function createUuid(): string {
+export function createHydrationIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
   if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
     const bytes = crypto.getRandomValues(new Uint8Array(16));
@@ -742,6 +742,7 @@ export async function listHydrationEntries(session: AuthSession, localDate: stri
 export async function createHydrationEntry(
   session: AuthSession,
   input: { amount_ml: number; local_date: string; timezone: string },
+  idempotencyKey = createHydrationIdempotencyKey(),
 ): Promise<void> {
   if (!Number.isInteger(input.amount_ml) || input.amount_ml < 1 || input.amount_ml > 5000) {
     throw new Error("Informe um volume entre 1 e 5.000 mL.");
@@ -751,7 +752,6 @@ export async function createHydrationEntry(
   if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.local_date) || input.local_date > localToday) {
     throw new Error("A data do registro é inválida ou está no futuro.");
   }
-  const idempotencyKey = createUuid();
   await request("rest/v1/hydration_entries", {
     method: "POST",
     headers: { Prefer: "return=minimal" },
