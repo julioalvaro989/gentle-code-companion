@@ -122,6 +122,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sleep_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          quality_rating: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          wake_feeling: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          quality_rating?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+          wake_feeling?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          quality_rating?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+          wake_feeling?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
