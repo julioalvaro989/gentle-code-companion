@@ -360,6 +360,28 @@ export async function saveWorkoutPlanWeek(
 }
 
 
+export async function syncWorkoutPlanWeek(
+  session: AuthSession,
+  input: Omit<WorkoutPlanWeekRecord, "id" | "user_id" | "created_at" | "updated_at">,
+): Promise<WorkoutPlanWeekRecord> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.week_start)) throw new Error("A data inicial do plano é inválida.");
+  if (!Array.isArray(input.days) || input.days.length !== 7) throw new Error("O plano semanal precisa conter sete dias.");
+  const rows = await request("rest/v1/rpc/sync_own_workout_plan_week", {
+    method: "POST",
+    body: JSON.stringify({
+      p_week_start: input.week_start,
+      p_profile_snapshot: input.profile_snapshot,
+      p_days: input.days,
+      p_generation_version: input.generation_version,
+    }),
+  }, session.access_token);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  if (!row || typeof row.id !== "string" || !Array.isArray(row.days)) {
+    throw new Error("O servidor não confirmou a sincronização do treino.");
+  }
+  return row as WorkoutPlanWeekRecord;
+}
+
 export async function completeWorkoutPlanDay(session: AuthSession, planWeekId: string, plannedDate: string): Promise<void> {
   if (!/^[0-9a-f-]{36}$/i.test(planWeekId) || !/^\d{4}-\d{2}-\d{2}$/.test(plannedDate)) {
     throw new Error("A sessão planejada é inválida.");
