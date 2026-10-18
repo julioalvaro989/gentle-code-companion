@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Activity, ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
-import { adoptSupabaseSession, getFitnessProfile, getFitnessOnboardingAnswers, saveFitnessOnboardingAnswers, getVibraAccess, saveFullFitnessProfile, type AuthSession, type FitnessProfileInput } from "../lib/supabase";
+import { adoptSupabaseSession, getFitnessProfile, getFitnessOnboardingAnswers, saveFitnessOnboardingAnswers, getVibraAccess, saveFullFitnessProfile, syncWorkoutPlanWeek, type AuthSession, type FitnessProfileInput } from "../lib/supabase";
 import { formatLocalDateInput, isCivilDateInFuture, isValidCivilDate, useLocalToday } from "../lib/date-utils";
+import { generateWeeklyWorkoutPlan, getLocalDateKey, getMonday } from "../lib/workout-planner";
 
 const inputStyle = { width: "100%", boxSizing: "border-box" as const, padding: "12px 14px", border: "1px solid #343047", borderRadius: 12, background: "#10101b", color: "#f8f7ff", font: "inherit" };
 const labelStyle = { display: "grid", gap: 7, color: "#d8d5e7", fontSize: 13, fontWeight: 600 as const };
@@ -108,7 +109,7 @@ export function FitnessProfilePage() {
         profile_completed: true,
       };
       await saveFullFitnessProfile(session, profile);
-      await saveFitnessOnboardingAnswers(session, {
+      const answers = {
         sessionMinutes: sessionMinutes.trim() ? Number(sessionMinutes) : null,
         equipment: equipment.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
         foodBudget: foodBudget.trim() ? Number(foodBudget.replace(",", ".")) : null,
@@ -116,9 +117,40 @@ export function FitnessProfilePage() {
         preferredFoods: dietaryPreferences.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
         allergies: allergies.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
         dislikedFoods: dislikedFoods.split(",").map(v => v.trim()).filter(Boolean).slice(0, 30),
-      });
-      setNotice("Perfil salvo com sucesso. Abrindo seu espaço Vibra…");
-      window.location.assign("/");
+      };
+      await saveFitnessOnboardingAnswers(session, answers);
+
+      const workoutProfile = {
+        primaryGoal: profile.primary_goal ?? profile.goal,
+        experienceLevel: profile.experience_level,
+        weeklyFrequency: profile.weekly_frequency,
+        trainingLocation: profile.training_location,
+        sessionMinutes: answers.sessionMinutes,
+        equipment: answers.equipment,
+        preferences: profile.preferences,
+        physicalLimitations: profile.physical_limitations,
+      };
+      const weekStart = getLocalDateKey(getMonday(new Date()));
+      const plan = generateWeeklyWorkoutPlan(workoutProfile, new Date(weekStart + "T12:00:00"));
+      try {
+        await syncWorkoutPlanWeek(session, {
+          week_start: plan.weekStart,
+          profile_snapshot: plan.profileSnapshot,
+          days: plan.days,
+          generation_version: 1,
+        });
+      } catch (syncError) {
+        console.error("[Vibra profile sync] Workout plan update failed", {
+          userId: session.user.id,
+          errorName: syncError instanceof Error ? syncError.name : "UnknownError",
+          timestamp: new Date().toISOString(),
+        });
+        setError("Seu perfil foi salvo, mas não foi possível sincronizar os treinos. Tente salvar novamente; seu histórico foi preservado.");
+        setNotice("Perfil salvo. A sincronização dos treinos precisa ser tentada novamente.");
+        return;
+      }
+
+      setNotice("Perfil salvo e treinos desta semana sincronizados. O planejamento alimentar automático ainda não está disponível nesta versão.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível salvar o perfil. Tente novamente.");
     } finally { setSaving(false); }
