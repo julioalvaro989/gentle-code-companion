@@ -198,7 +198,7 @@ export function FitnessProfilePage() {
         {notice && <p role="status" style={{ color: "#c9ff87" }}><CheckCircle2 size={16} style={{ verticalAlign: "middle" }}/> {notice}</p>}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, borderTop: "1px solid #302b43", paddingTop: 20 }}>
           <span style={{ color: "#a8a3bb", fontSize: 12 }}><ShieldCheck size={15} style={{ verticalAlign: "middle" }}/> Seus dados ficam vinculados à sua conta.</span>
-          <button type="submit" disabled={saving || progress < 100} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "13px 20px", border: 0, borderRadius: 12, background: saving || progress < 100 ? "#555364" : "#b9f35b", color: "#11111a", fontWeight: 800, cursor: saving || progress < 100 ? "not-allowed" : "pointer" }}>{saving ? "Salvando…" : "Salvar perfil e continuar"} <ArrowRight size={17}/></button>
+          <button type="submit" disabled={saving || progress < 100} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "13px 20px", border: 0, borderRadius: 12, background: saving || progress < 100 ? "#555364" : "#b9f35b", color: "#11111a", fontWeight: 800, cursor: saving || progress < 100 ? "not-allowed" : "pointer" }}>{saving ? "Salvando e sincronizando…" : "Salvar e sincronizar"} <ArrowRight size={17}/></button>
         </div>
       </form>
     </div>
