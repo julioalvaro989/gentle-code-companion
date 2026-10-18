@@ -368,6 +368,108 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          planned_for: string | null
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          planned_for?: string | null
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          planned_for?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workout_plan_weeks: {
+        Row: {
+          created_at: string
+          days: Json
+          generation_version: number
+          id: string
+          profile_snapshot: Json
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          days: Json
+          generation_version?: number
+          id?: string
+          profile_snapshot?: Json
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          days?: Json
+          generation_version?: number
+          id?: string
+          profile_snapshot?: Json
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      workout_plan_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          plan_week_id: string
+          planned_date: string
+          user_id: string
+          workout_session_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          plan_week_id: string
+          planned_date: string
+          user_id: string
+          workout_session_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          plan_week_id?: string
+          planned_date?: string
+          user_id?: string
+          workout_session_id?: string
+        }
+        Relationships: []
+      }
       vibra_subscriptions: {
         Row: {
           created_at: string
@@ -420,6 +522,10 @@ export type Database = {
       update_own_fitness_onboarding_answers: {
         Args: { p_expected_updated_at: string; p_patch: Json }
         Returns: string
+      }
+      complete_workout_plan_day: {
+        Args: { p_plan_week_id: string; p_planned_date: string }
+        Returns: Json
       }
       vibra_claim_admin_session: {
         Args: {
