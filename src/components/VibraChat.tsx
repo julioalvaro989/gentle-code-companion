@@ -164,6 +164,12 @@ export function VibraChat() {
   }, [place]);
 
   useEffect(() => {
+    const openChat = () => setIsOpen(true);
+    window.addEventListener("vibra:open-chat", openChat);
+    return () => window.removeEventListener("vibra:open-chat", openChat);
+  }, []);
+
+  useEffect(() => {
     if (positionRef.current) place(positionRef.current);
   }, [isOpen, place]);
 
