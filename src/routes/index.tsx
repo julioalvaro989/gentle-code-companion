@@ -10,7 +10,7 @@ import { adoptSupabaseSession, getFitnessProfile, getFitnessProgress, getVibraAc
 import { isVibraPlanId, VIBRA_PLANS, VIBRA_SELECTED_PLAN_KEY, type VibraPlanId } from "../lib/plans";
 import { useLocalToday } from "../lib/date-utils";
 const vibraLogoUrl = "/vibra-logo-horizontal.svg";
-import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen, Droplets, RotateCw, BarChart3, CalendarCheck, Timer, ChevronLeft, Camera } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, ChevronRight, CirclePlay, Clock3, Dumbbell, Eye, EyeOff, HeartPulse, Home, Leaf, Menu, Settings, Sparkles, Target, TrendingUp, Trophy, UserRound, Utensils, X, Apple, MessageCircle, Plus, BookOpen, Droplets, RotateCw, BarChart3, CalendarCheck, Timer, ChevronLeft, Camera, MoonStar, Check } from "lucide-react";
 
 const publicSiteUrl = import.meta.env['VITE_PUBLIC_SITE_URL']?.replace(/\/$/, "");
 
@@ -690,7 +690,7 @@ function GymApp() {
             </article>
             <article className="vh-stat">
               <span className="vh-stat-icon vh-stat-icon-green"><Utensils size={19}/></span>
-              <div className="vh-stat-body"><span class="vh-stat-label">Alimentação</span>
+              <div className="vh-stat-body"><span className="vh-stat-label">Alimentação</span>
                 <strong>Sem registros</strong><span className="vh-stat-note">O registro de refeições ainda não está conectado</span>
               </div>
               <button className="vh-stat-action" onClick={()=>changePage("Nutrição")} aria-label="Abrir nutrição"><ChevronRight size={16}/></button>
