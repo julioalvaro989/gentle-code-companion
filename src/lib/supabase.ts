@@ -574,10 +574,14 @@ export async function updateSleepSessionDetails(
   id: string,
   details: { quality_rating: number; wake_feeling: string; notes: string | null },
 ): Promise<void> {
-  await request("rest/v1/sleep_sessions?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), {
-    method: "PATCH",
-    headers: { Prefer: "return=representation" },
-    body: JSON.stringify({ ...details, updated_at: new Date().toISOString() }),
+  await request("rest/v1/rpc/update_sleep_session_details", {
+    method: "POST",
+    body: JSON.stringify({
+      p_session_id: id,
+      p_quality_rating: details.quality_rating,
+      p_wake_feeling: details.wake_feeling,
+      p_notes: details.notes,
+    }),
   }, session.access_token);
 }
 
