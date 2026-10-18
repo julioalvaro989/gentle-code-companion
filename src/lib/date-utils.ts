@@ -10,7 +10,7 @@ export function formatLocalDateInput(date: Date = new Date()): string {
 
 /** Validates an ISO-shaped civil date without interpreting it as a UTC timestamp. */
 export function isValidCivilDate(value: string): boolean {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
 
   const year = Number(match[1]);
