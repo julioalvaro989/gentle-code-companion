@@ -38,6 +38,7 @@ begin
     from jsonb_array_elements(p_days) with ordinality d(value, ordinality)
     where d.value->>'date' is null
        or (d.value->>'date')::date <> p_week_start + (d.ordinality - 1)::integer
+       or d.value->>'status' is null
        or d.value->>'status' not in ('planned', 'rest')
        or jsonb_typeof(d.value->'exercises') <> 'array'
   ) then
