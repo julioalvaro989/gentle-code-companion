@@ -133,7 +133,7 @@ returns public.sleep_sessions
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare changed public.sleep_sessions;
 begin
   if auth.uid() is null then
@@ -161,7 +161,7 @@ begin
   end if;
   return changed;
 end;
-$;
+$$;
 
 revoke all on function public.start_sleep_session() from public, anon;
 revoke all on function public.finish_sleep_session(uuid, smallint, text, text) from public, anon;
