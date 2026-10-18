@@ -409,7 +409,7 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
+      },
       workout_plan_weeks: {
         Row: {
           created_at: string
@@ -442,7 +442,7 @@ export type Database = {
           week_start?: string
         }
         Relationships: []
-      }
+      },
       workout_plan_completions: {
         Row: {
           completed_at: string
@@ -469,7 +469,7 @@ export type Database = {
           workout_session_id?: string
         }
         Relationships: []
-      }
+      },
       vibra_subscriptions: {
         Row: {
           created_at: string
