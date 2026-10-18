@@ -328,7 +328,7 @@ export async function saveWorkoutPlanWeek(
   session: AuthSession,
   input: { week_start: string; profile_snapshot: Record<string, unknown>; days: WorkoutPlanWeekRecord["days"]; generation_version: number },
 ): Promise<WorkoutPlanWeekRecord> {
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.week_start)) throw new Error("A data inicial do plano é inválida.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.week_start)) throw new Error("A data inicial do plano é inválida.");
   if (input.days.length !== 7 || input.days.some((day, index) => !day.date || !["planned", "rest"].includes(day.status) || !Array.isArray(day.exercises))) {
     throw new Error("O plano semanal precisa conter sete dias válidos.");
   }
@@ -361,7 +361,7 @@ export async function saveWorkoutPlanWeek(
 
 
 export async function completeWorkoutPlanDay(session: AuthSession, planWeekId: string, plannedDate: string): Promise<void> {
-  if (!/^[0-9a-f-]{36}$/i.test(planWeekId) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(plannedDate)) {
+  if (!/^[0-9a-f-]{36}$/i.test(planWeekId) || !/^\d{4}-\d{2}-\d{2}$/.test(plannedDate)) {
     throw new Error("A sessão planejada é inválida.");
   }
   await request("rest/v1/rpc/complete_workout_plan_day", {
