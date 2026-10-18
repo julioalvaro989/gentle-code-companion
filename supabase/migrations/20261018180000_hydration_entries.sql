@@ -34,6 +34,7 @@ create policy hydration_entries_insert_own
   with check (
     user_id = (select auth.uid())
     and amount_ml between 1 and 5000
+    and consumed_at <= now() + interval '5 minutes'
     and local_date <= (now() at time zone timezone)::date
   );
 
@@ -53,6 +54,10 @@ create policy hydration_entries_delete_own
   using (user_id = (select auth.uid()));
 
 revoke all privileges on table public.hydration_entries from anon, authenticated;
-grant select, insert, update, delete on table public.hydration_entries to authenticated;
+grant select on table public.hydration_entries to authenticated;
+grant insert (user_id, amount_ml, consumed_at, local_date, timezone, idempotency_key)
+  on table public.hydration_entries to authenticated;
+grant update (amount_ml) on table public.hydration_entries to authenticated;
+grant delete on table public.hydration_entries to authenticated;
 
 commit;
