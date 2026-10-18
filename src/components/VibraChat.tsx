@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUp, MessageCircle, Minimize2, Sparkles, X } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { adoptSupabaseSession, getVibraAccess } from "../lib/supabase";
@@ -270,7 +271,9 @@ export function VibraChat() {
 
   if (!isAuthenticated) return null;
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div className="vibra-chat-root">
       {isOpen && (
         <section
@@ -389,6 +392,7 @@ export function VibraChat() {
         <span className="vibra-chat-launcher-label">{isOpen ? "Fechar chat" : "Vibra AI"}</span>
         </span>
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 }
