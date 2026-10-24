@@ -7,10 +7,12 @@ export type MealPlan = { id: string; plan_date: string; meals: PlannedMeal[]; to
 export type FoodEstimate = { food_name: string; calories: number; protein_g: number; carbs_g: number; fat_g: number };
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+type RawFood = Partial<Record<"name" | "quantity" | "calories" | "protein_g" | "carbs_g" | "fat_g", unknown>>;
+type RawMeal = Partial<Record<"meal_type" | "title" | "foods" | "estimated_cost_brl", unknown>>;
 
 function userClient(token: string) {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   if (!url || !key) throw new Error("Configuração do servidor indisponível.");
   return createClient(url, key, {
     global: { headers: { Authorization: `Bearer ${token}` } },
@@ -27,7 +29,7 @@ async function authed(token: string) {
 }
 
 async function callAI(messages: { role: string; content: string }[], tool: object) {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("Serviço de IA indisponível.");
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -121,8 +123,8 @@ export const getOrGenerateMealPlan = createServerFn({ method: "POST" })
       },
     });
 
-    const meals: PlannedMeal[] = (Array.isArray(result?.meals) ? result.meals : []).slice(0, 6).map((m: Record<string, unknown>) => {
-      const foods: PlannedFood[] = (Array.isArray(m.foods) ? m.foods : []).slice(0, 10).map((f: Record<string, unknown>) => ({
+    const meals: PlannedMeal[] = (Array.isArray(result?.meals) ? result.meals : []).slice(0, 6).map((m: RawMeal) => {
+      const foods: PlannedFood[] = (Array.isArray(m.foods) ? (m.foods as RawFood[]) : []).slice(0, 10).map((f: RawFood) => ({
         name: str(f.name, 120), quantity: str(f.quantity, 60), calories: num(f.calories, 3000),
         protein_g: num(f.protein_g, 500), carbs_g: num(f.carbs_g, 500), fat_g: num(f.fat_g, 500),
       }));
