@@ -15,6 +15,13 @@
       "when": 1792851772744,
       "tag": "0001_hydration_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792852153102,
+      "tag": "0002_meal_plans_and_food_logs",
+      "breakpoints": true
     }
   ]
 }

@@ -788,3 +788,18 @@ export async function deleteHydrationEntry(session: AuthSession, id: string): Pr
   }, session.access_token);
 }
 
+
+export type FoodLog = { id: string; local_date: string; meal_type: string; food_name: string; quantity: string; calories: number; protein_g: number; carbs_g: number; fat_g: number; created_at: string };
+
+export async function listFoodLogs(session: AuthSession, localDate: string): Promise<FoodLog[]> {
+  const params = new URLSearchParams({ select: "*", user_id: "eq." + session.user.id, local_date: "eq." + localDate, order: "created_at.asc" });
+  return await request("rest/v1/food_logs?" + params.toString(), {}, session.access_token) as FoodLog[];
+}
+
+export async function createFoodLog(session: AuthSession, input: Omit<FoodLog, "id" | "created_at">): Promise<void> {
+  await request("rest/v1/food_logs", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ ...input, user_id: session.user.id }) }, session.access_token);
+}
+
+export async function deleteFoodLog(session: AuthSession, id: string): Promise<void> {
+  await request("rest/v1/food_logs?id=eq." + encodeURIComponent(id) + "&user_id=eq." + encodeURIComponent(session.user.id), { method: "DELETE", headers: { Prefer: "return=minimal" } }, session.access_token);
+}
