@@ -17,7 +17,7 @@ function timeLabel(value: string) {
 
 function dateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
+  const date = new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
   return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 }
 
