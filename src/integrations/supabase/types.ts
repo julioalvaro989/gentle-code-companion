@@ -122,45 +122,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sleep_sessions: {
-        Row: {
-          created_at: string
-          duration_seconds: number | null
-          ended_at: string | null
-          id: string
-          notes: string | null
-          quality_rating: number | null
-          started_at: string
-          updated_at: string
-          user_id: string
-          wake_feeling: string | null
-        }
-        Insert: {
-          created_at?: string
-          duration_seconds?: number | null
-          ended_at?: string | null
-          id?: string
-          notes?: string | null
-          quality_rating?: number | null
-          started_at?: string
-          updated_at?: string
-          user_id: string
-          wake_feeling?: string | null
-        }
-        Update: {
-          created_at?: string
-          duration_seconds?: number | null
-          ended_at?: string | null
-          id?: string
-          notes?: string | null
-          quality_rating?: number | null
-          started_at?: string
-          updated_at?: string
-          user_id?: string
-          wake_feeling?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -287,6 +248,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sleep_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          quality_rating: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          wake_feeling: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          quality_rating?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+          wake_feeling?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          quality_rating?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+          wake_feeling?: string | null
+        }
+        Relationships: []
+      }
       vibra_admin_audit: {
         Row: {
           created_at: string
@@ -368,108 +368,6 @@ export type Database = {
         }
         Relationships: []
       }
-      workout_sessions: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          duration_minutes: number | null
-          id: string
-          notes: string | null
-          planned_for: string | null
-          started_at: string | null
-          status: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          duration_minutes?: number | null
-          id?: string
-          notes?: string | null
-          planned_for?: string | null
-          started_at?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          duration_minutes?: number | null
-          id?: string
-          notes?: string | null
-          planned_for?: string | null
-          started_at?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      },
-      workout_plan_weeks: {
-        Row: {
-          created_at: string
-          days: Json
-          generation_version: number
-          id: string
-          profile_snapshot: Json
-          updated_at: string
-          user_id: string
-          week_start: string
-        }
-        Insert: {
-          created_at?: string
-          days: Json
-          generation_version?: number
-          id?: string
-          profile_snapshot?: Json
-          updated_at?: string
-          user_id: string
-          week_start: string
-        }
-        Update: {
-          created_at?: string
-          days?: Json
-          generation_version?: number
-          id?: string
-          profile_snapshot?: Json
-          updated_at?: string
-          user_id?: string
-          week_start?: string
-        }
-        Relationships: []
-      },
-      workout_plan_completions: {
-        Row: {
-          completed_at: string
-          id: string
-          plan_week_id: string
-          planned_date: string
-          user_id: string
-          workout_session_id: string
-        }
-        Insert: {
-          completed_at?: string
-          id?: string
-          plan_week_id: string
-          planned_date: string
-          user_id: string
-          workout_session_id: string
-        }
-        Update: {
-          completed_at?: string
-          id?: string
-          plan_week_id?: string
-          planned_date?: string
-          user_id?: string
-          workout_session_id?: string
-        }
-        Relationships: []
-      },
       vibra_subscriptions: {
         Row: {
           created_at: string
@@ -512,20 +410,223 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_plan_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          plan_week_id: string
+          planned_date: string
+          user_id: string
+          workout_session_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          plan_week_id: string
+          planned_date: string
+          user_id: string
+          workout_session_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          plan_week_id?: string
+          planned_date?: string
+          user_id?: string
+          workout_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_plan_completions_plan_week_id_fkey"
+            columns: ["plan_week_id"]
+            isOneToOne: false
+            referencedRelation: "workout_plan_weeks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_plan_completions_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_plan_weeks: {
+        Row: {
+          created_at: string
+          days: Json
+          generation_version: number
+          id: string
+          profile_snapshot: Json
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          days: Json
+          generation_version?: number
+          id?: string
+          profile_snapshot?: Json
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          days?: Json
+          generation_version?: number
+          id?: string
+          profile_snapshot?: Json
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      workout_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          planned_for: string | null
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          planned_for?: string | null
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          planned_for?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      complete_workout_plan_day: {
+        Args: { p_plan_week_id: string; p_planned_date: string }
+        Returns: {
+          completed_at: string
+          id: string
+          plan_week_id: string
+          planned_date: string
+          user_id: string
+          workout_session_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workout_plan_completions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      finish_sleep_session: {
+        Args: {
+          p_notes?: string
+          p_quality_rating: number
+          p_session_id: string
+          p_wake_feeling: string
+        }
+        Returns: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          quality_rating: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          wake_feeling: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sleep_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
       is_fitness_admin: { Args: never; Returns: boolean }
+      start_sleep_session: {
+        Args: never
+        Returns: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          quality_rating: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          wake_feeling: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sleep_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_own_fitness_onboarding_answers: {
         Args: { p_expected_updated_at: string; p_patch: Json }
         Returns: string
       }
-      complete_workout_plan_day: {
-        Args: { p_plan_week_id: string; p_planned_date: string }
-        Returns: Json
+      update_sleep_session_details: {
+        Args: {
+          p_notes?: string
+          p_quality_rating: number
+          p_session_id: string
+          p_wake_feeling: string
+        }
+        Returns: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          quality_rating: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          wake_feeling: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sleep_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       vibra_claim_admin_session: {
         Args: {
