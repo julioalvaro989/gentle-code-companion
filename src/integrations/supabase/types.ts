@@ -122,6 +122,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hydration_entries: {
+        Row: {
+          amount_ml: number
+          consumed_at: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          local_date: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_ml: number
+          consumed_at?: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          local_date: string
+          timezone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_ml?: number
+          consumed_at?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          local_date?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
