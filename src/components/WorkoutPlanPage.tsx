@@ -17,8 +17,8 @@ function buildProfile(profile: FitnessProfile | null, answers: Record<string, un
     experienceLevel: profile?.experience_level ?? null,
     weeklyFrequency: profile?.weekly_frequency ?? null,
     trainingLocation: profile?.training_location ?? null,
-    sessionMinutes: number(answers?.sessionMinutes),
-    equipment: strings(answers?.equipment),
+    sessionMinutes: number(answers?.["sessionMinutes"]),
+    equipment: strings(answers?.["equipment"]),
     preferences: profile?.preferences ?? null,
     physicalLimitations: profile?.physical_limitations ?? null,
   };

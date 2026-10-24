@@ -122,13 +122,13 @@ export function FitnessProfilePage() {
 
       const workoutProfile = {
         primaryGoal: profile.primary_goal ?? profile.goal,
-        experienceLevel: profile.experience_level,
-        weeklyFrequency: profile.weekly_frequency,
-        trainingLocation: profile.training_location,
+        experienceLevel: profile.experience_level ?? null,
+        weeklyFrequency: profile.weekly_frequency ?? null,
+        trainingLocation: profile.training_location ?? null,
         sessionMinutes: answers.sessionMinutes,
         equipment: answers.equipment,
-        preferences: profile.preferences,
-        physicalLimitations: profile.physical_limitations,
+        preferences: profile.preferences ?? null,
+        physicalLimitations: profile.physical_limitations ?? null,
       };
       const weekStart = getLocalDateKey(getMonday(new Date()));
       const plan = generateWeeklyWorkoutPlan(workoutProfile, new Date(weekStart + "T12:00:00"));
